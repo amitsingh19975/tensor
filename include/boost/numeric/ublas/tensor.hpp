@@ -16,11 +16,11 @@
 #define BOOST_NUMERIC_UBLAS_TENSOR_HPP
 
 #include "tensor/functions.hpp"
-#include "tensor/operators_arithmetic.hpp"
-#include "tensor/operators_comparison.hpp"
 #include "tensor/extents.hpp"
 #include "tensor/strides.hpp"
 #include "tensor/ostream.hpp"
 #include "tensor/tensor.hpp"
+#include "tensor/expression_operator.hpp"
+#include "tensor/ublas_type_traits.hpp"
 
 #endif // BOOST_NUMERIC_UBLAS_TENSOR_HPP

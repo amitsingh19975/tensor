@@ -1,3 +1,9 @@
 fixes:
   - "home/travis/build/*/boost-root/boost/::include/boost/"
   - "home/travis/build/*/boost-root/libs/numeric/ublas/::"
+coverage:
+  notify:
+    gitter:
+      default:
+        url: "https://webhooks.gitter.im/e/144a98031f16e45a538f"
+        threshold: 1%

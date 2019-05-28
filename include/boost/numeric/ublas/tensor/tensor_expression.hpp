@@ -18,38 +18,36 @@
 #include <boost/yap/yap.hpp>
 #include "expression_transforms.hpp"
 
-namespace boost {
-namespace numeric {
-namespace ublas {
+// namespace boost {
+// namespace numeric {
+// namespace ublas {
 
-template <class element_type, class storage_format, class storage_type>
-class tensor;
+// template <class T, class F, class A>
+// class tensor;
 
-template <class size_type>
-class basic_extents;
+// template <class size_type>
+// class basic_extents;
 
-// TODO: put in fwd.hpp
-struct tensor_tag {};
-}  // namespace ublas
-}  // namespace numeric
-}  // namespace boost
+// // TODO: put in fwd.hpp
+// struct tensor_tag {};
+// }  // namespace ublas
+// }  // namespace numeric
+// }  // namespace boost
 
 namespace boost {
 namespace numeric {
 namespace ublas {
 namespace detail {
 
-/** @\brief base class for tensor expressions
- *
- * \note implements crtp - no use of virtual function calls
- *
- * \tparam T type of the tensor
- * \tparam E type of the derived expression (crtp)
- *
- **/
 template <boost::yap::expr_kind Kind, typename Tuple>
 class tensor_expression {
+
+ public:
   const static boost::yap::expr_kind kind = Kind;
+  
+  Tuple elements;
+  bool is_extent_static = false; /* If true implies this expression is formed of
+                                    static extent tensor only. */
 
   BOOST_UBLAS_INLINE
   decltype(auto) operator()(size_t i) {
@@ -57,10 +55,11 @@ class tensor_expression {
         boost::yap::transform(*this, transforms::at_index{i}));
   }
 
+
+  // @Todo(coder3101): Add a method eval(). For Explicit Evaluation like Eigen
+
  protected:
-  explicit tensor_expression() = default;
-  tensor_expression(const tensor_expression&) = delete;
-  tensor_expression& operator=(const tensor_expression&) = delete;
+  tensor_expression() = default;
 };
 
 }  // namespace detail

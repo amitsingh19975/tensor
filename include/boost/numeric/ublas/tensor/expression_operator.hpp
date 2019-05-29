@@ -18,9 +18,12 @@
 //#include "multi_index_utility.hpp"
 //#include "functions.hpp"
 
-namespace boost {
-namespace numeric {
-namespace ublas {
+namespace boost
+{
+namespace numeric
+{
+namespace ublas
+{
 
 template <class element_type, class storage_format, class storage_type>
 class tensor;
@@ -31,7 +34,8 @@ class matrix_expression;
 template <class E>
 class vector_expression;
 
-namespace detail {
+namespace detail
+{
 template <boost::yap::expr_kind K, typename A> /* A : Hana Arguments */
 class tensor_expression;
 }
@@ -199,14 +203,14 @@ class tensor_expression;
   }
 
 // Binary Operators tensor-tensor
-BOOST_UBLAS_TENSOR_TENSOR_OPERATOR(plus);
-BOOST_UBLAS_TENSOR_TENSOR_OPERATOR(minus);
-BOOST_UBLAS_TENSOR_TENSOR_OPERATOR(multiplies);
-BOOST_UBLAS_TENSOR_TENSOR_OPERATOR(divides);
+BOOST_UBLAS_TENSOR_TENSOR_OPERATOR ( plus );
+BOOST_UBLAS_TENSOR_TENSOR_OPERATOR ( minus );
+BOOST_UBLAS_TENSOR_TENSOR_OPERATOR ( multiplies );
+BOOST_UBLAS_TENSOR_TENSOR_OPERATOR ( divides );
 
 // Unary Operator tensor
-BOOST_UBLAS_UNARY_TENSOR_OPERATOR(negate);
-BOOST_UBLAS_UNARY_TENSOR_OPERATOR(unary_plus);
+BOOST_UBLAS_UNARY_TENSOR_OPERATOR ( negate );
+BOOST_UBLAS_UNARY_TENSOR_OPERATOR ( unary_plus );
 
 // Tensor Contraction
 // template <class tensor_type_left, class tuple_type_left,

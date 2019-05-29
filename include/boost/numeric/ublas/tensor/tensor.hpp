@@ -40,6 +40,16 @@ class matrix;
 template <class T, class A>
 class vector;
 
+/*************************NOTICE CHANGES ARE AS FOLLOW****************************
+ * 1. All the private members have been moved to tensor_core. In order to access
+ *    extents_ or data_ or strides_ use this->elements[0_c].extents_ and so on.
+ *    Please note that due YAP restrictions those above fields are publicly accessable
+ *    for any one who calls tensor_variable.elements[0_c].*. An Issue will be opened
+ *    for this.
+
+*/
+// todo(@coder3101): If extent is static set this->is_extent_static = true;  for Runtime optimization. Defaults to false;
+
 using namespace boost::hana::literals;  // Required to access hana elements as
                                         // hana_var[0_c].
 
@@ -130,7 +140,7 @@ class tensor : public detail::tensor_expression<
   explicit BOOST_UBLAS_INLINE tensor(extents_type const &s)
       : expression_type() {
     this->elements[0_c].extents_ = s;
-	this->elements[0_c].strides = strides_type{s};
+	this->elements[0_c].strides_ = strides_type{s};
 	this->elements[0_c].data_.resize(s.product());
   }
 
@@ -148,7 +158,7 @@ class tensor : public detail::tensor_expression<
   tensor(extents_type const &s, const array_type &a) : expression_type() {
     
 	this->elements[0_c].extents_ = s;
-	this->elements[0_c].strides = strides_type{s};
+	this->elements[0_c].strides_ = strides_type{s};
 	this->elements[0_c].data_ = a;
 
     if (this->elements[0_c].extents_.product() !=
@@ -589,41 +599,6 @@ class tensor : public detail::tensor_expression<
   /// (i.e. first element of the normal tensor)
   BOOST_UBLAS_INLINE
   reverse_iterator rend() { return this->elements[0_c].data_.rend(); }
-
- private:
-  void copy_update_to_tensor_core_(extents_type e) {
-	this->elements[0_c].extents_ = e;
-	this->elements[0_c].strides = strides_type{e};
-	this->elements[0_c].data_.resize(e.product());
-  }
-
-  void move_to_tensor_core_(extents_type e, array_type a) {
-    detail::tensor_core<T, F, A> core;
-    core.extents_ = std::move(e);
-    core.strides_(core.extents_);
-    core.data_ = a;
-    this->elements = std::move(boost::hana::tuple<decltype(core)>(core));
-  }
-
-  void move_to_tensor_core_(extents_type e, value_type &a) {
-    detail::tensor_core<T, F, A> core;
-    core.extents_ = std::move(e);
-    core.strides_(core.extents_);
-    core.data_.resize(core.extents_.product(), a);
-    this->elements = std::move(boost::hana::tuple<decltype(core)>(core));
-  }
-
-  void move_to_tensor_core_(matrix_type &val) {
-    detail::tensor_core<T, F, A> core;
-    core.data_ = val.data();
-    this->elements = std::move(boost::hana::tuple<decltype(core)>(core));
-  }
-
-  void move_to_tensor_core_(vector_type &val) {
-    detail::tensor_core<T, F, A> core;
-    core.data_ = val.data();
-    this->elements = std::move(boost::hana::tuple<decltype(core)>(core));
-  }
 
 #if 0
 	// -------------

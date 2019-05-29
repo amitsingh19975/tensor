@@ -29,10 +29,13 @@ class tensor_core {
 
  public:
   tensor_core() : extents_(), strides_(), data_() {}
-
+  
   extents_type extents_;
   strides_type strides_;
   array_type data_;
+
+  decltype(auto) operator()(size_t index) { return data_[index]; }
+
 };
 }  // namespace detail
 }  // namespace ublas

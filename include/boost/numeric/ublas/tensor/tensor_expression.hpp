@@ -18,22 +18,6 @@
 #include <boost/yap/yap.hpp>
 #include "expression_transforms.hpp"
 
-// namespace boost {
-// namespace numeric {
-// namespace ublas {
-
-// template <class T, class F, class A>
-// class tensor;
-
-// template <class size_type>
-// class basic_extents;
-
-// // TODO: put in fwd.hpp
-// struct tensor_tag {};
-// }  // namespace ublas
-// }  // namespace numeric
-// }  // namespace boost
-
 namespace boost {
 namespace numeric {
 namespace ublas {
@@ -41,11 +25,12 @@ namespace detail {
 
 template <boost::yap::expr_kind Kind, typename Tuple>
 class tensor_expression {
-
  public:
   const static boost::yap::expr_kind kind = Kind;
-  
+
+  public:
   Tuple elements;
+  public:
   bool is_extent_static = false; /* If true implies this expression is formed of
                                     static extent tensor only. */
 
@@ -55,11 +40,8 @@ class tensor_expression {
         boost::yap::transform(*this, transforms::at_index{i}));
   }
 
-
   // @Todo(coder3101): Add a method eval(). For Explicit Evaluation like Eigen
 
- protected:
-  tensor_expression() = default;
 };
 
 }  // namespace detail

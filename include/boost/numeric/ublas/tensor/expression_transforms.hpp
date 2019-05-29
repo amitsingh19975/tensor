@@ -49,8 +49,8 @@ namespace transforms {
 struct at_index {
   template <typename T, typename F, typename A>
   decltype(auto) operator()(
-      boost::yap::terminal<tensor_expression, tensor<T, F, A>> &expr) {
-    boost::yap::make_terminal(boost::yap::value(expr)[index]);
+      boost::yap::terminal<tensor_expression, tensor_core<T, F, A>> &expr) {
+    return boost::yap::make_terminal(boost::yap::value(expr)(index));
   }
   size_t index;
 };

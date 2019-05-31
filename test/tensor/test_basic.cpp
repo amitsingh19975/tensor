@@ -13,12 +13,12 @@ int main()
     tensor<float> a{shape{3,3}, 5.2};
     
     // Mix and match allowed. Unless there is a +, -, * and / operator overload. Float + int is valid
-    auto expr = s * s + (s + 52 / s) - s * 2;
+    auto expr = s * a + (s + 52 / s) - a * 2;
     
     //Evalutate to tensor.
     tensor<float> ten1(expr);
     
-    auto casted_tensor = boost::numeric::ublas::static_tensor_cast<int>(expr); 
+    auto casted_tensor = boost::numeric::ublas::static_tensor_cast<int>(ten1); 
     // We have dynamic and reinterpret cast as well.
     // This cast is eager and is only performed on tensor l-value or r-value
     // A Work is in progress for the implementation of lazy cast that takes an expression.

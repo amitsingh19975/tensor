@@ -15,6 +15,34 @@
 #include "extents.hpp"
 #include "strides.hpp"
 
+// Forward the friends;
+
+namespace boost::numeric::ublas{
+    
+    template <class new_type, class tensor_t>
+    auto static_tensor_cast(tensor_t&);
+    
+    template <class new_type, class tensor_t>
+    auto static_tensor_cast(tensor_t&&);
+    
+    template <class new_type, class tensor_t>
+    auto dynamic_tensor_cast(tensor_t&);
+    
+    template <class new_type, class tensor_t>
+    auto dynamic_tensor_cast(tensor_t&&);
+    
+    template <class new_type, class tensor_t>
+    auto reinterpret_tensor_cast(tensor_t&);
+    
+    template <class new_type, class tensor_t>
+    auto reinterpret_tensor_cast(tensor_t&&);
+    
+    
+    template <class TT, class FF, class AA>
+    class tensor;
+}
+
+
 namespace boost::numeric::ublas::detail
 {
 
@@ -33,15 +61,39 @@ public:
     {
         return data_[index];
     }
+    
+    auto const & extents() const {
+        return extents_;
+    }
 
 private:
     extents_type extents_;
     strides_type strides_;
     array_type data_;
 
-
     template <class TT, class FF, class AA>
     friend class ::boost::numeric::ublas::tensor;
+    
+    template <boost::yap::expr_kind K, typename Tuple>
+    friend struct tensor_expression;
+    
+    template <class type, typename AB>
+    friend auto ::boost::numeric::ublas::static_tensor_cast(AB&);
+    
+    template <class type, typename AB>
+    friend auto ::boost::numeric::ublas::static_tensor_cast(AB&&);
+    
+    template <class type, typename AB>
+    friend auto ::boost::numeric::ublas::dynamic_tensor_cast(AB&);
+    
+    template <class type, typename AB>
+    friend auto ::boost::numeric::ublas::dynamic_tensor_cast(AB&&);
+    
+    template <class type, typename AB>
+    friend auto ::boost::numeric::ublas::reinterpret_tensor_cast(AB&);
+
+    template <class type, typename AB>
+    friend auto ::boost::numeric::ublas::reinterpret_tensor_cast(AB&&);
 
 };
 }  // namespace boost::numeric::ublas::detail

@@ -17,20 +17,17 @@
 #include <boost/yap/print.hpp>
 #include <boost/yap/yap.hpp>
 #include "expression_transforms.hpp"
+#include "extents.hpp"
+#include "strides.hpp"
 
 namespace boost::numeric::ublas::detail
 {
 
 template <boost::yap::expr_kind Kind, typename Tuple>
-class tensor_expression
-{
-public:
+struct tensor_expression {
     const static boost::yap::expr_kind kind = Kind;
 
     Tuple elements;
-
-    bool is_extent_static = false; /* If true implies this expression is formed of
-                                    static extent tensor only. */
 
     BOOST_UBLAS_INLINE
     decltype ( auto ) operator() ( size_t i )
@@ -39,7 +36,24 @@ public:
                    boost::yap::transform ( *this, transforms::at_index{i} ) );
     }
 
-    // @Todo(coder3101): Add a method eval(). For Explicit Evaluation like Eigen
+    // todo : Make this eval() based on device too.
+
+    template <class T, class F = ::boost::numeric::ublas::first_order, class A = std::vector<T, std::allocator<T>>>
+    auto eval()
+    {
+        using namespace boost::hana::literals;
+
+        ::boost::numeric::ublas::tensor<T, F, A> result;
+        auto shape_expr = boost::yap::transform ( *this, transforms::get_extents{} );
+        result.elements[0_c].extents_ = shape_expr;
+        result.elements[0_c].strides_ = basic_strides<std::size_t, F> {shape_expr};
+        result.elements[0_c].data_.resize ( shape_expr.product() );
+
+        for ( auto i = 0u; i < shape_expr.product(); i++ )
+            result.elements[0_c].data_[i] = this->operator() ( i );
+
+        return result;
+    }
 
 };
 }  // namespace boost::numeric::ublas::detail

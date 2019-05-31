@@ -43,18 +43,15 @@ class matrix;
 template <class T, class A>
 class vector;
 
+template <class A, typename B>
+auto static_tensor_cast(B&);
+
 /*************************NOTICE CHANGES ARE AS FOLLOW****************************
  * 1. All the private members have been moved to tensor_core. In order to access
  *    extents_ or data_ or strides_ use this->elements[0_c].extents_ and so on.
- *    Please note that due YAP restrictions those above fields are publicly accessable
- *    for any one who calls tensor_variable.elements[0_c].*. An Issue will be opened
- *    for this.
-
 */
-// todo(@coder3101): If extent is static set this->is_extent_static = true;  for Runtime optimization. Defaults to false;
 
-using namespace boost::hana::literals;  // Required to access hana elements as
-// hana_var[0_c].
+using namespace boost::hana::literals; 
 
 template <class T, class F = first_order,
           class A = std::vector<T, std::allocator<T>>>
@@ -293,7 +290,7 @@ public:
         this->elements[0_c].data_.resize ( other.elements[0_c].extents_.product() );
 
 
-        copy ( this->rank(), this->elements[0_c].extents().data(),
+        copy ( this->rank(), this->elements[0_c].extents_.data(),
                this->elements[0_c].data(), this->elements[0_c].strides().data(),
                other.elements[0_c].data(), other.elements[0_c].strides().data() );
     }
@@ -307,19 +304,47 @@ public:
      *
      * @param expr tensor expression
      */
-    //   BOOST_UBLAS_INLINE
-    //   template <class derived_type>
-    //   tensor(const tensor_expression_type<derived_type> &expr)
-    //       : extents_(detail::retrieve_extents(expr)),
-    //         strides_(extents_),
-    //         data_(extents_.product()) {
-    //     static_assert(
-    //         detail::has_tensor_types<self_type,
-    //                                  tensor_expression_type<derived_type>>::value,
-    //         "Error in boost::numeric::ublas::tensor: expression does not
-    //         contain a " "tensor. cannot retrieve shape.");
-    //     //detail::eval(*this, expr);
-    //   }
+    BOOST_UBLAS_INLINE
+    template <boost::yap::expr_kind Kind, typename Tuple>
+    tensor ( detail::tensor_expression<Kind, Tuple> &expr )
+        : expression_type()
+    {
+
+        auto expr_shape = boost::yap::transform ( expr, detail::transforms::get_extents{} );
+
+        this->elements[0_c].extents_ = expr_shape;
+        this->elements[0_c].strides_ = strides_type{expr_shape};
+
+        // Todo : Make this run on a separate device when implementing device policy
+        // #pragma omp parallel for
+
+        this->elements[0_c].data_.resize ( expr_shape.product() );
+
+        for ( auto i = 0u; i < expr_shape.product(); i++ )
+            this->elements[0_c].data_ [ i ] = expr ( i );
+
+    }
+
+    BOOST_UBLAS_INLINE
+    template <boost::yap::expr_kind Kind, typename Tuple>
+    tensor ( detail::tensor_expression<Kind, Tuple> &&expr )
+        : expression_type()
+    {
+
+        auto expr_shape = boost::yap::transform ( expr, detail::transforms::get_extents{} );
+
+        this->elements[0_c].extents_ = expr_shape;
+        this->elements[0_c].strides_ = strides_type{expr_shape};
+
+        // Todo : Make this run on a separate device when implementing device policy
+        // #pragma omp parallel for
+
+        this->elements[0_c].data_.resize ( expr_shape.product() );
+
+        for ( auto i = 0u; i < expr_shape.product(); i++ )
+            this->elements[0_c].data_ [ i ] = std::move ( expr ( i ) );
+    
+    }
 
     /** @brief Constructs a tensor with a matrix expression
     *

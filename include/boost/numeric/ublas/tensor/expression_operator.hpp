@@ -13,16 +13,11 @@
 #define BOOST_UBLAS_EXPRESSION_OPERATOR_HPP
 
 #include <boost/yap/yap.hpp>
-//#include <algorithm>
-//#include <type_traits>
-//#include "multi_index_utility.hpp"
-//#include "functions.hpp"
+#include <boost/yap/user_macros.hpp>
+#include <type_traits>
+#include "tensor_cast_macros.hpp"
 
-namespace boost
-{
-namespace numeric
-{
-namespace ublas
+namespace boost::numeric::ublas
 {
 
 template <class element_type, class storage_format, class storage_type>
@@ -37,180 +32,29 @@ class vector_expression;
 namespace detail
 {
 template <boost::yap::expr_kind K, typename A> /* A : Hana Arguments */
-class tensor_expression;
+struct tensor_expression;
 }
 
-}  // namespace ublas
-}  // namespace numeric
-}  // namespace boost
+// tensor-casts
+BOOST_UBLAS_EAGER_TENSOR_CAST(static_tensor_cast, static_cast);
+BOOST_UBLAS_EAGER_TENSOR_CAST(dynamic_tensor_cast, dynamic_cast);
+BOOST_UBLAS_EAGER_TENSOR_CAST(reinterpret_tensor_cast, reinterpret_cast);
 
-#define BOOST_UBLAS_TENSOR_TENSOR_OPERATOR(op_name)                           \
-  template <::boost::yap::expr_kind Kind, typename Tuple, typename Expr>      \
-  constexpr auto operator BOOST_YAP_INDIRECT_CALL(op_name)(                   \
-      boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> const     \
-          &lhs,                                                               \
-      Expr &&rhs) {                                                           \
-    using lhs_type = ::boost::yap::detail::operand_type_t<                    \
-        boost::numeric::ublas::detail::tensor_expression,                     \
-        boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> const   \
-            &>;                                                               \
-    using rhs_type = ::boost::yap::detail::operand_type_t<                    \
-        boost::numeric::ublas::detail::tensor_expression, Expr>;              \
-    using tuple_type = ::boost::hana::tuple<lhs_type, rhs_type>;              \
-    bool s = lhs.is_extent_static && rhs.is_extent_static;                    \
-    return boost::numeric::ublas::detail::tensor_expression<                  \
-        ::boost::yap::expr_kind::op_name, tuple_type>{                        \
-        tuple_type{::boost::yap::detail::make_operand<lhs_type>{}(lhs),       \
-                   ::boost::yap::detail::make_operand<rhs_type>{}(            \
-                       static_cast<Expr &&>(rhs))},                           \
-        s};                                                                   \
-  }                                                                           \
-  template <::boost::yap::expr_kind Kind, typename Tuple, typename Expr>      \
-  constexpr auto operator BOOST_YAP_INDIRECT_CALL(op_name)(                   \
-      boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &lhs,     \
-      Expr &&rhs) {                                                           \
-    using lhs_type = ::boost::yap::detail::operand_type_t<                    \
-        boost::numeric::ublas::detail::tensor_expression,                     \
-        boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &>;     \
-    using rhs_type = ::boost::yap::detail::operand_type_t<                    \
-        boost::numeric::ublas::detail::tensor_expression, Expr>;              \
-    using tuple_type = ::boost::hana::tuple<lhs_type, rhs_type>;              \
-    bool s = lhs.is_extent_static && rhs.is_extent_static;                    \
-    return boost::numeric::ublas::detail::tensor_expression<                  \
-        ::boost::yap::expr_kind::op_name, tuple_type>{                        \
-        tuple_type{::boost::yap::detail::make_operand<lhs_type>{}(lhs),       \
-                   ::boost::yap::detail::make_operand<rhs_type>{}(            \
-                       static_cast<Expr &&>(rhs))},                           \
-        s};                                                                   \
-  }                                                                           \
-  template <::boost::yap::expr_kind Kind, typename Tuple, typename Expr>      \
-  constexpr auto operator BOOST_YAP_INDIRECT_CALL(op_name)(                   \
-      boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &&lhs,    \
-      Expr &&rhs) {                                                           \
-    using lhs_type = ::boost::yap::detail::remove_cv_ref_t<                   \
-        boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &&>;    \
-    using rhs_type = ::boost::yap::detail::operand_type_t<                    \
-        boost::numeric::ublas::detail::tensor_expression, Expr>;              \
-    using tuple_type = ::boost::hana::tuple<lhs_type, rhs_type>;              \
-    bool s = lhs.is_extent_static && rhs.is_extent_static;                    \
-    return boost::numeric::ublas::detail::tensor_expression<                  \
-        ::boost::yap::expr_kind::op_name, tuple_type>{                        \
-        tuple_type{std::move(lhs),                                            \
-                   ::boost::yap::detail::make_operand<rhs_type>{}(            \
-                       static_cast<Expr &&>(rhs))},                           \
-        s};                                                                   \
-  }                                                                           \
-  template <typename T, ::boost::yap::expr_kind Kind, typename Tuple>         \
-  constexpr auto operator BOOST_YAP_INDIRECT_CALL(op_name)(                   \
-      T &&lhs,                                                                \
-      boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &&rhs)    \
-      ->::boost::yap::detail::free_binary_op_result_t<                        \
-          boost::numeric::ublas::detail::tensor_expression,                   \
-          ::boost::yap::expr_kind::op_name, T,                                \
-          boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &&> { \
-    using result_types = ::boost::yap::detail::free_binary_op_result<         \
-        boost::numeric::ublas::detail::tensor_expression,                     \
-        ::boost::yap::expr_kind::op_name, T,                                  \
-        boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &&>;    \
-    using lhs_type = typename result_types::lhs_type;                         \
-    using rhs_type = typename result_types::rhs_type;                         \
-    using tuple_type = ::boost::hana::tuple<lhs_type, rhs_type>;              \
-    bool s = lhs.is_extent_static && rhs.is_extent_static;                    \
-    return {tuple_type{lhs_type{static_cast<T &&>(lhs)}, std::move(rhs)}, s}; \
-  }                                                                           \
-  template <typename T, ::boost::yap::expr_kind Kind, typename Tuple>         \
-  constexpr auto operator BOOST_YAP_INDIRECT_CALL(op_name)(                   \
-      T &&lhs,                                                                \
-      boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> const     \
-          &rhs)                                                               \
-      ->::boost::yap::detail::free_binary_op_result_t<                        \
-          boost::numeric::ublas::detail::tensor_expression,                   \
-          ::boost::yap::expr_kind::op_name, T,                                \
-          boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> const \
-              &> {                                                            \
-    using result_types = ::boost::yap::detail::free_binary_op_result<         \
-        boost::numeric::ublas::detail::tensor_expression,                     \
-        ::boost::yap::expr_kind::op_name, T,                                  \
-        boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> const   \
-            &>;                                                               \
-    using lhs_type = typename result_types::lhs_type;                         \
-    using rhs_type = typename result_types::rhs_type;                         \
-    using tuple_type = ::boost::hana::tuple<lhs_type, rhs_type>;              \
-    using rhs_tuple_type = typename result_types::rhs_tuple_type;             \
-    bool s = lhs.is_extent_static && rhs.is_extent_static;                    \
-    return {tuple_type{lhs_type{static_cast<T &&>(lhs)},                      \
-                       rhs_type{rhs_tuple_type{std::addressof(rhs)}}},        \
-            s};                                                               \
-  }                                                                           \
-  template <typename T, ::boost::yap::expr_kind Kind, typename Tuple>         \
-  constexpr auto operator BOOST_YAP_INDIRECT_CALL(op_name)(                   \
-      T &&lhs,                                                                \
-      boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &rhs)     \
-      ->::boost::yap::detail::free_binary_op_result_t<                        \
-          boost::numeric::ublas::detail::tensor_expression,                   \
-          ::boost::yap::expr_kind::op_name, T,                                \
-          boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &> {  \
-    using result_types = ::boost::yap::detail::free_binary_op_result<         \
-        boost::numeric::ublas::detail::tensor_expression,                     \
-        ::boost::yap::expr_kind::op_name, T,                                  \
-        boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &>;     \
-    using lhs_type = typename result_types::lhs_type;                         \
-    using rhs_type = typename result_types::rhs_type;                         \
-    using tuple_type = ::boost::hana::tuple<lhs_type, rhs_type>;              \
-    using rhs_tuple_type = typename result_types::rhs_tuple_type;             \
-    bool s = lhs.is_extent_static && rhs.is_extent_static;                    \
-    return {tuple_type{lhs_type{static_cast<T &&>(lhs)},                      \
-                       rhs_type{rhs_tuple_type{std::addressof(rhs)}}},        \
-            s};                                                               \
-  }
+}  // namespace boost::numeric::ublas
 
-#define BOOST_UBLAS_UNARY_TENSOR_OPERATOR(op_name)                          \
-  template <::boost::yap::expr_kind Kind, typename Tuple>                   \
-  auto operator BOOST_YAP_INDIRECT_CALL(op_name)(                           \
-      boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> const   \
-          &x) {                                                             \
-    using lhs_type = ::boost::yap::detail::operand_type_t<                  \
-        boost::numeric::ublas::detail::tensor_expression,                   \
-        boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> const \
-            &>;                                                             \
-    using tuple_type = ::boost::hana::tuple<lhs_type>;                      \
-    bool s = x.is_extent_static;                                            \
-    return boost::numeric::ublas::detail::tensor_expression<                \
-        ::boost::yap::expr_kind::op_name, tuple_type>{                      \
-        tuple_type{::boost::yap::detail::make_operand<lhs_type>{}(x)}, s};  \
-  }                                                                         \
-  template <::boost::yap::expr_kind Kind, typename Tuple>                   \
-  auto operator BOOST_YAP_INDIRECT_CALL(op_name)(                           \
-      boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &x) {   \
-    using lhs_type = ::boost::yap::detail::operand_type_t<                  \
-        boost::numeric::ublas::detail::tensor_expression,                   \
-        boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &>;   \
-    using tuple_type = ::boost::hana::tuple<lhs_type>;                      \
-    bool s = x.is_extent_static;                                            \
-    return boost::numeric::ublas::detail::tensor_expression<                \
-        ::boost::yap::expr_kind::op_name, tuple_type>{                      \
-        tuple_type{::boost::yap::detail::make_operand<lhs_type>{}(x)}, s};  \
-  }                                                                         \
-  template <::boost::yap::expr_kind Kind, typename Tuple>                   \
-  auto operator BOOST_YAP_INDIRECT_CALL(op_name)(                           \
-      boost::numeric::ublas::detail::tensor_expression<Kind, Tuple> &&x) {  \
-    using tuple_type = ::boost::hana::tuple<                                \
-        boost::numeric::ublas::detail::tensor_expression<Kind, Tuple>>;     \
-    bool s = x.is_extent_static;                                            \
-    return boost::numeric::ublas::detail::tensor_expression<                \
-        ::boost::yap::expr_kind::op_name, tuple_type>{                      \
-        tuple_type{std::move(x)}, s};                                       \
-  }
+// Binary tensor-tensor operator 
+BOOST_YAP_USER_BINARY_OPERATOR ( plus, boost::numeric::ublas::detail::tensor_expression, boost::numeric::ublas::detail::tensor_expression );
+BOOST_YAP_USER_BINARY_OPERATOR ( minus, boost::numeric::ublas::detail::tensor_expression, boost::numeric::ublas::detail::tensor_expression );
+BOOST_YAP_USER_BINARY_OPERATOR ( multiplies, boost::numeric::ublas::detail::tensor_expression, boost::numeric::ublas::detail::tensor_expression );
+BOOST_YAP_USER_BINARY_OPERATOR ( divides, boost::numeric::ublas::detail::tensor_expression, boost::numeric::ublas::detail::tensor_expression );
 
-// Binary Operators tensor-tensor
-BOOST_UBLAS_TENSOR_TENSOR_OPERATOR ( plus );
-BOOST_UBLAS_TENSOR_TENSOR_OPERATOR ( minus );
-BOOST_UBLAS_TENSOR_TENSOR_OPERATOR ( multiplies );
-BOOST_UBLAS_TENSOR_TENSOR_OPERATOR ( divides );
+// Unary tensor operator
+BOOST_YAP_USER_UNARY_OPERATOR ( negate, boost::numeric::ublas::detail::tensor_expression, boost::numeric::ublas::detail::tensor_expression );
+BOOST_YAP_USER_UNARY_OPERATOR ( unary_plus, boost::numeric::ublas::detail::tensor_expression, boost::numeric::ublas::detail::tensor_expression );
 
-// Unary Operator tensor
-BOOST_UBLAS_UNARY_TENSOR_OPERATOR ( negate );
-BOOST_UBLAS_UNARY_TENSOR_OPERATOR ( unary_plus );
+
+//todo(coder3101): Also add matrix and vector tensor expression overloads. Also Tensor Contraction Support
+
 
 // Tensor Contraction
 // template <class tensor_type_left, class tuple_type_left,
@@ -244,3 +88,7 @@ BOOST_UBLAS_UNARY_TENSOR_OPERATOR ( unary_plus );
 // }
 
 #endif
+
+
+
+

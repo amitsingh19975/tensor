@@ -264,9 +264,9 @@ public:
     this->elements[0_c].data_.resize(other.elements[0_c].extents_.product());
 
     copy(this->rank(), this->elements[0_c].extents_.data(),
-         this->elements[0_c].data_.data(), this->elements[0_c].strides().data(),
+         this->elements[0_c].data_.data(), this->elements[0_c].strides_.data(),
          other.elements[0_c].data_.data(),
-         other.elements[0_c].strides().data());
+         other.elements[0_c].strides_.data());
   }
 
   /** @brief Constructs a tensor with an tensor expression

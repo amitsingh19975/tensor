@@ -14,105 +14,194 @@
 
 #include <boost/yap/yap.hpp>
 
-namespace boost::numeric::ublas
-{
+namespace boost::numeric::ublas {
 
 template <class element_type, class storage_format, class storage_type>
 class tensor;
 
-template <class size_type>
-class basic_extents;
+template <class size_type> class basic_extents;
 
-namespace detail
-{
+namespace detail {
 
-template <boost::yap::expr_kind Kind, typename Tuple>
-struct tensor_expression;
+template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression;
 
 }
 
-}  // namespace boost::numeric::ublas
+} // namespace boost::numeric::ublas
 
-namespace boost::numeric::ublas::detail::transforms
-{
+namespace boost::numeric::ublas::detail::transforms {
 
 struct at_index {
-    template <typename T, typename F, typename A>
-    decltype ( auto ) operator() (
-        boost::yap::terminal<tensor_expression, tensor_core<T, F, A>> &expr )
-    {
-        return boost::yap::make_terminal ( boost::yap::value ( expr ) ( index ) );
-    }
-    size_t index;
+  template <typename T, typename F, typename A>
+  decltype(auto)
+  operator()(boost::yap::terminal<
+             tensor_expression,
+             ::boost::numeric::ublas::detail::tensor_core<T, F, A>> &expr) {
+    return boost::yap::make_terminal(boost::yap::value(expr)(index));
+  }
+
+  size_t index;
 };
 
-// todo(@coder3101): Make a constexpr version of this transform once constexpr based extents are ready.
+struct scalar_extent_type {
+  // This is the assumed extent type of a Scalar in the expression. The
+  // transform get_extents returns this object if called on a scalar terminal
+  // node.
+};
+
+// todo(@coder3101): Make a constexpr version of this transform once constexpr
+// based extents are ready.
 
 struct get_extents {
 
-    template <class T, class F, class A>
-    decltype ( auto ) operator() ( ::boost::yap::expr_tag<boost::yap::expr_kind::terminal>, ::boost::numeric::ublas::detail::tensor_core<T,F,A>& terminal )
-    {
-        return terminal.extents();
+  template <class T, class F, class A>
+  decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+             ::boost::numeric::ublas::detail::tensor_core<T, F, A> &terminal) {
+    return terminal.extents();
+  }
+
+  template <class LExpr, class RExpr>
+  decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::minus>, LExpr &lexpr,
+             RExpr &rexpr) {
+
+    auto left = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(lexpr),
+        *this); // left-side extent
+    auto right = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(rexpr),
+        *this); // right-side extent
+
+    // If both left and right sides are scalars then the result is also scalar
+    // type. Return scalar type extent.
+    if constexpr (std::is_same<decltype(left), scalar_extent_type>::value &&
+                  std::is_same<decltype(right), scalar_extent_type>::value)
+      return scalar_extent_type{};
+
+    // If left side is only scalar, it means right will be a non-scalar. Return
+    // right's extent
+    else if constexpr (std::is_same<decltype(left), scalar_extent_type>::value)
+      return right;
+
+    // If right side is only scalar, it means left will be a non-scalar. Return
+    // left's extent
+    else if constexpr (std::is_same<decltype(right), scalar_extent_type>::value)
+      return left;
+
+    // otherwise both are non-scalars, assert they have same extent for
+    // operation and return any one of the two
+    else {
+      if (left != right)
+        throw std::runtime_error("Cannot Subtract Tensor of shapes " +
+                                 left.to_string() + " and " +
+                                 right.to_string());
+      return left;
     }
+  }
 
-    template <class LExpr, class RExpr>
-    decltype ( auto ) operator() ( ::boost::yap::expr_tag<boost::yap::expr_kind::minus>, LExpr &lexpr, RExpr &rexpr )
-    {
+  template <class LExpr, class RExpr>
+  decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::multiplies>,
+             LExpr &lexpr, RExpr &rexpr) {
 
-        auto left = boost::yap::transform ( boost::yap::as_expr<detail::tensor_expression> ( lexpr ), *this );
-        auto right = boost::yap::transform ( boost::yap::as_expr<detail::tensor_expression> ( rexpr ), *this );
-        if ( left != right ) throw std::runtime_error ( "Cannot Subtract Tensor of shapes " + left.to_string() + " and " + right.to_string() );
-        return left;
-
+    auto left = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
+    auto right = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+    if constexpr (std::is_same<decltype(left), scalar_extent_type>::value &&
+                  std::is_same<decltype(right), scalar_extent_type>::value)
+      return scalar_extent_type{};
+    else if constexpr (std::is_same<decltype(left), scalar_extent_type>::value)
+      return right;
+    else if constexpr (std::is_same<decltype(right), scalar_extent_type>::value)
+      return left;
+    else {
+      if (left != right)
+        throw std::runtime_error("Cannot Multiply Tensor of shapes " +
+                                 left.to_string() + " and " +
+                                 right.to_string());
+      return left;
     }
+  }
 
-    template <class LExpr, class RExpr>
-    decltype ( auto ) operator() ( ::boost::yap::expr_tag<boost::yap::expr_kind::multiplies>, LExpr &lexpr, RExpr &rexpr )
-    {
+  template <class LExpr, class RExpr>
+  decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::divides>,
+             LExpr &lexpr, RExpr &rexpr) {
 
-        auto left = boost::yap::transform ( boost::yap::as_expr<detail::tensor_expression> ( lexpr ), *this );
-        auto right = boost::yap::transform ( boost::yap::as_expr<detail::tensor_expression> ( rexpr ), *this );
-        if ( left != right ) throw std::runtime_error ( "Cannot Multiply Tensor of shapes " + left.to_string() + " and " + right.to_string() );
-        return left;
-
+    auto left = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
+    auto right = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+    if constexpr (std::is_same<decltype(left), scalar_extent_type>::value &&
+                  std::is_same<decltype(right), scalar_extent_type>::value)
+      return scalar_extent_type{};
+    else if constexpr (std::is_same<decltype(left), scalar_extent_type>::value)
+      return right;
+    else if constexpr (std::is_same<decltype(right), scalar_extent_type>::value)
+      return left;
+    else {
+      if (left != right)
+        throw std::runtime_error("Cannot Divide Tensor of shapes " +
+                                 left.to_string() + " and " +
+                                 right.to_string());
+      return left;
     }
+  }
 
-    template <class LExpr, class RExpr>
-    decltype ( auto ) operator() ( ::boost::yap::expr_tag<boost::yap::expr_kind::divides>, LExpr &lexpr, RExpr &rexpr )
-    {
+  template <class LExpr, class RExpr>
+  decltype(auto) operator()(::boost::yap::expr_tag<boost::yap::expr_kind::plus>,
+                            LExpr &lexpr, RExpr &rexpr) {
+    auto left = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
+    auto right = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
 
-        auto left = boost::yap::transform ( boost::yap::as_expr<detail::tensor_expression> ( lexpr ), *this );
-        auto right = boost::yap::transform ( boost::yap::as_expr<detail::tensor_expression> ( rexpr ), *this );
-        if ( left != right ) throw std::runtime_error ( "Cannot Divide Tensor of shapes " + left.to_string() + " and " + right.to_string() );
-        return left;
-
+    if constexpr (std::is_same<decltype(left), scalar_extent_type>::value &&
+                  std::is_same<decltype(right), scalar_extent_type>::value)
+      return scalar_extent_type{};
+    else if constexpr (std::is_same<decltype(left), scalar_extent_type>::value)
+      return right;
+    else if constexpr (std::is_same<decltype(right), scalar_extent_type>::value)
+      return left;
+    else {
+      if (left != right)
+        throw std::runtime_error("Cannot Add Tensor of shapes " +
+                                 left.to_string() + " and " +
+                                 right.to_string());
+      return left;
     }
+  }
 
-    template <class LExpr, class RExpr>
-    decltype ( auto ) operator() ( ::boost::yap::expr_tag<boost::yap::expr_kind::plus>, LExpr &lexpr, RExpr &rexpr )
-    {
-        auto left = boost::yap::transform ( boost::yap::as_expr<detail::tensor_expression> ( lexpr ), *this );
-        auto right = boost::yap::transform ( boost::yap::as_expr<detail::tensor_expression> ( rexpr ), *this );
-        if ( left != right ) throw std::runtime_error ( "Cannot Add Tensor of shapes " + left.to_string() + " and " + right.to_string() );
-        return left;
-    }
+  template <class Expr>
+  decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::negate>,
+             Expr &expr) {
+    return boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(expr), *this);
+  }
 
-    template <class Expr>
-    decltype ( auto ) operator() ( ::boost::yap::expr_tag<boost::yap::expr_kind::negate>, Expr &expr )
-    {
-        return boost::yap::transform ( boost::yap::as_expr<detail::tensor_expression>(expr), *this );
-    }
+  template <class Expr>
+  decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::unary_plus>,
+             Expr &expr) {
+    return boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(expr), *this);
+  }
 
-    template <class Expr>
-    decltype ( auto ) operator() ( ::boost::yap::expr_tag<boost::yap::expr_kind::unary_plus>, Expr &expr )
-    {
-        return boost::yap::transform ( boost::yap::as_expr<detail::tensor_expression>(expr), *this );
-    }
+  // Match Scalars so that we could avoid them from expression completely as
+  // they do not have extents. return the special type called scalar_extent_type
+  // which makes the caller know that this node is extent-less.
+
+  template <typename scalar_t>
+  decltype(auto)
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
+             scalar_t &) {
+    return scalar_extent_type{};
+  }
 };
 
-
-}  // namespace boost::numeric::ublas::detail::transforms
+} // namespace boost::numeric::ublas::detail::transforms
 
 #endif
-

@@ -16,9 +16,6 @@
 
 namespace boost::numeric::ublas {
 
-template <class element_type, class storage_format, class storage_type>
-class tensor;
-
 template <class size_type> class basic_extents;
 
 namespace detail {
@@ -37,9 +34,8 @@ struct at_index {
   operator()(boost::yap::terminal<
              tensor_expression,
              ::boost::numeric::ublas::detail::tensor_core<T, F, A>> &expr) {
-    return boost::yap::make_terminal(boost::yap::value(expr)(index));
+    return boost::yap::make_terminal(std::move(boost::yap::value(expr)(index)));
   }
-
   size_t index;
 };
 
@@ -199,6 +195,30 @@ struct get_extents {
   operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
              scalar_t &) {
     return scalar_extent_type{};
+  }
+};
+
+template <class T, class F = ::boost::numeric::ublas::column_major,
+          class A = std::vector<T, std::allocator<T>>>
+struct evaluate_ublas_expr {
+  template <template <typename...> class outer, class... inner>
+  decltype(auto)
+  operator()(boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+             outer<inner...> &expr) {
+    if constexpr (std::is_base_of_v<::boost::numeric::ublas::vector_expression<
+                                        outer<inner...>>,
+                                    outer<inner...>>) {
+      return ::boost::numeric::ublas::tensor<T, F, A>{
+          std::move(::boost::numeric::ublas::vector<T>{expr})};
+    } else if constexpr (std::is_base_of_v<
+                             ::boost::numeric::ublas::matrix_expression<
+                                 outer<inner...>>,
+                             outer<inner...>>) {
+      return ::boost::numeric::ublas::tensor<T, F, A>{
+          std::move(::boost::numeric::ublas::matrix<T>{expr})};
+    } else
+      return boost::yap::make_terminal<detail::tensor_expression>(
+          std::move(expr));
   }
 };
 

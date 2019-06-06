@@ -265,8 +265,7 @@ public:
 
     copy(this->rank(), this->elements[0_c].extents_.data(),
          this->elements[0_c].data_.data(), this->elements[0_c].strides_.data(),
-         other.elements[0_c].data_.data(),
-         other.elements[0_c].strides_.data());
+         other.elements[0_c].data_.data(), other.elements[0_c].strides_.data());
   }
 
   /** @brief Constructs a tensor with an tensor expression
@@ -282,38 +281,14 @@ public:
   template <boost::yap::expr_kind Kind, typename Tuple>
   tensor(detail::tensor_expression<Kind, Tuple> &expr) : expression_type() {
 
-    auto expr_shape =
-        boost::yap::transform(expr, detail::transforms::get_extents{});
-
-    this->elements[0_c].extents_ = expr_shape;
-    this->elements[0_c].strides_ = strides_type{expr_shape};
-
-    // Todo : Make this run on a separate device when implementing device policy
-    // #pragma omp parallel for
-
-    this->elements[0_c].data_.resize(expr_shape.product());
-
-    for (auto i = 0u; i < expr_shape.product(); i++)
-      this->elements[0_c].data_[i] = expr(i);
+    expr.eval_to(*this);
   }
 
   BOOST_UBLAS_INLINE
   template <boost::yap::expr_kind Kind, typename Tuple>
   tensor(detail::tensor_expression<Kind, Tuple> &&expr) : expression_type() {
 
-    auto expr_shape =
-        boost::yap::transform(expr, detail::transforms::get_extents{});
-
-    this->elements[0_c].extents_ = expr_shape;
-    this->elements[0_c].strides_ = strides_type{expr_shape};
-
-    // Todo : Make this run on a separate device when implementing device policy
-    // #pragma omp parallel for
-
-    this->elements[0_c].data_.resize(expr_shape.product());
-
-    for (auto i = 0u; i < expr_shape.product(); i++)
-      this->elements[0_c].data_[i] = std::move(expr(i));
+    expr.eval_to(*this);
   }
 
   /** @brief Constructs a tensor with a matrix expression
@@ -395,7 +370,7 @@ public:
   BOOST_UBLAS_INLINE
   size_type order() const { return this->elements[0_c].extents_.size(); }
 
-  /** @brief Returns the strides of the tensor */
+  /** @brief Returns the strides of th    e tensor */
   BOOST_UBLAS_INLINE
   strides_type const &strides() const { return this->elements[0_c].strides_; }
 

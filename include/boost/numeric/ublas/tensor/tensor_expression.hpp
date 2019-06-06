@@ -29,8 +29,8 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
 
   BOOST_UBLAS_INLINE
   decltype(auto) operator()(size_t i) {
-    return boost::yap::evaluate(
-        boost::yap::transform(*this, transforms::at_index{i}));
+    auto nth = boost::yap::transform(*this, transforms::at_index{i});
+    return boost::yap::evaluate(nth);
   }
 
   // todo(coder3101) : Make eval() and eval_to() based on device.
@@ -55,7 +55,11 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
 
   template <class T, class F, class A>
   void eval_to(::boost::numeric::ublas::tensor<T, F, A> &target) {
-    auto shape_expr = boost::yap::transform(*this, transforms::get_extents{});
+    auto semi_eval = boost::yap::transform(
+        *this, transforms::evaluate_ublas_expr<T, F, A>{});
+    auto shape_expr =
+        boost::yap::transform(semi_eval, transforms::get_extents{});
+
     using namespace boost::hana::literals;
 
     target.elements[0_c].data_.resize(shape_expr.product());
@@ -63,7 +67,7 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
     target.elements[0_c].strides_ = basic_strides<std::size_t, F>{shape_expr};
 
     for (auto i = 0u; i < shape_expr.product(); i++)
-      target.elements[0_c].data_[i] = this->operator()(i);
+      target.elements[0_c].data_[i] = semi_eval(i);
   }
 };
 } // namespace boost::numeric::ublas::detail

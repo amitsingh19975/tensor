@@ -1,52 +1,56 @@
 
 #include <boost/core/demangle.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/tensor.hpp>
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/vector_expression.hpp>
 #include <boost/yap/print.hpp>
+#include <boost/yap/yap.hpp>
 #include <iostream>
 #include <typeinfo>
 
 using namespace boost::numeric::ublas;
 
 int main() {
-  tensor<int> s{shape{3, 3}, 5};
-  tensor<float> a{shape{3, 3}, 5.3};
 
-  // Mix and match allowed. Unless there is a +, -, * and / operator overload.
-  // Float + int is valid
-  auto expr = s * a + 2;
+  std::cout << "******************* TENSOR TEST********************\n";
 
-  // Evaluate to tensor.
-  tensor<float> ten1(expr);
+  tensor<int> s{shape{5, 1}, 5};
+  tensor<int> a{shape{5, 1}, 5};
 
-  auto casted_tensor = boost::numeric::ublas::static_tensor_cast<int>(ten1);
-  // We have dynamic and reinterpret cast as well.
-  // This cast is eager and is only performed on tensor l-value or r-value
-  // A Work is in progress for the implementation of lazy cast that takes an
-  // expression.
+  auto ten_expr = s - a;
 
-  auto ss = expr.eval<int>();
-  // This is similar to Eigen. It retuns a new tensor after evaluating the
-  // expression. I just implemented it because Eigen has something like this.
-  // This eval<..> is a template function that takes all three parameters and
-  // returns a tensor build out of those parameters. This therefore can be used
-  // to change layout of a tensor or dtype as well.
+  // boost::yap::print(std::cout, ten_expr);
 
-  boost::yap::print(std::cout, expr);
-  // Just a proof that expr is really a YAP expression
+  std::cout << "******************* MAT-VEC TEST********************\n";
+  // Compatibility check
+  vector<int> v1{5, 5}, v2{5, 5};
 
-  std::cout << boost::core::demangle(typeid(casted_tensor.at(1, 1)).name())
-            << " \n";
-  std::cout << ten1.at(1, 1) << "\n";
-  // We did really changed the type to int from double with the cast.
+  auto vec_expr = 4 * v1 + v2;
 
+  // std::cerr<<"VECTOR Expr : "<< vector<int>{vec_expr}.data()[0]<<"\n";
+  // std::cerr<<"TENSOR Expr : "<<tensor<int>{ten_expr}.data()[0]<<"\n";
+  matrix<int> m1{5, 1, 1}, m2{5, 1, 1};
+
+  auto mat_expr = m1 + 3 * m2;
+
+  // todo(coder3101)
+  auto mixed_expr = ten_expr + mat_expr - vec_expr;
+
+  //    tensor<int> p(modified);
+  //  vector<int> v{vec_expr};
+  //  tensor<int> t{ten_expr};
+  //  tensor<int> ms{//
+  //  std::cout<<t.extents().to_string()<< " " <<ms.extents().to_string()<<"\n";
+
+  std::cout << "******************* XFORM ********************\n";
+  auto exx = boost::yap::transform(mixed_expr, detail::transforms::evaluate_ublas_expr<int>{});
+   boost::yap::print(std::cerr, exx);
+  std::cerr << exx(0)<<" \n";
+//  tensor<int> result{mixed_expr};
+//  std::cerr << "Extent is " << result.extents().to_string() << "\n";
+//  for (auto e : result)
+//    std::cerr << " " << e;
+//  std::cout << "\n";
   return 0;
 }
-
-/*
- * Areas of Work in Progress.
- * Last expression templates were inherited from ublas_expression has hence was
- * easily interchangeably used with matrix and vector expression. This new YAP
- * expression however does things in complete different way and hence it is
- * still WIP on how to make YAP expression work with matrix and vector
- * expression.
- */

@@ -24,38 +24,26 @@
 #include "extents.hpp"
 #include "index.hpp"
 #include "strides.hpp"
-#include "tensor_core.hpp"
 #include "tensor_expression.hpp"
 
-namespace boost {
-namespace numeric {
-namespace ublas {
-
-template <class T, class F, class A> class tensor;
+namespace boost::numeric::ublas {
 
 template <class T, class F, class A> class matrix;
 
 template <class T, class A> class vector;
 
-template <class A, typename B> auto static_tensor_cast(B &);
-
 using namespace boost::hana::literals;
 
 template <class T, class F = first_order,
           class A = std::vector<T, std::allocator<T>>>
-class tensor : public detail::tensor_expression<
-                   boost::yap::expr_kind::terminal,
-                   boost::hana::tuple<detail::tensor_core<T, F, A>>> {
+class tensor {
+
   static_assert(std::is_same<F, first_order>::value ||
                     std::is_same<F, last_order>::value,
                 "boost::numeric::tensor template class only supports first- or "
                 "last-order storage formats.");
 
   using self_type = tensor<T, F, A>;
-  using core_type = detail::tensor_core<T, F, A>;
-  using expression_type = detail::tensor_expression<
-      boost::yap::expr_kind::terminal,
-      boost::hana::tuple<detail::tensor_core<T, F, A>>>;
 
 public:
   template <class derived_type>
@@ -99,7 +87,8 @@ public:
    *
    */
   BOOST_UBLAS_INLINE
-  constexpr tensor() : expression_type() {}
+  constexpr tensor() { // NOLINT(hicpp-use-equals-default,modernize-use-equals-default)
+  }
 
   /** @brief Constructs a tensor with an initializer list
    *
@@ -109,13 +98,10 @@ public:
    *
    * @param l initializer list for setting the dimension extents of the tensor
    */
-  explicit BOOST_UBLAS_INLINE tensor(std::initializer_list<size_type> l)
-      : expression_type() {
-    auto e = extents_type{std::move(l)};
-    this->elements[0_c].extents_ = e;
-    this->elements[0_c].strides_ = strides_type{e};
-    this->elements[0_c].data_.resize(e.product());
-  }
+  explicit BOOST_UBLAS_INLINE
+  tensor( // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+      std::initializer_list<size_type> l)
+      : extents_{std::move(l)}, strides_{extents_}, data_{extents_.product()} {}
 
   /** @brief Constructs a tensor with a \c shape
    *
@@ -125,12 +111,9 @@ public:
    *
    * @param s initial tensor dimension extents
    */
-  explicit BOOST_UBLAS_INLINE tensor(extents_type const &s)
-      : expression_type() {
-    this->elements[0_c].extents_ = s;
-    this->elements[0_c].strides_ = strides_type{s};
-    this->elements[0_c].data_.resize(s.product());
-  }
+  explicit BOOST_UBLAS_INLINE
+  tensor(extents_type const &s) // NOLINT(modernize-pass-by-value)
+      : extents_{s}, strides_{extents_}, data_{extents_.product()} {}
 
   /** @brief Constructs a tensor with a \c shape and initiates it with
    * one-dimensional data
@@ -143,14 +126,11 @@ public:
    * storage layout
    */
   BOOST_UBLAS_INLINE
-  tensor(extents_type const &s, const array_type &a) : expression_type() {
+  tensor(extents_type const &s, // NOLINT(modernize-pass-by-value)
+         const array_type &a)
+      : extents_{s}, strides_{extents_}, data_{a} {
 
-    this->elements[0_c].extents_ = s;
-    this->elements[0_c].strides_ = strides_type{s};
-    this->elements[0_c].data_ = a;
-
-    if (this->elements[0_c].extents_.product() !=
-        this->elements[0_c].data_.size())
+    if (extents_.product() != data_.size())
       throw std::runtime_error(
           "Error in boost::numeric::ublas::tensor: size of provided data and "
           "specified extents do not match.");
@@ -165,27 +145,26 @@ public:
    *  @param i initial value of all elements of type \c value_type
    */
   BOOST_UBLAS_INLINE
-  tensor(extents_type const &e, const value_type &i) : expression_type() {
-    this->elements[0_c].extents_ = e;
-    this->elements[0_c].strides_ = strides_type{e};
-    this->elements[0_c].data_.resize(e.product(), i);
-  }
+  tensor(extents_type const &e, // NOLINT(modernize-pass-by-value)
+         const value_type &i)
+      : extents_{e}, strides_{extents_}, data_{extents_.product(), i} {}
 
   /** @brief Constructs a tensor from another tensor
    *
    *  @param v tensor to be copied.
    */
   BOOST_UBLAS_INLINE
-  tensor(const tensor &v) : expression_type() { this->elements = v.elements; }
+  tensor(const tensor &v)
+      : extents_{v.extents_}, strides_{v.strides_}, data_{v.data_} {}
 
   /** @brief Constructs a tensor from another tensor
    *
    *  @param v tensor to be moved.
    */
   BOOST_UBLAS_INLINE
-  tensor(tensor &&v) : expression_type() {
-    this->elements = std::move(v.elements);
-  }
+  tensor(tensor &&v) noexcept
+      : extents_{std::move(v.extents_)}, strides_{std::move(v.strides_)},
+        data_{std::move(v.data_)} {}
 
   /** @brief Constructs a tensor with a matrix
    *
@@ -194,13 +173,13 @@ public:
    *  @param v matrix to be copied.
    */
   BOOST_UBLAS_INLINE
-  tensor(const matrix_type &v) : expression_type() {
+  tensor( // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+      const matrix_type &v)
+      : data_{v.data()} {
 
-    this->elements[0_c].data_ = v.data();
-
-    if (!this->elements[0_c].data_.empty()) {
-      this->elements[0_c].extents_ = extents_type{v.size1(), v.size2()};
-      this->elements[0_c].strides_ = strides_type{this->elements[0_c].extents_};
+    if (!data_.empty()) {
+      extents_ = extents_type{v.size1(), v.size2()};
+      strides_ = strides_type{this->elements[0_c].extents_};
     }
   }
 
@@ -211,11 +190,12 @@ public:
    *  @param v matrix to be moved.
    */
   BOOST_UBLAS_INLINE
-  tensor(matrix_type &&v) : expression_type() {
+  tensor( // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+      matrix_type &&v) {
     if (v.size1() * v.size2() != 0) {
-      this->elements[0_c].extents_ = extents_type{v.size1(), v.size2()};
-      this->elements[0_c].strides_ = strides_type(this->elements[0_c].extents_);
-      this->elements[0_c].data_ = std::move(v.data());
+      extents_ = extents_type{v.size1(), v.size2()};
+      strides_ = strides_type(this->elements[0_c].extents_);
+      data_ = std::move(v.data());
     }
   }
 
@@ -227,14 +207,13 @@ public:
    *  @param v vector to be copied.
    */
   BOOST_UBLAS_INLINE
-  tensor(const vector_type &v) : expression_type() {
+  tensor( // NOLINT(hicpp-explicit-conversions,google-explicit-constructor)
+      const vector_type &v)
+      : data_{v.data()} {
 
-    this->elements[0_c].data_ = v.data();
-
-    if (!this->elements[0_c].data_.empty()) {
-      this->elements[0_c].extents_ =
-          extents_type{this->elements[0_c].data_.size(), 1};
-      this->elements[0_c].strides_ = strides_type(this->elements[0_c].extents_);
+    if (!data_.empty()) {
+      extents_ = extents_type{data_.size(), 1};
+      strides_ = strides_type(extents_);
     }
   }
 
@@ -243,11 +222,12 @@ public:
    *  @param v vector to be moved.
    */
   BOOST_UBLAS_INLINE
-  tensor(vector_type &&v) : expression_type() {
+  tensor( // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+      vector_type &&v) {
     if (v.size() != 0) {
-      this->elements[0_c].extents_ = extents_type{v.size(), 1};
-      this->elements[0_c].strides_ = strides_type(this->elements[0_c].extents_);
-      this->elements[0_c].data_ = std::move(v.data());
+      extents_ = extents_type{v.size(), 1};
+      strides_ = strides_type(extents_);
+      data_ = std::move(v.data());
     }
   }
 
@@ -257,15 +237,13 @@ public:
    */
   BOOST_UBLAS_INLINE
   template <class other_layout>
-  tensor(const tensor<value_type, other_layout> &other) : expression_type() {
+  tensor(const tensor<value_type, // NOLINT(google-explicit-constructor)
+                      other_layout> &other)
+      : extents_{other.extents_}, strides_{strides_type{other.extents_}},
+        data_{extents_.product()} {
 
-    this->elements[0_c].extents_ = other.elements[0_c].extents_;
-    this->elements[0_c].strides_ = strides_type{other.elements[0_c].extents_};
-    this->elements[0_c].data_.resize(other.elements[0_c].extents_.product());
-
-    copy(this->rank(), this->elements[0_c].extents_.data(),
-         this->elements[0_c].data_.data(), this->elements[0_c].strides_.data(),
-         other.elements[0_c].data_.data(), other.elements[0_c].strides_.data());
+    copy(this->rank(), extents_.data(), data_.data(), strides_.data(),
+         other.data_.data(), other.strides_.data());
   }
 
   /** @brief Constructs a tensor with an tensor expression
@@ -277,16 +255,17 @@ public:
    *
    * @param expr tensor expression
    */
+
   BOOST_UBLAS_INLINE
   template <boost::yap::expr_kind Kind, typename Tuple>
-  tensor(detail::tensor_expression<Kind, Tuple> &expr) : expression_type() {
+  explicit tensor(detail::tensor_expression<Kind, Tuple> &expr) {
 
     expr.eval_to(*this);
   }
 
   BOOST_UBLAS_INLINE
   template <boost::yap::expr_kind Kind, typename Tuple>
-  tensor(detail::tensor_expression<Kind, Tuple> &&expr) : expression_type() {
+  explicit tensor(detail::tensor_expression<Kind, Tuple> &&expr) {
 
     expr.eval_to(*this);
   }
@@ -303,7 +282,8 @@ public:
   //    */
   BOOST_UBLAS_INLINE
   template <class derived_type>
-  tensor(const matrix_expression_type<derived_type> &expr)
+  tensor( // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+      const matrix_expression_type<derived_type> &expr)
       : tensor(matrix_type(expr)) {}
 
   /** @brief Constructs a tensor with a vector expression
@@ -318,7 +298,8 @@ public:
    */
   BOOST_UBLAS_INLINE
   template <class derived_type>
-  tensor(const vector_expression_type<derived_type> &expr)
+  tensor( // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+      const vector_expression_type<derived_type> &expr)
       : tensor(vector_type(expr)) {}
 
   /** @brief Evaluates the tensor_expression and assigns the results to the
@@ -339,7 +320,7 @@ public:
   }
 
   tensor &operator=(tensor other) {
-    swap(this->elements[0_c], other.elements[0_c]);
+    swap(*this, other);
     return *this;
   }
 
@@ -350,41 +331,39 @@ public:
 
   /** @brief Returns true if the tensor is empty (\c size==0) */
   BOOST_UBLAS_INLINE
-  bool empty() const { return this->elements[0_c].data_.empty(); }
+  bool empty() const { return data_.empty(); }
 
   /** @brief Returns the size of the tensor */
   BOOST_UBLAS_INLINE
-  size_type size() const { return this->elements[0_c].data_.size(); }
+  size_type size() const { return data_.size(); }
 
   /** @brief Returns the size of the tensor */
   BOOST_UBLAS_INLINE
-  size_type size(size_type r) const {
-    return this->elements[0_c].extents_.at(r);
-  }
+  size_type size(size_type r) const { return extents_.at(r); }
 
   /** @brief Returns the number of dimensions/modes of the tensor */
   BOOST_UBLAS_INLINE
-  size_type rank() const { return this->elements[0_c].extents_.size(); }
+  size_type rank() const { return extents_.size(); }
 
   /** @brief Returns the number of dimensions/modes of the tensor */
   BOOST_UBLAS_INLINE
-  size_type order() const { return this->elements[0_c].extents_.size(); }
+  size_type order() const { return extents_.size(); }
 
   /** @brief Returns the strides of th    e tensor */
   BOOST_UBLAS_INLINE
-  strides_type const &strides() const { return this->elements[0_c].strides_; }
+  strides_type const &strides() const { return strides_; }
 
   /** @brief Returns the extents of the tensor */
   BOOST_UBLAS_INLINE
-  extents_type const &extents() const { return this->elements[0_c].extents_; }
+  extents_type const &extents() const { return extents_; }
 
   /** @brief Returns a \c const reference to the container. */
   BOOST_UBLAS_INLINE
-  const_pointer data() const { return this->elements[0_c].data_.data(); }
+  const_pointer data() const { return data_.data(); }
 
   /** @brief Returns a \c const reference to the container. */
   BOOST_UBLAS_INLINE
-  pointer data() { return this->elements[0_c].data_.data(); }
+  pointer data() { return data_.data(); }
 
   /** @brief Element access using a single index.
    *
@@ -393,9 +372,7 @@ public:
    *  @param i zero-based index where 0 <= i < this->size()
    */
   BOOST_UBLAS_INLINE
-  const_reference operator[](size_type i) const {
-    return this->elements[0_c].data_[i];
-  }
+  const_reference operator[](size_type i) const { return data_[i]; }
 
   /** @brief Element access using a single index.
    *
@@ -405,7 +382,7 @@ public:
    *  @param i zero-based index where 0 <= i < this->size()
    */
   BOOST_UBLAS_INLINE
-  reference operator[](size_type i) { return this->elements[0_c].data_[i]; }
+  reference operator[](size_type i) { return data_[i]; }
 
   /** @brief Element access using a multi-index or single-index.
    *
@@ -421,11 +398,10 @@ public:
   template <class... size_types>
   BOOST_UBLAS_INLINE const_reference at(size_type i, size_types... is) const {
     if constexpr (sizeof...(is) == 0)
-      return this->elements[0_c].data_[i];
+      return data_[i];
     else
-      return this->elements[0_c]
-          .data_[detail::access<0ul>(size_type(0), this->elements[0_c].strides_,
-                                     i, std::forward<size_types>(is)...)];
+      return data_[detail::access<0ul>(size_type(0), strides_, i,
+                                       std::forward<size_types>(is)...)];
   }
 
   /** @brief Element access using a multi-index or single-index.
@@ -442,11 +418,10 @@ public:
   BOOST_UBLAS_INLINE
   template <class... size_types> reference at(size_type i, size_types... is) {
     if constexpr (sizeof...(is) == 0)
-      return this->elements[0_c].data_[i];
+      return data_[i];
     else
-      return this->elements[0_c]
-          .data_[detail::access<0ul>(size_type(0), this->elements[0_c].strides_,
-                                     i, std::forward<size_types>(is)...)];
+      return data_[detail::access<0ul>(size_type(0), strides_, i,
+                                       std::forward<size_types>(is)...)];
   }
 
   /** @brief Element access using a single index.
@@ -457,9 +432,7 @@ public:
    *  @param i zero-based index where 0 <= i < this->size()
    */
   BOOST_UBLAS_INLINE
-  const_reference operator()(size_type i) const {
-    return this->elements[0_c].data_[i];
-  }
+  const_reference operator()(size_type i) const { return data_[i]; }
 
   /** @brief Element access using a single index.
    *
@@ -468,7 +441,7 @@ public:
    *  @param i zero-based index where 0 <= i < this->size()
    */
   BOOST_UBLAS_INLINE
-  reference operator()(size_type i) { return this->elements[0_c].data_[i]; }
+  reference operator()(size_type i) { return data_[i]; }
 
   /** @brief Generates a tensor index for tensor contraction
    *
@@ -517,72 +490,69 @@ public:
   }
 
   friend void swap(tensor &lhs, tensor &rhs) {
-    std::swap(lhs.elements[0_c].data_, rhs.elements[0_c].data_);
-    std::swap(lhs.elements[0_c].extents_, rhs.elements[0_c].extents_);
-    std::swap(lhs.elements[0_c].strides_, rhs.elements[0_c].strides_);
+    std::swap(lhs.data_, rhs.data_);
+    std::swap(lhs.extents_, rhs.extents_);
+    std::swap(lhs.strides_, rhs.strides_);
   }
 
   /// \brief return an iterator on the first element of the tensor
   BOOST_UBLAS_INLINE
-  const_iterator begin() const { return this->elements[0_c].data_.begin(); }
+  const_iterator begin() const { return data_.begin(); }
 
   /// \brief return an iterator on the first element of the tensor
   BOOST_UBLAS_INLINE
-  const_iterator cbegin() const { return this->elements[0_c].data_.cbegin(); }
+  const_iterator cbegin() const { return data_.cbegin(); }
 
   /// \brief return an iterator after the last element of the tensor
   BOOST_UBLAS_INLINE
-  const_iterator end() const { return this->elements[0_c].data_.end(); }
+  const_iterator end() const { return data_.end(); }
 
   /// \brief return an iterator after the last element of the tensor
   BOOST_UBLAS_INLINE
-  const_iterator cend() const { return this->elements[0_c].data_.cend(); }
+  const_iterator cend() const { return data_.cend(); }
 
   /// \brief Return an iterator on the first element of the tensor
   BOOST_UBLAS_INLINE
-  iterator begin() { return this->elements[0_c].data_.begin(); }
+  iterator begin() { return data_.begin(); }
 
   /// \brief Return an iterator at the end of the tensor
   BOOST_UBLAS_INLINE
-  iterator end() { return this->elements[0_c].data_.end(); }
+  iterator end() { return data_.end(); }
 
   /// \brief Return a const reverse iterator before the first element of the
   /// reversed tensor (i.e. end() of normal tensor)
   BOOST_UBLAS_INLINE
-  const_reverse_iterator rbegin() const {
-    return this->elements[0_c].data_.rbegin();
-  }
+  const_reverse_iterator rbegin() const { return data_.rbegin(); }
 
   /// \brief Return a const reverse iterator before the first element of the
   /// reversed tensor (i.e. end() of normal tensor)
   BOOST_UBLAS_INLINE
-  const_reverse_iterator crbegin() const {
-    return this->elements[0_c].data_.crbegin();
-  }
+  const_reverse_iterator crbegin() const { return data_.crbegin(); }
 
   /// \brief Return a const reverse iterator on the end of the reverse tensor
   /// (i.e. first element of the normal tensor)
   BOOST_UBLAS_INLINE
-  const_reverse_iterator rend() const {
-    return this->elements[0_c].data_.rend();
-  }
+  const_reverse_iterator rend() const { return data_.rend(); }
 
   /// \brief Return a const reverse iterator on the end of the reverse tensor
   /// (i.e. first element of the normal tensor)
   BOOST_UBLAS_INLINE
-  const_reverse_iterator crend() const {
-    return this->elements[0_c].data_.crend();
-  }
+  const_reverse_iterator crend() const { return data_.crend(); }
 
   /// \brief Return a const reverse iterator before the first element of the
   /// reversed tensor (i.e. end() of normal tensor)
   BOOST_UBLAS_INLINE
-  reverse_iterator rbegin() { return this->elements[0_c].data_.rbegin(); }
+  reverse_iterator rbegin() { return data_.rbegin(); }
 
   /// \brief Return a const reverse iterator on the end of the reverse tensor
   /// (i.e. first element of the normal tensor)
   BOOST_UBLAS_INLINE
-  reverse_iterator rend() { return this->elements[0_c].data_.rend(); }
+  reverse_iterator rend() { return data_.rend(); }
+
+private:
+  extents_type extents_;
+  strides_type strides_;
+  array_type data_;
 
 #if 0
                 // -------------
@@ -600,8 +570,6 @@ public:
 #endif
 };
 
-} // namespace ublas
-} // namespace numeric
-} // namespace boost
+} // namespace boost::numeric::ublas
 
 #endif

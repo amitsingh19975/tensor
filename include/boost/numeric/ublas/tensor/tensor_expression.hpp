@@ -27,8 +27,25 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
 
   Tuple elements;
 
-  BOOST_UBLAS_INLINE
-  decltype(auto) operator()(size_t i) {
+  template <class T, class F, class A>
+  explicit tensor_expression(::boost::numeric::ublas::tensor<T, F, A> &t)
+      : elements(boost::hana::tuple<
+                 ::boost::numeric::ublas::tensor<T, F, A>&>{t}) {
+    static_assert(kind == boost::yap::expr_kind::terminal);
+  }
+
+  template <class T, class F, class A>
+  explicit tensor_expression(::boost::numeric::ublas::tensor<T, F, A> &&t)
+      : elements(boost::hana::tuple<::boost::numeric::ublas::tensor<T, F, A>>{
+            std::move(t)}) {
+    static_assert(kind == boost::yap::expr_kind::terminal);
+  }
+
+  explicit tensor_expression(Tuple &t) : elements(t) {}
+
+  explicit tensor_expression(Tuple &&t) : elements(std::move(t)) {}
+
+  BOOST_UBLAS_INLINE decltype(auto) operator()(size_t i) {
     auto nth = boost::yap::transform(*this, transforms::at_index{i});
     return boost::yap::evaluate(nth);
   }
@@ -43,12 +60,13 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
     ::boost::numeric::ublas::tensor<T, F, A> result;
 
     auto shape_expr = boost::yap::transform(*this, transforms::get_extents{});
-    result.elements[0_c].extents_ = shape_expr;
-    result.elements[0_c].strides_ = basic_strides<std::size_t, F>{shape_expr};
-    result.elements[0_c].data_.resize(shape_expr.product());
+
+    result.extents_ = shape_expr;
+    result.strides_ = basic_strides<std::size_t, F>{shape_expr};
+    result.data_.resize(shape_expr.product());
 
     for (auto i = 0u; i < shape_expr.product(); i++)
-      result.elements[0_c].data_[i] = this->operator()(i);
+      result.data_[i] = this->operator()(i);
 
     return result;
   }
@@ -60,14 +78,12 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
     auto shape_expr =
         boost::yap::transform(semi_eval, transforms::get_extents{});
 
-    using namespace boost::hana::literals;
-
-    target.elements[0_c].data_.resize(shape_expr.product());
-    target.elements[0_c].extents_ = shape_expr;
-    target.elements[0_c].strides_ = basic_strides<std::size_t, F>{shape_expr};
+    target.data_.resize(shape_expr.product());
+    target.extents_ = shape_expr;
+    target.strides_ = basic_strides<std::size_t, F>{shape_expr};
 
     for (auto i = 0u; i < shape_expr.product(); i++)
-      target.elements[0_c].data_[i] = semi_eval(i);
+      target.data_[i] = semi_eval(i);
   }
 };
 } // namespace boost::numeric::ublas::detail

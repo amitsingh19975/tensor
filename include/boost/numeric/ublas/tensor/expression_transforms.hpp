@@ -29,12 +29,11 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression;
 namespace boost::numeric::ublas::detail::transforms {
 
 struct at_index {
-  template <typename T, typename F, typename A>
+  template <class T, class F, class A>
   decltype(auto)
-  operator()(boost::yap::terminal<
-             tensor_expression,
-             ::boost::numeric::ublas::detail::tensor_core<T, F, A>> &expr) {
-    return boost::yap::make_terminal(std::move(boost::yap::value(expr)(index)));
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+             ::boost::numeric::ublas::detail::tensor<T, F, A> &terminal) {
+    return boost::yap::make_terminal(std::move(terminal(index)));
   }
   size_t index;
 };
@@ -51,14 +50,14 @@ struct scalar_extent_type {
 struct get_extents {
 
   template <class T, class F, class A>
-  decltype(auto)
+  constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-             ::boost::numeric::ublas::detail::tensor_core<T, F, A> &terminal) {
+             ::boost::numeric::ublas::detail::tensor<T, F, A> &terminal) {
     return terminal.extents();
   }
 
   template <class LExpr, class RExpr>
-  decltype(auto)
+  constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::minus>, LExpr &lexpr,
              RExpr &rexpr) {
 
@@ -97,7 +96,7 @@ struct get_extents {
   }
 
   template <class LExpr, class RExpr>
-  decltype(auto)
+  constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::multiplies>,
              LExpr &lexpr, RExpr &rexpr) {
 
@@ -122,7 +121,7 @@ struct get_extents {
   }
 
   template <class LExpr, class RExpr>
-  decltype(auto)
+  constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::divides>,
              LExpr &lexpr, RExpr &rexpr) {
 
@@ -147,7 +146,7 @@ struct get_extents {
   }
 
   template <class LExpr, class RExpr>
-  decltype(auto) operator()(::boost::yap::expr_tag<boost::yap::expr_kind::plus>,
+  constexpr decltype(auto) operator()(::boost::yap::expr_tag<boost::yap::expr_kind::plus>,
                             LExpr &lexpr, RExpr &rexpr) {
     auto left = boost::yap::transform(
         boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
@@ -171,7 +170,7 @@ struct get_extents {
   }
 
   template <class Expr>
-  decltype(auto)
+  constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::negate>,
              Expr &expr) {
     return boost::yap::transform(
@@ -179,7 +178,7 @@ struct get_extents {
   }
 
   template <class Expr>
-  decltype(auto)
+  constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::unary_plus>,
              Expr &expr) {
     return boost::yap::transform(
@@ -191,7 +190,7 @@ struct get_extents {
   // which makes the caller know that this node is extent-less.
 
   template <typename scalar_t>
-  decltype(auto)
+  constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
              scalar_t &) {
     return scalar_extent_type{};
@@ -202,7 +201,7 @@ template <class T, class F = ::boost::numeric::ublas::column_major,
           class A = std::vector<T, std::allocator<T>>>
 struct evaluate_ublas_expr {
   template <template <typename...> class outer, class... inner>
-  decltype(auto)
+  constexpr decltype(auto)
   operator()(boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
              outer<inner...> &expr) {
     if constexpr (std::is_base_of_v<::boost::numeric::ublas::vector_expression<

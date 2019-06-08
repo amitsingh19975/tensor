@@ -32,8 +32,6 @@ template <class T, class F, class A> class matrix;
 
 template <class T, class A> class vector;
 
-using namespace boost::hana::literals;
-
 template <class T, class F = first_order,
           class A = std::vector<T, std::allocator<T>>>
 class tensor {
@@ -147,7 +145,7 @@ public:
   BOOST_UBLAS_INLINE
   tensor(extents_type const &e, // NOLINT(modernize-pass-by-value)
          const value_type &i)
-      : extents_{e}, strides_{extents_}, data_{extents_.product(), i} {}
+      : extents_{e}, strides_{extents_}, data_(extents_.product(), i) {}
 
   /** @brief Constructs a tensor from another tensor
    *
@@ -179,7 +177,7 @@ public:
 
     if (!data_.empty()) {
       extents_ = extents_type{v.size1(), v.size2()};
-      strides_ = strides_type{this->elements[0_c].extents_};
+      strides_ = strides_type{extents_};
     }
   }
 
@@ -194,7 +192,7 @@ public:
       matrix_type &&v) {
     if (v.size1() * v.size2() != 0) {
       extents_ = extents_type{v.size1(), v.size2()};
-      strides_ = strides_type(this->elements[0_c].extents_);
+      strides_ = strides_type(extents_);
       data_ = std::move(v.data());
     }
   }
@@ -237,7 +235,7 @@ public:
    */
   BOOST_UBLAS_INLINE
   template <class other_layout>
-  tensor(const tensor<value_type, // NOLINT(google-explicit-constructor)
+  tensor(const tensor<value_type, // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
                       other_layout> &other)
       : extents_{other.extents_}, strides_{strides_type{other.extents_}},
         data_{extents_.product()} {
@@ -481,12 +479,11 @@ public:
    */
   BOOST_UBLAS_INLINE
   void reshape(extents_type const &e, value_type v = value_type{}) {
-    this->elements[0_c].extents_ = e;
-    this->elements[0_c].strides_ = strides_type(this->elements[0_c].extents_);
+    extents_ = e;
+    strides_ = strides_type(extents_);
 
     if (e.product() != this->size())
-      this->elements[0_c].data_.resize(this->elements[0_c].extents_.product(),
-                                       v);
+      data_.resize(extents_.product(), v);
   }
 
   friend void swap(tensor &lhs, tensor &rhs) {
@@ -553,6 +550,9 @@ private:
   extents_type extents_;
   strides_type strides_;
   array_type data_;
+
+  template <boost::yap::expr_kind, typename>
+  friend class boost::numeric::ublas::detail::tensor_expression;
 
 #if 0
                 // -------------

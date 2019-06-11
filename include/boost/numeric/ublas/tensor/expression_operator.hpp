@@ -94,7 +94,6 @@ BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     greater_equal, boost::numeric::ublas::detail::tensor_expression,
     boost::numeric::ublas::is_tensor)
 
-
 // Expr to Expr
 BOOST_YAP_USER_BINARY_OPERATOR(plus,
                                boost::numeric::ublas::detail::tensor_expression,
@@ -137,6 +136,7 @@ template <class tensor_type_left, class tuple_type_left,
           class tensor_type_right, class tuple_type_right>
 auto operator*(std::pair<tensor_type_left const &, tuple_type_left> lhs,
                std::pair<tensor_type_right const &, tuple_type_right> rhs) {
+
   using namespace boost::numeric::ublas;
 
   auto const &tensor_left = lhs.first;

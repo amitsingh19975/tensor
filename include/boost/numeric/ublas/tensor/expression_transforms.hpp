@@ -12,17 +12,22 @@
 #ifndef BOOST_UBLAS_TENSOR_EXPRESSION_TRANSFORM_HPP
 #define BOOST_UBLAS_TENSOR_EXPRESSION_TRANSFORM_HPP
 
+#include "extents.hpp"
 #include <boost/yap/yap.hpp>
 
 namespace boost::numeric::ublas {
-
-template <class size_type> class basic_extents;
 
 namespace detail {
 
 template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression;
 
 }
+
+template <class T, class F, class A> class tensor;
+
+template <class T, class F, class A> class matrix;
+
+template <class T, class A> class vector;
 
 } // namespace boost::numeric::ublas
 
@@ -32,28 +37,61 @@ struct at_index {
   template <class T, class F, class A>
   decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-             ::boost::numeric::ublas::detail::tensor<T, F, A> &terminal) {
-    return boost::yap::make_terminal(std::move(terminal(index)));
+             ::boost::numeric::ublas::tensor<T, F, A> const &terminal) {
+    return boost::yap::make_terminal(terminal(index));
+  }
+  template <class T, class F, class A>
+  decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+             ::boost::numeric::ublas::matrix<T, F, A> const &terminal) {
+    return boost::yap::make_terminal(terminal(index));
+  }
+  template <class T, class A>
+  decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+             ::boost::numeric::ublas::vector<T, A> const &terminal) {
+    return boost::yap::make_terminal(terminal(index));
+  }
+  template <typename Expr>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
+             boost::numeric::ublas::matrix_expression<Expr> &terminal) {
+    return boost::yap::make_terminal(terminal()(index));
+  }
+  template <typename Expr>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
+             boost::numeric::ublas::vector_expression<Expr> &terminal) {
+    return boost::yap::make_terminal(terminal()(index));
   }
   size_t index;
 };
 
-struct scalar_extent_type {
-  // This is the assumed extent type of a Scalar in the expression. The
-  // transform get_extents returns this object if called on a scalar terminal
-  // node.
-};
-
-// todo(@coder3101): Make a constexpr version of this transform once constexpr
-// based extents are ready.
+/*
+ * We assume that basic_extents<size_t>(1) is a scalar; Every Scalar operand
+ * returns this value.
+ */
 
 struct get_extents {
 
   template <class T, class F, class A>
   constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-             ::boost::numeric::ublas::detail::tensor<T, F, A> &terminal) {
+             ::boost::numeric::ublas::tensor<T, F, A> &terminal) {
     return terminal.extents();
+  }
+  template <class T, class F, class A>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+             ::boost::numeric::ublas::matrix<T, F, A> &terminal) {
+    return boost::numeric::ublas::basic_extents<size_t>{terminal.size1(),
+                                                        terminal.size2()};
+  }
+  template <class T, class A>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+             ::boost::numeric::ublas::vector<T, A> &terminal) {
+    return boost::numeric::ublas::basic_extents<size_t>{terminal.size(), 1};
   }
 
   template <class LExpr, class RExpr>
@@ -62,30 +100,15 @@ struct get_extents {
              RExpr &rexpr) {
 
     auto left = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(lexpr),
-        *this); // left-side extent
+        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
     auto right = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(rexpr),
-        *this); // right-side extent
-
-    // If both left and right sides are scalars then the result is also scalar
-    // type. Return scalar type extent.
-    if constexpr (std::is_same<decltype(left), scalar_extent_type>::value &&
-                  std::is_same<decltype(right), scalar_extent_type>::value)
-      return scalar_extent_type{};
-
-    // If left side is only scalar, it means right will be a non-scalar. Return
-    // right's extent
-    else if constexpr (std::is_same<decltype(left), scalar_extent_type>::value)
+        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+    if (left.is_free_scalar() && right.is_free_scalar())
+      return basic_extents<size_t>{1};
+    else if (left.is_free_scalar())
       return right;
-
-    // If right side is only scalar, it means left will be a non-scalar. Return
-    // left's extent
-    else if constexpr (std::is_same<decltype(right), scalar_extent_type>::value)
+    else if (right.is_free_scalar())
       return left;
-
-    // otherwise both are non-scalars, assert they have same extent for
-    // operation and return any one of the two
     else {
       if (left != right)
         throw std::runtime_error("Cannot Subtract Tensor of shapes " +
@@ -104,12 +127,11 @@ struct get_extents {
         boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
     auto right = boost::yap::transform(
         boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
-    if constexpr (std::is_same<decltype(left), scalar_extent_type>::value &&
-                  std::is_same<decltype(right), scalar_extent_type>::value)
-      return scalar_extent_type{};
-    else if constexpr (std::is_same<decltype(left), scalar_extent_type>::value)
+    if (left.is_free_scalar() && right.is_free_scalar())
+      return basic_extents<size_t>{1};
+    else if (left.is_free_scalar())
       return right;
-    else if constexpr (std::is_same<decltype(right), scalar_extent_type>::value)
+    else if (right.is_free_scalar())
       return left;
     else {
       if (left != right)
@@ -129,12 +151,11 @@ struct get_extents {
         boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
     auto right = boost::yap::transform(
         boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
-    if constexpr (std::is_same<decltype(left), scalar_extent_type>::value &&
-                  std::is_same<decltype(right), scalar_extent_type>::value)
-      return scalar_extent_type{};
-    else if constexpr (std::is_same<decltype(left), scalar_extent_type>::value)
+    if (left.is_free_scalar() && right.is_free_scalar())
+      return basic_extents<size_t>{1};
+    else if (left.is_free_scalar())
       return right;
-    else if constexpr (std::is_same<decltype(right), scalar_extent_type>::value)
+    else if (right.is_free_scalar())
       return left;
     else {
       if (left != right)
@@ -146,19 +167,19 @@ struct get_extents {
   }
 
   template <class LExpr, class RExpr>
-  constexpr decltype(auto) operator()(::boost::yap::expr_tag<boost::yap::expr_kind::plus>,
-                            LExpr &lexpr, RExpr &rexpr) {
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::plus>, LExpr &lexpr,
+             RExpr &rexpr) {
     auto left = boost::yap::transform(
         boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
     auto right = boost::yap::transform(
         boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
 
-    if constexpr (std::is_same<decltype(left), scalar_extent_type>::value &&
-                  std::is_same<decltype(right), scalar_extent_type>::value)
-      return scalar_extent_type{};
-    else if constexpr (std::is_same<decltype(left), scalar_extent_type>::value)
+    if (left.is_free_scalar() && right.is_free_scalar())
+      return basic_extents<size_t>{1};
+    else if (left.is_free_scalar())
       return right;
-    else if constexpr (std::is_same<decltype(right), scalar_extent_type>::value)
+    else if (right.is_free_scalar())
       return left;
     else {
       if (left != right)
@@ -185,40 +206,207 @@ struct get_extents {
         boost::yap::as_expr<detail::tensor_expression>(expr), *this);
   }
 
-  // Match Scalars so that we could avoid them from expression completely as
-  // they do not have extents. return the special type called scalar_extent_type
-  // which makes the caller know that this node is extent-less.
+  template <class LExpr, class RExpr>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>,
+             LExpr &lexpr, RExpr &rexpr) {
+    auto left = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
+    auto right = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
 
-  template <typename scalar_t>
+    if (left.is_free_scalar() && right.is_free_scalar())
+      return basic_extents<size_t>{1};
+    else if (left.is_free_scalar())
+      return right;
+    else if (right.is_free_scalar())
+      return left;
+    else {
+      if (left != right)
+        throw std::runtime_error("Cannot perform == on tensor of shapes " +
+                                 left.to_string() + " and " +
+                                 right.to_string());
+      return left;
+    }
+  }
+
+  template <class LExpr, class RExpr>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>,
+             LExpr &lexpr, RExpr &rexpr) {
+    auto left = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
+    auto right = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+
+    if (left.is_free_scalar() && right.is_free_scalar())
+      return basic_extents<size_t>{1};
+    else if (left.is_free_scalar())
+      return right;
+    else if (right.is_free_scalar())
+      return left;
+    else {
+      if (left != right)
+        throw std::runtime_error("Cannot perform != on tensor of shapes " +
+                                 left.to_string() + " and " +
+                                 right.to_string());
+      return left;
+    }
+  }
+  template <class LExpr, class RExpr>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less>, LExpr &lexpr,
+             RExpr &rexpr) {
+    auto left = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
+    auto right = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+
+    if (left.is_free_scalar() && right.is_free_scalar())
+      return basic_extents<size_t>{1};
+    else if (left.is_free_scalar())
+      return right;
+    else if (right.is_free_scalar())
+      return left;
+    else {
+      if (left != right)
+        throw std::runtime_error("Cannot perform < on tensor of shapes " +
+                                 left.to_string() + " and " +
+                                 right.to_string());
+      return left;
+    }
+  }
+  template <class LExpr, class RExpr>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater>,
+             LExpr &lexpr, RExpr &rexpr) {
+    auto left = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
+    auto right = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+
+    if (left.is_free_scalar() && right.is_free_scalar())
+      return basic_extents<size_t>{1};
+    else if (left.is_free_scalar())
+      return right;
+    else if (right.is_free_scalar())
+      return left;
+    else {
+      if (left != right)
+        throw std::runtime_error("Cannot perform > on tensor of shapes " +
+                                 left.to_string() + " and " +
+                                 right.to_string());
+      return left;
+    }
+  }
+  template <class LExpr, class RExpr>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater_equal>,
+             LExpr &lexpr, RExpr &rexpr) {
+    auto left = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
+    auto right = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+
+    if (left.is_free_scalar() && right.is_free_scalar())
+      return basic_extents<size_t>{1};
+    else if (left.is_free_scalar())
+      return right;
+    else if (right.is_free_scalar())
+      return left;
+    else {
+      if (left != right)
+        throw std::runtime_error("Cannot perform >= on tensor of shapes " +
+                                 left.to_string() + " and " +
+                                 right.to_string());
+      return left;
+    }
+  }
+  template <class LExpr, class RExpr>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less_equal>,
+             LExpr &lexpr, RExpr &rexpr) {
+    auto left = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
+    auto right = boost::yap::transform(
+        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+
+    if (left.is_free_scalar() && right.is_free_scalar())
+      return basic_extents<size_t>{1};
+    else if (left.is_free_scalar())
+      return right;
+    else if (right.is_free_scalar())
+      return left;
+    else {
+      if (left != right)
+        throw std::runtime_error("Cannot perform <= on tensor of shapes " +
+                                 left.to_string() + " and " +
+                                 right.to_string());
+      return left;
+    }
+  }
+
+  // Match Scalars so that we could avoid them from expression completely as
+  // they do not have extents. return the special type called
+  // scalar_extent_type which makes the caller know that this node is
+  // extent-less. Otherwise match
+
+  template <typename Expr>
   constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
-             scalar_t &) {
-    return scalar_extent_type{};
+             Expr &terminal) {
+    if constexpr (std::is_base_of_v<
+                      boost::numeric::ublas::vector_expression<Expr>, Expr>) {
+      return basic_extents<size_t>{terminal.size(), 1};
+    }
+    if constexpr (std::is_base_of_v<
+                      boost::numeric::ublas::matrix_expression<Expr>, Expr>) {
+      return basic_extents<size_t>{terminal.size1(), terminal.size2()};
+    }
+    return basic_extents<size_t>{1};
   }
 };
 
-template <class T, class F = ::boost::numeric::ublas::column_major,
-          class A = std::vector<T, std::allocator<T>>>
-struct evaluate_ublas_expr {
-  template <template <typename...> class outer, class... inner>
+struct expr_has_logical_operator {
+
+  template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-             outer<inner...> &expr) {
-    if constexpr (std::is_base_of_v<::boost::numeric::ublas::vector_expression<
-                                        outer<inner...>>,
-                                    outer<inner...>>) {
-      return ::boost::numeric::ublas::tensor<T, F, A>{
-          std::move(::boost::numeric::ublas::vector<T>{expr})};
-    } else if constexpr (std::is_base_of_v<
-                             ::boost::numeric::ublas::matrix_expression<
-                                 outer<inner...>>,
-                             outer<inner...>>) {
-      return ::boost::numeric::ublas::tensor<T, F, A>{
-          std::move(::boost::numeric::ublas::matrix<T>{expr})};
-    } else
-      return boost::yap::make_terminal<detail::tensor_expression>(
-          std::move(expr));
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>, Expr1 &,
+             Expr2 &) {
+    status = true;
   }
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>,
+             Expr1 &, Expr2 &) {
+    status = true;
+  }
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less>, Expr1 &,
+             Expr2 &) {
+    status = true;
+  }
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less_equal>, Expr1 &,
+             Expr2 &) {
+    status = true;
+  }
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater>, Expr1 &,
+             Expr2 &) {
+    status = true;
+  }
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater_equal>,
+             Expr1 &, Expr2 &) {
+    status = true;
+  }
+
+  bool status = false;
 };
 
 } // namespace boost::numeric::ublas::detail::transforms

@@ -99,7 +99,7 @@ public:
   explicit BOOST_UBLAS_INLINE
   tensor( // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
       std::initializer_list<size_type> l)
-      : extents_{std::move(l)}, strides_{extents_}, data_{extents_.product()} {}
+      : extents_{std::move(l)}, strides_{extents_}, data_(extents_.product()) {}
 
   /** @brief Constructs a tensor with a \c shape
    *
@@ -111,7 +111,7 @@ public:
    */
   explicit BOOST_UBLAS_INLINE
   tensor(extents_type const &s) // NOLINT(modernize-pass-by-value)
-      : extents_{s}, strides_{extents_}, data_{extents_.product()} {}
+      : extents_{s}, strides_{extents_}, data_(extents_.product()) {}
 
   /** @brief Constructs a tensor with a \c shape and initiates it with
    * one-dimensional data
@@ -126,7 +126,7 @@ public:
   BOOST_UBLAS_INLINE
   tensor(extents_type const &s, // NOLINT(modernize-pass-by-value)
          const array_type &a)
-      : extents_{s}, strides_{extents_}, data_{a} {
+      : extents_{s}, strides_{extents_}, data_(a) {
 
     if (extents_.product() != data_.size())
       throw std::runtime_error(
@@ -153,7 +153,8 @@ public:
    */
   BOOST_UBLAS_INLINE
   tensor(const tensor &v)
-      : extents_{v.extents_}, strides_{v.strides_}, data_{v.data_} {}
+      : extents_{v.extents_}, strides_{v.strides_}, data_(v.data_) {
+  }
 
   /** @brief Constructs a tensor from another tensor
    *
@@ -238,7 +239,7 @@ public:
   tensor(const tensor<value_type, // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
                       other_layout> &other)
       : extents_{other.extents_}, strides_{strides_type{other.extents_}},
-        data_{extents_.product()} {
+        data_(extents_.product()) {
 
     copy(this->rank(), extents_.data(), data_.data(), strides_.data(),
          other.data_.data(), other.strides_.data());
@@ -256,14 +257,14 @@ public:
 
   BOOST_UBLAS_INLINE
   template <boost::yap::expr_kind Kind, typename Tuple>
-  explicit tensor(detail::tensor_expression<Kind, Tuple> &expr) {
+  tensor(detail::tensor_expression<Kind, Tuple> &expr) {
 
     expr.eval_to(*this);
   }
 
   BOOST_UBLAS_INLINE
   template <boost::yap::expr_kind Kind, typename Tuple>
-  explicit tensor(detail::tensor_expression<Kind, Tuple> &&expr) {
+  tensor(detail::tensor_expression<Kind, Tuple> &&expr) {
 
     expr.eval_to(*this);
   }
@@ -312,7 +313,7 @@ public:
    */
   BOOST_UBLAS_INLINE
   template <boost::yap::expr_kind Kind, typename Tuple>
-  tensor &operator=(const detail::tensor_expression<Kind, Tuple> &expr) {
+  tensor &operator=(detail::tensor_expression<Kind, Tuple> &expr) {
     expr.eval_to(*this);
     return *this;
   }

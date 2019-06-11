@@ -27,24 +27,6 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
 
   Tuple elements;
 
-  template <class T, class F, class A>
-  explicit tensor_expression(::boost::numeric::ublas::tensor<T, F, A> &t)
-      : elements(boost::hana::tuple<
-                 ::boost::numeric::ublas::tensor<T, F, A>&>{t}) {
-    static_assert(kind == boost::yap::expr_kind::terminal);
-  }
-
-  template <class T, class F, class A>
-  explicit tensor_expression(::boost::numeric::ublas::tensor<T, F, A> &&t)
-      : elements(boost::hana::tuple<::boost::numeric::ublas::tensor<T, F, A>>{
-            std::move(t)}) {
-    static_assert(kind == boost::yap::expr_kind::terminal);
-  }
-
-  explicit tensor_expression(Tuple &t) : elements(t) {}
-
-  explicit tensor_expression(Tuple &&t) : elements(std::move(t)) {}
-
   BOOST_UBLAS_INLINE decltype(auto) operator()(size_t i) {
     auto nth = boost::yap::transform(*this, transforms::at_index{i});
     return boost::yap::evaluate(nth);
@@ -54,9 +36,7 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
 
   template <class T, class F = ::boost::numeric::ublas::first_order,
             class A = std::vector<T, std::allocator<T>>>
-  auto eval() {
-    using namespace boost::hana::literals;
-
+  auto eval() const {
     ::boost::numeric::ublas::tensor<T, F, A> result;
 
     auto shape_expr = boost::yap::transform(*this, transforms::get_extents{});
@@ -73,17 +53,28 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
 
   template <class T, class F, class A>
   void eval_to(::boost::numeric::ublas::tensor<T, F, A> &target) {
-    auto semi_eval = boost::yap::transform(
-        *this, transforms::evaluate_ublas_expr<T, F, A>{});
-    auto shape_expr =
-        boost::yap::transform(semi_eval, transforms::get_extents{});
-
+    auto shape_expr = boost::yap::transform(*this, transforms::get_extents{});
     target.data_.resize(shape_expr.product());
     target.extents_ = shape_expr;
     target.strides_ = basic_strides<std::size_t, F>{shape_expr};
 
     for (auto i = 0u; i < shape_expr.product(); i++)
-      target.data_[i] = semi_eval(i);
+      target.data_[i] = this->operator()(i);
+  }
+  operator bool() {
+    boost::numeric::ublas::detail::transforms::expr_has_logical_operator e;
+    boost::yap::transform(*this, e);
+    if (!e.status) {
+      throw std::runtime_error(
+          "Cannot convert the tensor expression to bool type. Only expression "
+          "with at least one-logical operator are convertible");
+    } else {
+      auto shape_expr = boost::yap::transform(*this, transforms::get_extents{});
+      for (auto i = 0u; i < shape_expr.product(); i++)
+        if (!this->operator()(i))
+          return false;
+    }
+    return true;
   }
 };
 } // namespace boost::numeric::ublas::detail

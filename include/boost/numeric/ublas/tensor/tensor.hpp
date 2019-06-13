@@ -28,6 +28,8 @@
 
 namespace boost::numeric::ublas {
 
+template <class T, class F, class A> class tensor;
+
 template <class T, class F, class A> class matrix;
 
 template <class T, class A> class vector;
@@ -153,8 +155,7 @@ public:
    */
   BOOST_UBLAS_INLINE
   tensor(const tensor &v)
-      : extents_{v.extents_}, strides_{v.strides_}, data_(v.data_) {
-  }
+      : extents_{v.extents_}, strides_{v.strides_}, data_(v.data_) {}
 
   /** @brief Constructs a tensor from another tensor
    *
@@ -236,13 +237,14 @@ public:
    */
   BOOST_UBLAS_INLINE
   template <class other_layout>
-  tensor(const tensor<value_type, // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
-                      other_layout> &other)
+  tensor(const tensor<
+         value_type, // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+         other_layout> &other)
       : extents_{other.extents()}, strides_{strides_type{other.extents()}},
         data_(extents_.product()) {
 
     copy(this->rank(), extents_.data(), data_.data(), strides_.data(),
-         other.data_.data(), other.strides_.data());
+         other.data(), other.strides().data());
   }
 
   /** @brief Constructs a tensor with an tensor expression

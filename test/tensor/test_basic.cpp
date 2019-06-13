@@ -28,7 +28,9 @@ template <class T> constexpr std::string_view type_name() {
 }
 
 int main() {
-  tensor<int> t1{shape{5, 5}, 45}, t2{shape{5, 5}, 55};
+  tensor<int, first_order > t1{shape{5, 5}, 45}, t2{shape{5, 5}, 55};
+  tensor<int, last_order > t3{t1};
+
   matrix<int> m1{5, 5, 44}, m2{5, 6, 9};
   vector<int> v1(5,9), v2(10,8);
 

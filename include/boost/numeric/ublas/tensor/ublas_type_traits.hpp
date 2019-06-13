@@ -21,6 +21,8 @@ namespace boost::numeric::ublas {
 template <class T, class F, class A> class tensor;
 template <class T, class F, class A> class matrix;
 template <class T, class A> class vector;
+template <class derived_type> class matrix_expression;
+template <class derived_type> class vector_expression;
 namespace detail {
 template <boost::yap::expr_kind K, typename Tuple> class tensor_expression;
 }

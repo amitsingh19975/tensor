@@ -132,6 +132,7 @@ public:
    * @returns true if (1,1,[1,...,1])
    */
   bool is_scalar() const {
+    if(_base.size() == 1 && _base[0] == 1) return false; // it is free_scalar
     return _base.size() != 0 &&
            std::all_of(_base.begin(), _base.end(),
                        [](const_reference a) { return a == 1; });
@@ -214,11 +215,15 @@ public:
 
   size_type size() const { return this->_base.size(); }
 
-  /** @brief Returns true if size >= 1 and all elements > 0 */
+  /** @brief Returns true if size > 1 and all elements > 0 or if size == 1 &&
+   * data[0] == 1 */
   bool valid() const {
-    return this->size() >= 1 &&
-           std::none_of(_base.begin(), _base.end(),
-                        [](const_reference a) { return a == value_type(0); });
+    if (this->size() == 1 && _base[0] == 1)
+      return true;
+    else
+      return this->size() > 1 &&
+             std::none_of(_base.begin(), _base.end(),
+                          [](const_reference a) { return a == value_type(0); });
   }
 
   /** @brief Returns the number of elements a tensor holds with this */
@@ -274,6 +279,8 @@ public:
    */
 
   std::string to_string() const {
+    if (_base.empty())
+      return "{}";
     std::string res = "{";
     for (auto i = 0u; i < _base.size() - 1; i++)
       res += (std::to_string(_base[i]) + ", ");

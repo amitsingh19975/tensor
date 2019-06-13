@@ -238,7 +238,7 @@ public:
   template <class other_layout>
   tensor(const tensor<value_type, // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
                       other_layout> &other)
-      : extents_{other.extents_}, strides_{strides_type{other.extents_}},
+      : extents_{other.extents()}, strides_{strides_type{other.extents()}},
         data_(extents_.product()) {
 
     copy(this->rank(), extents_.data(), data_.data(), strides_.data(),

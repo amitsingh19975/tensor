@@ -9,7 +9,6 @@
 
 using namespace boost::numeric::ublas;
 
-
 template <class T> constexpr std::string_view type_name() {
   using namespace std;
 #ifdef __clang__
@@ -30,6 +29,10 @@ template <class T> constexpr std::string_view type_name() {
 
 int main() {
   tensor<int> t1{shape{5, 5}, 45}, t2{shape{5, 5}, 55};
+  matrix<int> m1{5, 5, 44}, m2{5, 6, 9};
+  vector<int> v1(5,9), v2(10,8);
+
+
 
   //  // Unary Operators
   //  auto expr = -t1;
@@ -58,7 +61,6 @@ int main() {
   //  auto i = 78;
   //  auto expr22 = tensor<int>{shape{7, 7}} + i;
   //  auto expr23 = t1 - i;
-
 
   //
   //  // boost::yap::print(std::cerr, expr);
@@ -91,5 +93,4 @@ int main() {
   //  tensor<int> t31{expr22};
   //  tensor<int> t32{expr21};
   //  tensor<int> t33 = expr23;
-
 }

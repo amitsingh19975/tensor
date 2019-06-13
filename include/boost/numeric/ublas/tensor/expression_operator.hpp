@@ -15,6 +15,7 @@
 #include "functions.hpp"
 #include "multi_index_utility.hpp"
 #include "tensor_cast_macros.hpp"
+#include "ublas_type_traits.hpp"
 #include <boost/yap/user_macros.hpp>
 
 namespace boost::numeric::ublas {
@@ -23,27 +24,11 @@ namespace detail {
 template <boost::yap::expr_kind K, typename A> struct tensor_expression;
 
 }
-template <typename T> struct is_tensor { constexpr static bool value = false; };
-template <typename T> struct is_vector { constexpr static bool value = false; };
-template <typename T> struct is_matrix { constexpr static bool value = false; };
-
-template <class T, class F, class A> struct is_tensor<tensor<T, F, A>> {
-  constexpr static bool value = true;
-};
-template <class T, class A> struct is_vector<vector<T, A>> {
-  constexpr static bool value = true;
-};
-template <class T, class F, class A> struct is_matrix<matrix<T, F, A>> {
-  constexpr static bool value = true;
-};
-
-template <class T> constexpr bool is_vector_v = is_vector<T>::value;
-template <class T> constexpr bool is_tensor_v = is_tensor<T>::value;
-template <class T> constexpr bool is_matrix_v = is_matrix<T>::value;
 
 BOOST_UBLAS_EAGER_TENSOR_CAST(static_tensor_cast, static_cast)
 BOOST_UBLAS_EAGER_TENSOR_CAST(dynamic_tensor_cast, dynamic_cast)
 BOOST_UBLAS_EAGER_TENSOR_CAST(reinterpret_tensor_cast, reinterpret_cast)
+
 } // namespace boost::numeric::ublas
 
 // Tensor to expr

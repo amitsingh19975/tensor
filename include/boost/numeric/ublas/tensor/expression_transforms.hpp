@@ -13,6 +13,7 @@
 #define BOOST_UBLAS_TENSOR_EXPRESSION_TRANSFORM_HPP
 
 #include "extents.hpp"
+#include "ublas_type_traits.hpp"
 #include <boost/yap/yap.hpp>
 
 namespace boost::numeric::ublas {
@@ -31,8 +32,19 @@ template <class T, class A> class vector;
 
 } // namespace boost::numeric::ublas
 
+/**
+ * @brief This namespace contains all the transforms of YAP expression.
+ */
 namespace boost::numeric::ublas::detail::transforms {
 
+/**
+ * @brief A transform that extracts ith index value from terminal types.
+ *
+ * @note This transform when applied to an tensor_expression with terminal nodes
+ * as tensor returns a new expression with terminal nodes as ith values of
+ * tensor.
+ *
+ */
 struct at_index {
   template <class T, class F, class A>
   decltype(auto)
@@ -70,6 +82,14 @@ struct at_index {
 /*
  * We assume that basic_extents<size_t>(1) is a scalar; Every Scalar operand
  * returns this value.
+ */
+
+/**
+ * @brief This transform returns the extent of the expression.
+ *
+ * @note If any extent inconsistency is found, this transform throws a runtime
+ * exception. Also note that for vector the returned extent is `{vec.size, 1}` and
+ * for matrix it is `{mat.size1, mat.size2}`.
  */
 
 struct get_extents {
@@ -355,18 +375,22 @@ struct get_extents {
   constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
              Expr &terminal) {
-    if constexpr (std::is_base_of_v<
-                      boost::numeric::ublas::vector_expression<Expr>, Expr>) {
+    if constexpr (boost::numeric::ublas::is_vector_expression_v<Expr>) {
       return basic_extents<size_t>{terminal.size(), 1};
-    }
-    if constexpr (std::is_base_of_v<
-                      boost::numeric::ublas::matrix_expression<Expr>, Expr>) {
+    } else if constexpr (boost::numeric::ublas::is_matrix_expression_v<Expr>) {
       return basic_extents<size_t>{terminal.size1(), terminal.size2()};
-    }
-    return basic_extents<size_t>{1};
+    } else
+      return basic_extents<size_t>{1};
   }
 };
 
+/**
+ * @brief A stateful transform that that sets status to true if the expression
+ * to which it is applied has at-least one logical operator in it.
+ *
+ * @note If this transform sets status to true then only the expression can be
+ * implicitly converted to bool type.
+ */
 struct expr_has_logical_operator {
 
   template <class Expr1, class Expr2>

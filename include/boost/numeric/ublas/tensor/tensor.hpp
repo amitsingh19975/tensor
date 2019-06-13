@@ -34,6 +34,19 @@ template <class T, class F, class A> class matrix;
 
 template <class T, class A> class vector;
 
+/** @brief A dense tensor of values of type \c T.
+ *
+ * For a \f$n\f$-dimensional tensor \f$v\f$ and \f$0\leq i < n\f$ every element
+ * \f$v_i\f$ is mapped to the \f$i\f$-th element of the container. A storage
+ * type \c A can be specified which defaults to \c unbounded_array. Elements are
+ * constructed by \c A, which need not initialise their value.
+ *
+ * @tparam T type of the objects stored in the tensor (like int, double,
+ * complex,...)
+ * @tparam A The type of the storage array of the tensor. Default is \c
+ * unbounded_array<T>. \c <bounded_array<T> and \c std::vector<T> can also be
+ * used
+ */
 template <class T, class F = first_order,
           class A = std::vector<T, std::allocator<T>>>
 class tensor {

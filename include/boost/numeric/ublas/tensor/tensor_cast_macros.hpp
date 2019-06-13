@@ -18,9 +18,13 @@
 // todo(@coder3101): Casting always return a new tensor with std::vector<T> as
 // internal container. Make this return the same container as passed in
 // Tensor::array_type.
-
 // todo(@coder3101): Also Lazy cast that takes tensor_expression
 
+/**
+ * @brief This MACRO defines a casting function. It eagerly casts the tensor
+ * from one to other data type.
+ *
+ */
 #define BOOST_UBLAS_EAGER_TENSOR_CAST(func_name, cast_name)                    \
   template <class new_type, typename Tensor> auto func_name(Tensor &e) {       \
     if constexpr (std::is_same<new_type, typename Tensor::value_type>::value)  \

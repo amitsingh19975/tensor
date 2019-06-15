@@ -470,4 +470,20 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_standard_iterator, value,  test_ty
 	}
 }
 
+BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_throw, value, test_types, fixture)
+{
+  using namespace boost::numeric;
+  using value_type  = typename value::first_type;
+  using layout_type = typename value::second_type;
+  using tensor_type = ublas::tensor<value_type, layout_type>;
+
+  std::vector<value_type> vec(30);
+  BOOST_CHECK_THROW(tensor_type({5,5},vec), std::runtime_error);
+
+  auto t = tensor_type{{5,5}};
+  auto i = ublas::index::index_type<4>{};
+  BOOST_CHECK_THROW(t.operator()(i,i,i), std::runtime_error);
+
+}
+
 BOOST_AUTO_TEST_SUITE_END()

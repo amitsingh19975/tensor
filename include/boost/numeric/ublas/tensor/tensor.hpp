@@ -572,7 +572,7 @@ private:
   array_type data_;
 
   template <boost::yap::expr_kind, typename>
-  friend class boost::numeric::ublas::detail::tensor_expression;
+  friend struct boost::numeric::ublas::detail::tensor_expression;
 
 #if 0
                 // -------------

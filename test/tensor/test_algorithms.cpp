@@ -312,17 +312,17 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_trans, value,  test_typ
 		for(auto i = 0ul; i < s; ++i)
 			BOOST_CHECK_EQUAL( a[i], b2[i] );
 
-		        size_type zero = 0;
-                ublas::trans( zero, n.data(), pi.data(), c2.data(), wc.data(), a.data(), wa.data() );
-                ublas::trans( zero, nc.data(), pi.data(), b2.data(), wb.data(), c2.data(), wc.data() );
-
-                value_type *c0 = nullptr;
-                size_type const*const s0 = nullptr;
-
-                BOOST_CHECK_THROW(ublas::trans( p, n.data(), pi.data(), c0, wc.data(),  a.data(), wa.data()), std::length_error);
-                BOOST_CHECK_THROW(ublas::trans( p, s0, pi.data(), c2.data(),wc.data(),  a.data(), wa.data()), std::length_error);
-                BOOST_CHECK_THROW(ublas::trans( p, n.data(), pi.data(), c2.data(), s0,  a.data(), wa.data()), std::length_error);
-                BOOST_CHECK_THROW(ublas::trans( p, n.data(), s0, c2.data(), wc.data(),  a.data(), wa.data()), std::length_error);
+//		        size_type zero = 0;
+//                ublas::trans( zero, n.data(), pi.data(), c2.data(), wc.data(), a.data(), wa.data() );
+//                ublas::trans( zero, nc.data(), pi.data(), b2.data(), wb.data(), c2.data(), wc.data() );
+//
+//                value_type *c0 = nullptr;
+//                size_type const*const s0 = nullptr;
+//
+//                BOOST_CHECK_THROW(ublas::trans( p, n.data(), pi.data(), c0, wc.data(),  a.data(), wa.data()), std::length_error);
+//                BOOST_CHECK_THROW(ublas::trans( p, s0, pi.data(), c2.data(),wc.data(),  a.data(), wa.data()), std::length_error);
+//                BOOST_CHECK_THROW(ublas::trans( p, n.data(), pi.data(), c2.data(), s0,  a.data(), wa.data()), std::length_error);
+//                BOOST_CHECK_THROW(ublas::trans( p, n.data(), s0, c2.data(), wc.data(),  a.data(), wa.data()), std::length_error);
 
         }
 }

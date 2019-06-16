@@ -211,4 +211,10 @@ auto operator/=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr const &e) {
   return lhs;
 }
 
+template <boost::yap::expr_kind K, typename Tuple>
+bool operator!(boost::numeric::ublas::detail::tensor_expression<K, Tuple>& expr){
+  bool result = expr;
+  return !result;
+}
+
 #endif

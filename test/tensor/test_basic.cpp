@@ -2,6 +2,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/tensor.hpp>
 #include <boost/numeric/ublas/vector.hpp>
+#include <complex>
 
 template <class T> constexpr std::string_view type_name() {
   using namespace std;
@@ -23,8 +24,16 @@ template <class T> constexpr std::string_view type_name() {
 
 int main() {
   using namespace boost::numeric::ublas;
-//  tensor<int> t1{shape{4, 4}, 4};
-//  tensor<float> t2{shape{4, 4}, 4.2};
+  tensor<int> t1{shape{4, 4}, 4};
+  tensor<float> t2{shape{4, 4}, 4.2};
+
+  auto expr = (t1 + t1)/2;
+
+  tensor<std::complex<float>> c_t{{5,5}};
+  auto expr2 = c_t / 5.0f;
+  boost::yap::print(std::cout, expr2);
+  auto ig = expr2(0);
+
 //
 //  auto expr = ((t1 + t2) == (t1 + t2) > 5);
 //

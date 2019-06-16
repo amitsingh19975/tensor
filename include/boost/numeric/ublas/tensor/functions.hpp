@@ -420,7 +420,7 @@ auto trans(tensor<V, F, A> const &a, std::vector<std::size_t> const &tau) {
  */
 template <class V, class F, class A> auto norm(tensor<V, F, A> const &a) {
   static_assert(std::is_default_constructible<V>::value,
-                "Value type of tensor must be default constructible in order "
+                "Value type of tensor must be default construct able in order "
                 "to call boost::numeric::ublas::norm");
   if (a.empty()) {
     throw std::runtime_error(

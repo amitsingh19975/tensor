@@ -25,13 +25,8 @@ constexpr std::string_view type_name() {
 
 int main() {
   using namespace boost::numeric::ublas;
-  tensor<int> t1{shape{4, 4}, 4};
-  tensor<float> t2{shape{4, 4}, 4.2};
-
-  auto expr = (t1 + t1) / 2;
-
-  tensor<std::complex<float>> c_t{{5, 5}};
-  auto expr2 = c_t / 5.0f;
-  boost::yap::print(std::cout, expr2);
-  auto ig = expr2(0);
+  using tensor_type = tensor<int>;
+  auto phia = std::vector<std::size_t >(3);
+  auto sphia = std::vector<std::size_t>(2);
+  prod(tensor_type({1,2}), tensor_type(tensor_type{2,1,3}), sphia, phia);
 }

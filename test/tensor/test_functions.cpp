@@ -237,19 +237,16 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_prod_tensor_2, value,  test_types,
 		}
 	}
 
-	//auto phia = std::vector<std::size_t >(2);
+	auto phia = std::vector<std::size_t >(3);
+	auto sphia = std::vector<std::size_t>(2);
 
-	//BOOST_CHECK_THROW(ublas::prod(tensor_type{}, tensor_type({2,1}),  ))
-
-//	auto extent = extents[7];
-//	auto filled_tensor = tensor_type{extent, value_type{3}};
-//        auto filled_vector = std::vector<std::size_t >(filled_tensor.rank());
-//
-//        auto empty_tensor = tensor_type{};
-//	auto empty_vector = std::vector<std::size_t>{};
-//
-//	BOOST_CHECK_THROW(prod(empty_tensor, empty_tensor, ))
-
+	BOOST_CHECK_THROW(ublas::prod(tensor_type{}, tensor_type({2,1,2}), phia, phia), std::runtime_error);
+        BOOST_CHECK_THROW(ublas::prod(tensor_type({1,2,3}), tensor_type(), phia, phia), std::runtime_error);
+        BOOST_CHECK_THROW(ublas::prod(tensor_type({1,2,4}), tensor_type({2,1}), phia, phia), std::runtime_error);
+        BOOST_CHECK_THROW(ublas::prod(tensor_type({1,2}), tensor_type({2,1,2}), phia, phia), std::runtime_error);
+        BOOST_CHECK_THROW(ublas::prod(tensor_type({1,2}), tensor_type({2,1,3}), sphia, phia), std::runtime_error);
+        BOOST_CHECK_THROW(ublas::prod(tensor_type({1,2}), tensor_type({2,2}), phia, sphia), std::runtime_error);
+        BOOST_CHECK_THROW(ublas::prod(tensor_type({1,2}), tensor_type({4,4}), sphia, phia), std::runtime_error);
 }
 
 

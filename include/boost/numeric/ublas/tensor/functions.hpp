@@ -229,7 +229,7 @@ auto prod(tensor<V, F, A1> const &a, tensor<V, F, A2> const &b,
   // phia1.erase( std::remove(phia1.begin(), phia1.end(), phia.at(i)),
   // phia1.end() )  ;
 
-  assert(phia1.size() == pa);
+  //assert(phia1.size() == pa);
 
   for (auto i = 0ul; i < r; ++i)
     nc[i] = na[phia1[i] - 1];
@@ -239,15 +239,15 @@ auto prod(tensor<V, F, A1> const &a, tensor<V, F, A2> const &b,
   // phib1.erase( std::remove(phib1.begin(), phib1.end(), phia.at(i)),
   // phib1.end() )  ;
 
-  assert(phib1.size() == pb);
+  //assert(phib1.size() == pb);
 
   for (auto i = 0ul; i < s; ++i)
     nc[r + i] = nb[phib1[i] - 1];
 
   //	std::copy( phib.begin(), phib.end(), phib1.end()  );
 
-  assert(phia1.size() == pa);
-  assert(phib1.size() == pb);
+  //assert(phia1.size() == pa);
+  //assert(phib1.size() == pb);
 
   auto c = tensor_type(extents_type(nc), value_type{});
 

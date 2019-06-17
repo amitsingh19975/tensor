@@ -75,6 +75,18 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_prod_vector, value,  test_types, f
 
 		}
 	}
+  auto n = extents[8];
+  auto a = tensor_type(n, value_type{2});
+  auto b = vector_type(n[0], value_type{1});
+
+  auto zero_rank_empty_tensor = tensor_type{};
+  auto empty = vector_type{};
+
+  BOOST_CHECK_THROW(prod(a, b, 0), std::length_error);
+  BOOST_CHECK_THROW(prod(a, b, 9), std::length_error);
+  BOOST_CHECK_THROW(prod(zero_rank_empty_tensor, b, 1), std::length_error);
+  BOOST_CHECK_THROW(prod(a, empty, 2), std::length_error);
+
 }
 
 
@@ -104,6 +116,18 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_prod_matrix, value,  test_types, f
 
 		}
 	}
+
+  auto n = extents[8];
+  auto a = tensor_type(n, value_type{2});
+  auto b = matrix_type(n[0], n[0], value_type{1});
+
+  auto zero_rank_empty_tensor = tensor_type{};
+  auto empty = matrix_type{};
+
+  BOOST_CHECK_THROW(prod(a, b, 0), std::length_error);
+  BOOST_CHECK_THROW(prod(a, b, 9), std::length_error);
+  BOOST_CHECK_THROW(prod(zero_rank_empty_tensor, b, 1), std::length_error);
+  BOOST_CHECK_THROW(prod(a, empty, 2), std::length_error);
 }
 
 
@@ -212,6 +236,20 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_prod_tensor_2, value,  test_types,
 			std::next_permutation(pi.begin(), pi.end());
 		}
 	}
+
+	//auto phia = std::vector<std::size_t >(2);
+
+	//BOOST_CHECK_THROW(ublas::prod(tensor_type{}, tensor_type({2,1}),  ))
+
+//	auto extent = extents[7];
+//	auto filled_tensor = tensor_type{extent, value_type{3}};
+//        auto filled_vector = std::vector<std::size_t >(filled_tensor.rank());
+//
+//        auto empty_tensor = tensor_type{};
+//	auto empty_vector = std::vector<std::size_t>{};
+//
+//	BOOST_CHECK_THROW(prod(empty_tensor, empty_tensor, ))
+
 }
 
 
@@ -237,6 +275,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_inner_prod, value,  test_types, fi
 		BOOST_CHECK_EQUAL( c , r );
 
 	}
+  BOOST_CHECK_THROW(ublas::inner_prod(tensor_type({1,2,3}), tensor_type({1,2,3,4})), std::length_error); // rank different
+  BOOST_CHECK_THROW(ublas::inner_prod(tensor_type(), tensor_type()), std::length_error); //empty tensor
+  BOOST_CHECK_THROW(ublas::inner_prod(tensor_type({1,2,3}), tensor_type({3,2,1})), std::length_error); // different extent
 }
 
 
@@ -263,6 +304,8 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_norm, value,  test_types, fixture 
 
 		tensor_type var = (a+a)/2.0f; // std::complex<float>/int not allowed as expression is captured
 		auto r2 = ublas::norm( var );
+
+		BOOST_CHECK_THROW(ublas::norm(tensor_type{}), std::runtime_error);
 
 		BOOST_CHECK_EQUAL( c , r );
 		BOOST_CHECK_EQUAL( std::sqrt( c ) , r2 );

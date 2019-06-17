@@ -4,3 +4,4 @@ ublas.kdev4
 .idea/
 CMakeLists.txt
 cmake-build-debug/
+build/

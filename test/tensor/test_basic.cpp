@@ -4,7 +4,8 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <complex>
 
-template <class T> constexpr std::string_view type_name() {
+template <class T>
+constexpr std::string_view type_name() {
   using namespace std;
 #ifdef __clang__
   string_view p = __PRETTY_FUNCTION__;
@@ -27,19 +28,10 @@ int main() {
   tensor<int> t1{shape{4, 4}, 4};
   tensor<float> t2{shape{4, 4}, 4.2};
 
-  auto expr = (t1 + t1)/2;
+  auto expr = (t1 + t1) / 2;
 
-  tensor<std::complex<float>> c_t{{5,5}};
+  tensor<std::complex<float>> c_t{{5, 5}};
   auto expr2 = c_t / 5.0f;
   boost::yap::print(std::cout, expr2);
   auto ig = expr2(0);
-
-//
-//  auto expr = ((t1 + t2) == (t1 + t2) > 5);
-//
-//  tensor<int> r1 = expr;
-//  tensor<float> r2 = expr;
-
-  std::cout<<true+true;
-  //std::cout << "T1 : " << r1.at(0) << "T2 : " << r2.at(0) << "\n";
 }

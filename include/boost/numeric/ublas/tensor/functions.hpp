@@ -66,10 +66,6 @@ auto prod(tensor<V, F, A1> const &a, vector<V, A2> const &b,
         "error in boost::numeric::ublas::prod(ttv): rank of tensor must be "
         "greater than or equal to the modus.");
 
-  if (p == 0)
-    throw std::length_error("error in boost::numeric::ublas::prod(ttv): rank "
-                            "of tensor must be greater than zero.");
-
   if (a.empty())
     throw std::length_error("error in boost::numeric::ublas::prod(ttv): first "
                             "argument tensor should not be empty.");
@@ -126,10 +122,6 @@ auto prod(tensor<V, F, A1> const &a, matrix<V, F, A2> const &b,
   if (p < m || m > a.extents().size())
     throw std::length_error("error in boost::numeric::ublas::prod(ttm): rank "
                             "of the tensor must be greater equal the modus.");
-
-  if (p == 0)
-    throw std::length_error("error in boost::numeric::ublas::prod(ttm): rank "
-                            "of the tensor must be greater than zero.");
 
   if (a.empty())
     throw std::length_error("error in boost::numeric::ublas::prod(ttm): first "

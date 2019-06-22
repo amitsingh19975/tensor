@@ -24,7 +24,7 @@ template <class T, class A> class vector;
 template <class derived_type> class matrix_expression;
 template <class derived_type> class vector_expression;
 namespace detail {
-template <boost::yap::expr_kind K, typename Tuple> class tensor_expression;
+template <boost::yap::expr_kind K, typename Tuple> struct tensor_expression;
 }
 
 /**

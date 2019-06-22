@@ -17,7 +17,6 @@
 #include "utility.hpp"
 
 #include <functional>
-#include <iostream>
 
 using test_types =
     zip<int, long, float, double>::with_t<boost::numeric::ublas::first_order,
@@ -112,7 +111,8 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_eval, value, test_types,
 
     BOOST_CHECK(result3.extents() == e);
     for (auto st = 0u; st < t.extents().product(); st++)
-      BOOST_CHECK_EQUAL(result3(st), static_cast<value_type>(((2.0f * t(st)) / (t(st) + 1))));
+      BOOST_CHECK_EQUAL(
+          result3(st), static_cast<value_type>(((2.0f * t(st)) / (t(st) + 1))));
   }
 }
 
@@ -159,9 +159,8 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_eval_to, value,
   }
 }
 
-
-  BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_bool_operator, value,
-                                   test_types, fixture) {
+BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_bool_operator, value,
+                                 test_types, fixture) {
   using namespace boost::numeric;
   using value_type = typename value::first_type;
   using layout_type = typename value::second_type;
@@ -192,6 +191,11 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_eval_to, value,
     auto expr4 = t < t + 1;
     bool result4 = expr4;
     BOOST_CHECK(result4);
+
+    auto expr5 = t + 1 == t;
+    bool result5 = expr5;
+    if (e.product() > 0)
+      BOOST_CHECK_EQUAL(result5, false);
 
     BOOST_CHECK_THROW(static_cast<bool>(t - t), std::runtime_error);
   }

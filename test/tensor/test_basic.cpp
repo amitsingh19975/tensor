@@ -1,11 +1,11 @@
 
+#include <algorithm>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/tensor.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <complex>
 
-template <class T>
-constexpr std::string_view type_name() {
+template <class T> constexpr std::string_view type_name() {
   using namespace std;
 #ifdef __clang__
   string_view p = __PRETTY_FUNCTION__;
@@ -26,7 +26,10 @@ constexpr std::string_view type_name() {
 int main() {
   using namespace boost::numeric::ublas;
   using tensor_type = tensor<int>;
-  auto phia = std::vector<std::size_t >(3);
-  auto sphia = std::vector<std::size_t>(2);
-  prod(tensor_type({1,2}), tensor_type(tensor_type{2,1,3}), sphia, phia);
+  std::vector<int> sa(25), sb(25);
+  std::iota(sa.begin(), sa.end(), 1);
+  std::iota(sb.begin(), sb.end(), 1);
+
+  tensor_type a{shape{5, 5}, sa}, b{shape{5, 5}, sb};
+  std::cout << static_cast<bool>(a + 1 == b);
 }

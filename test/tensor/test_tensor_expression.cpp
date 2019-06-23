@@ -1,4 +1,4 @@
-//  Copyright (c) 2018-2019 Cem Bassoy
+//  Copyright (c) 2019 Mohammad Ashar Khan
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -18,9 +18,8 @@
 
 #include <functional>
 
-using test_types =
-    zip<int, long, float, double>::with_t<boost::numeric::ublas::first_order,
-                                          boost::numeric::ublas::last_order>;
+using test_types = zip<int, long, float, double, std::complex<float>>::with_t<
+    boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
 
 struct fixture {
   using extents_type = boost::numeric::ublas::shape;
@@ -69,9 +68,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_call_operator, value,
     for (auto st = 0u; st < t.extents().product(); st++)
       BOOST_CHECK_EQUAL(expr2(st), 2.0f * t(st));
 
-    auto expr3 = ((2.0f * t) / (t + 1));
+    auto expr3 = ((2.0f * t) / (t + 1.0f));
     for (auto st = 0u; st < t.extents().product(); st++)
-      BOOST_CHECK_EQUAL(expr3(st), ((2.0f * t(st)) / (t(st) + 1)));
+      BOOST_CHECK_EQUAL(expr3(st), ((2.0f * t(st)) / (t(st) + 1.0f)));
   }
 }
 
@@ -106,13 +105,13 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_eval, value, test_types,
     for (auto st = 0u; st < t.extents().product(); st++)
       BOOST_CHECK_EQUAL(result2(st), 2.0f * t(st));
 
-    auto expr3 = ((2.0f * t) / (t + 1));
+    auto expr3 = ((2.0f * t) / (t + 1.0f));
     auto result3 = expr3.template eval<value_type, layout_type>();
 
     BOOST_CHECK(result3.extents() == e);
     for (auto st = 0u; st < t.extents().product(); st++)
       BOOST_CHECK_EQUAL(
-          result3(st), static_cast<value_type>(((2.0f * t(st)) / (t(st) + 1))));
+          result3(st), static_cast<value_type>(((2.0f * t(st)) / (t(st) + 1.0f))));
   }
 }
 
@@ -148,14 +147,14 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_eval_to, value,
     for (auto st = 0u; st < t.extents().product(); st++)
       BOOST_CHECK_EQUAL(result2(st), 2.0f * t(st));
 
-    auto expr3 = ((2.0f * t) / (t + 1));
+    auto expr3 = ((2.0f * t) / (t + 1.0f));
     tensor_type result3;
     expr3.eval_to(result3);
 
     BOOST_CHECK(result3.extents() == e);
     for (int st = 0; st < t.extents().product(); st++)
       BOOST_CHECK_EQUAL(
-          result3(st), static_cast<value_type>(((2.0f * t(st)) / (t(st) + 1))));
+          result3(st), static_cast<value_type>(((2.0f * t(st)) / (t(st) + 1.0f))));
   }
 }
 
@@ -180,23 +179,25 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_bool_operator, value,
 
     BOOST_CHECK(result);
 
-    auto expr2 = 2.0f * t == t + t;
-    bool result2 = expr2;
-    BOOST_CHECK(result2);
+    if constexpr (!std::is_same_v<value_type, std::complex<float>>) {
+      auto expr3 = t > t - 1.0f;
+      bool result3 = expr3;
+      BOOST_CHECK(result3);
 
-    auto expr3 = t > t - 1;
-    bool result3 = expr3;
-    BOOST_CHECK(result3);
+      auto expr4 = t < t + 1.0f;
+      bool result4 = expr4;
+      BOOST_CHECK(result4);
 
-    auto expr4 = t < t + 1;
-    bool result4 = expr4;
-    BOOST_CHECK(result4);
+      auto expr5 = t + 1.0f == t;
+      bool result5 = expr5;
+      if (e.product() > 0)
+        BOOST_CHECK_EQUAL(result5, false);
 
-    auto expr5 = t + 1 == t;
-    bool result5 = expr5;
-    if (e.product() > 0)
-      BOOST_CHECK_EQUAL(result5, false);
+      auto expr2 = 2.0f * t == t + t;
+      bool result2 = expr2;
+      BOOST_CHECK(result2);
 
-    BOOST_CHECK_THROW(static_cast<bool>(t - t), std::runtime_error);
+      BOOST_CHECK_THROW(static_cast<bool>(t-t), std::runtime_error);
+    }
   }
 }

@@ -24,6 +24,8 @@
  * @brief This MACRO defines a casting function. It eagerly casts the tensor
  * from one to other data type.
  *
+ * @note Please note the casted tensor has underlying container as `std::vector`
+ *
  */
 #define BOOST_UBLAS_EAGER_TENSOR_CAST(func_name, cast_name)                    \
   template <class new_type, typename Tensor> auto func_name(Tensor &e) {       \

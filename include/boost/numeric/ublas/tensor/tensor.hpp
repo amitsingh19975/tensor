@@ -574,6 +574,20 @@ private:
   template <boost::yap::expr_kind, typename>
   friend struct boost::numeric::ublas::detail::tensor_expression;
 
+  template <typename new_type, class Tensor>
+  friend auto static_tensor_cast(Tensor &e);
+  template <typename new_type, class Tensor>
+  friend auto dynamic_tensor_cast(Tensor &e);
+  template <typename new_type, class Tensor>
+  friend auto reinterpret_tensor_cast(Tensor &e);
+
+  template <typename new_type, class Tensor>
+  friend auto static_tensor_cast(Tensor &&e);
+  template <typename new_type, class Tensor>
+  friend auto dynamic_tensor_cast(Tensor &&e);
+  template <typename new_type, class Tensor>
+  friend auto reinterpret_tensor_cast(Tensor &&e);
+
 #if 0
                 // -------------
                 // Serialization

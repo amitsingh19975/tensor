@@ -21,5 +21,6 @@
 #include "tensor/ostream.hpp"
 #include "tensor/tensor.hpp"
 #include "tensor/expression_operator.hpp"
+#include "tensor/ublas_type_traits.hpp"
 
 #endif // BOOST_NUMERIC_UBLAS_TENSOR_HPP

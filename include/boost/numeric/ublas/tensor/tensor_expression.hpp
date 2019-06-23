@@ -97,7 +97,8 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    * @brief Implicitly converts this tensor_expression to a bool type.
    *
    * @note This conversion throws a runtime_error if the expression does not
-   * contain any logical operator. It returns true if tensor on both side are empty.
+   * contain any logical operator. It returns true if tensor on both side are
+   * empty.
    */
   operator bool() { // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
     ::boost::numeric::ublas::detail::transforms::expr_has_logical_operator e;

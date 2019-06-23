@@ -252,6 +252,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_assign_arithmetic_operations, valu
 	};
 
 	for(auto const& e : extents)
+	  if(!e.empty())
 		check(e);
 
 	auto r  = tensor_type (extents.at(0));

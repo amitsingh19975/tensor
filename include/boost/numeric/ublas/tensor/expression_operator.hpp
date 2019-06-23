@@ -155,7 +155,7 @@ auto operator+=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
-  if (shape != lhs.extents()) {
+  if (shape != lhs.extents() && !shape.is_free_scalar()) {
     throw std::runtime_error("Cannot apply operator += with extents " +
                              lhs.extents().to_string() + " and " +
                              shape.to_string());
@@ -171,7 +171,7 @@ auto operator-=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
-  if (shape != lhs.extents()) {
+  if (shape != lhs.extents() && !shape.is_free_scalar()) {
     throw std::runtime_error("Cannot apply operator -= with extents " +
                              lhs.extents().to_string() + " and " +
                              shape.to_string());
@@ -186,7 +186,7 @@ auto operator*=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
-  if (shape != lhs.extents()) {
+  if (shape != lhs.extents() && !shape.is_free_scalar()) {
     throw std::runtime_error("Cannot apply operator *= with extents " +
                              lhs.extents().to_string() + " and " +
                              shape.to_string());
@@ -201,7 +201,7 @@ auto operator/=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
-  if (shape != lhs.extents()) {
+  if (shape != lhs.extents() && !shape.is_free_scalar()) {
     throw std::runtime_error("Cannot apply operator /= with extents " +
                              lhs.extents().to_string() + " and " +
                              shape.to_string());

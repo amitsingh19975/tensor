@@ -150,9 +150,9 @@ auto operator*(std::pair<tensor_type_left const &, tuple_type_left> lhs,
 
 // Assign Operators
 template <class T, class F, class V, class Expr>
-auto operator+=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr const &e) {
+auto operator+=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
-      boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(e);
+      boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
   if (shape != lhs.extents()) {
@@ -166,9 +166,9 @@ auto operator+=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr const &e) {
 }
 
 template <class T, class F, class V, class Expr>
-auto operator-=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr const &e) {
+auto operator-=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
-      boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(e);
+      boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
   if (shape != lhs.extents()) {
@@ -181,9 +181,9 @@ auto operator-=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr const &e) {
   return lhs;
 }
 template <class T, class F, class V, class Expr>
-auto operator*=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr const &e) {
+auto operator*=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
-      boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(e);
+      boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
   if (shape != lhs.extents()) {
@@ -196,9 +196,9 @@ auto operator*=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr const &e) {
   return lhs;
 }
 template <class T, class F, class V, class Expr>
-auto operator/=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr const &e) {
+auto operator/=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
-      boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(e);
+      boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
   if (shape != lhs.extents()) {
@@ -212,7 +212,7 @@ auto operator/=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr const &e) {
 }
 
 template <boost::yap::expr_kind K, typename Tuple>
-bool operator!(boost::numeric::ublas::detail::tensor_expression<K, Tuple>& expr){
+bool operator!(boost::numeric::ublas::detail::tensor_expression<K, Tuple>&& expr){
   bool result = expr;
   return !result;
 }

@@ -332,7 +332,7 @@ public:
    */
   BOOST_UBLAS_INLINE
   template <boost::yap::expr_kind Kind, typename Tuple>
-  tensor &operator=(detail::tensor_expression<Kind, Tuple> &expr) {
+  tensor &operator=(detail::tensor_expression<Kind, Tuple> &&expr) {
     expr.eval_to(*this);
     return *this;
   }

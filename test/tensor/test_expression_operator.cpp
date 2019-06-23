@@ -256,7 +256,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_assign_arithmetic_operations, valu
 
 	auto r  = tensor_type (extents.at(0));
 
-	BOOST_CHECK_NO_THROW ( r += tensor_type(extents.at(0)) + 2 + tensor_type(extents.at(0))  );
+	BOOST_CHECK_THROW    ( r += tensor_type(extents.at(0)) + 2 + tensor_type(extents.at(0)), std::runtime_error  );
 	BOOST_CHECK_THROW    ( r += tensor_type(extents.at(0)) + 2 + tensor_type(extents.at(2)), std::runtime_error  );
 	BOOST_CHECK_THROW    ( r += tensor_type(extents.at(1)) + 2 + tensor_type(extents.at(2)), std::runtime_error  );
 	BOOST_CHECK_THROW    ( r += tensor_type(extents.at(2)) + 2 + tensor_type(extents.at(2)) + tensor_type(extents.at(1)), std::runtime_error  );

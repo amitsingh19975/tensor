@@ -5,6 +5,13 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <complex>
 
+/**
+ *
+ * This file is not run as test it is just for my local developement quick
+ * testings
+ *
+ */
+
 template <class T> constexpr std::string_view type_name() {
   using namespace std;
 #ifdef __clang__
@@ -31,5 +38,13 @@ int main() {
   std::iota(sb.begin(), sb.end(), 1);
 
   tensor_type a{shape{5, 5}, sa}, b{shape{5, 5}, sb};
-  std::cout << static_cast<bool>(a + 1 == b);
+  tensor_type type;
+  type = a + b;
+  auto expr = a  + b;
+  tensor<int> ssd(a + b);
+  tensor<int> sas(expr);
+  tensor<int> asms = expr;
+
+  type+=2;
+
 }

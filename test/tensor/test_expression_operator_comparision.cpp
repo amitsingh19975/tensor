@@ -94,104 +94,103 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison, value,  test_types, fi
 }
 
 
-//BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_tensor_expressions, value,  test_types, fixture)
-//{
-//	using namespace boost::numeric;
-//	using value_type  = typename value::first_type;
-//	using layout_type = typename value::second_type;
-//	using tensor_type = ublas::tensor<value_type, layout_type>;
-//
-//
-//	auto check = [](auto const& e)
-//	{
-//		auto t  = tensor_type (e);
-//		auto t2 = tensor_type (e);
-//		auto v  = value_type  {};
-//
-//		std::iota(t.begin(), t.end(), v);
-//		std::iota(t2.begin(), t2.end(), v+2);
-//
-//		bool result = t == t;
-//		BOOST_CHECK(result);
-//
-//		result = t != t2;
-//		BOOST_CHECK( result );
-//
-//		if(t.empty())
-//			return;
-//
-//		result = !(t < t);
-//		BOOST_CHECK( result );
-//
-//		result = !(t > t);
-//		BOOST_CHECK( result );
-//
-//		result = t < (t2 + t);
-//		BOOST_CHECK( result );
-//
-//		result = (t + t2) > t;
-//		BOOST_CHECK( result );
-//
-//		result = (t + t) >= t;
-//		BOOST_CHECK( result );
-//
-//		result = (t + t2) >= t;
-//		BOOST_CHECK( result);
-//
-//		result = (t2+t2+2) >= t;
-//		BOOST_CHECK( result );
-//
-//		result = 2*t2 > t;
-//                BOOST_CHECK( result );
-//
-//		result = t < 2*t2;
-//		BOOST_CHECK( result );
-//
-//		result = 2*t2 > t;
-//		BOOST_CHECK( result );
-//
-//		result = 2*t2 >= t2;
-//		BOOST_CHECK( result );
-//
-//		result = t2 <= 2*t2;
-//		BOOST_CHECK( result );
-//
-//		result = 3*t2 >= t;
-//		BOOST_CHECK( result );
-//
-//	};
-//
-//	for(auto const& e : extents)
-//		check(e);
-//
-//	auto e0 = extents.at(0);
-//	auto e1 = extents.at(1);
-//	auto e2 = extents.at(2);
-//
-//	bool b = false;
-//
-////#ifdef __GNUC__
-////	//BOOST_CHECK_NO_THROW (b = tensor_type(e0) == (tensor_type(e0) + tensor_type(e0))  );
-////	BOOST_CHECK_NO_THROW (b = tensor_type(e1) == (tensor_type(e2) + tensor_type(e2))  );
-////	BOOST_CHECK_NO_THROW (b = tensor_type(e0) == (tensor_type(e2) + 2) );
-////	BOOST_CHECK_NO_THROW (b = tensor_type(e1) != (2 + tensor_type(e2)) );
-////
-////	BOOST_CHECK_NO_THROW (b = (tensor_type(e0) + tensor_type(e0)) == tensor_type(e0) );
-////	BOOST_CHECK_NO_THROW (b = (tensor_type(e2) + tensor_type(e2)) == tensor_type(e1) );
-////	BOOST_CHECK_NO_THROW (b = (tensor_type(e2) + 2)               == tensor_type(e0) );
-////	BOOST_CHECK_NO_THROW (b = (2 + tensor_type(e2))               != tensor_type(e1) );
-////#endif
-//	BOOST_CHECK_THROW    (b = tensor_type(e1) >= (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
-//	BOOST_CHECK_THROW    (b = tensor_type(e1) <= (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
-//	BOOST_CHECK_THROW    (b = tensor_type(e1) <  (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
-//	BOOST_CHECK_THROW    (b = tensor_type(e1) >  (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
-//
-//	BOOST_CHECK_THROW    (b = tensor_type(e1) >= (tensor_type(e2) + 2), std::runtime_error  );
-//	BOOST_CHECK_THROW    (b = tensor_type(e1) <= (2 + tensor_type(e2)), std::runtime_error  );
-//	BOOST_CHECK_THROW    (b = tensor_type(e1) <  (tensor_type(e2) + 3), std::runtime_error  );
-//	BOOST_CHECK_THROW    (b = tensor_type(e1) >  (4 + tensor_type(e2)), std::runtime_error  );
-//
-//}
+BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_tensor_expressions, value,  test_types, fixture)
+{
+	using namespace boost::numeric;
+	using value_type  = typename value::first_type;
+	using layout_type = typename value::second_type;
+	using tensor_type = ublas::tensor<value_type, layout_type>;
+
+
+	auto check = [](auto const& e)
+	{
+		auto t  = tensor_type (e);
+		auto t2 = tensor_type (e);
+		auto v  = value_type  {};
+
+		std::iota(t.begin(), t.end(), v);
+		std::iota(t2.begin(), t2.end(), v+2);
+
+		bool result = t == t;
+		BOOST_CHECK(result);
+
+		result = t != t2;
+		BOOST_CHECK( result );
+
+		if(t.empty())
+			return;
+
+		result = !(t < t);
+		BOOST_CHECK( result );
+
+		result = !(t > t);
+		BOOST_CHECK( result );
+
+		result = t < (t2 + t);
+		BOOST_CHECK( result );
+
+		result = (t + t2) > t;
+		BOOST_CHECK( result );
+
+		result = (t + t) >= t;
+		BOOST_CHECK( result );
+
+		result = (t + t2) >= t;
+		BOOST_CHECK( result);
+
+		result = (t2+t2+2) >= t;
+		BOOST_CHECK( result );
+
+		result = 2*t2 > t;
+                BOOST_CHECK( result );
+
+		result = t < 2*t2;
+		BOOST_CHECK( result );
+
+		result = 2*t2 > t;
+		BOOST_CHECK( result );
+
+		result = 2*t2 >= t2;
+		BOOST_CHECK( result );
+
+		result = t2 <= 2*t2;
+		BOOST_CHECK( result );
+
+		result = 3*t2 >= t;
+		BOOST_CHECK( result );
+
+	};
+
+	for(auto const& e : extents)
+		check(e);
+
+	auto e0 = extents.at(0);
+	auto e1 = extents.at(1);
+	auto e2 = extents.at(2);
+
+	bool b = false;
+
+	//BOOST_CHECK_NO_THROW (b = tensor_type(e0) == (tensor_type(e0) + tensor_type(e0))  );
+	BOOST_CHECK_NO_THROW (b = tensor_type(e1) == (tensor_type(e2) + tensor_type(e2))  );
+	BOOST_CHECK_NO_THROW (b = tensor_type(e0) == (tensor_type(e2) + 2) );
+	BOOST_CHECK_NO_THROW (b = tensor_type(e1) != (2 + tensor_type(e2)) );
+
+	BOOST_CHECK_NO_THROW (b = (tensor_type(e0) + tensor_type(e0)) == tensor_type(e0) );
+	BOOST_CHECK_NO_THROW (b = (tensor_type(e2) + tensor_type(e2)) == tensor_type(e1) );
+	BOOST_CHECK_NO_THROW (b = (tensor_type(e2) + 2)               == tensor_type(e0) );
+	BOOST_CHECK_NO_THROW (b = (2 + tensor_type(e2))               != tensor_type(e1) );
+
+	BOOST_CHECK_THROW    (b = tensor_type(e1) >= (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
+	BOOST_CHECK_THROW    (b = tensor_type(e1) <= (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
+	BOOST_CHECK_THROW    (b = tensor_type(e1) <  (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
+	BOOST_CHECK_THROW    (b = tensor_type(e1) >  (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
+
+	BOOST_CHECK_THROW    (b = tensor_type(e1) >= (tensor_type(e2) + 2), std::runtime_error  );
+	BOOST_CHECK_THROW    (b = tensor_type(e1) <= (2 + tensor_type(e2)), std::runtime_error  );
+	BOOST_CHECK_THROW    (b = tensor_type(e1) <  (tensor_type(e2) + 3), std::runtime_error  );
+	BOOST_CHECK_THROW    (b = tensor_type(e1) >  (4 + tensor_type(e2)), std::runtime_error  );
+
+}
 //
 //
 //

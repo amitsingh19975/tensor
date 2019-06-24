@@ -390,6 +390,8 @@ struct get_extents {
  *
  * @note If this transform sets status to true then only the expression can be
  * implicitly converted to bool type.
+ *
+ * @deprecated Please use `expr_count_logical_operator`.
  */
 struct [[deprecated("This stateless transform has been replaced with "
                     "expr_count_logical_operator")]] expr_has_logical_operator {
@@ -439,66 +441,66 @@ struct [[deprecated("This stateless transform has been replaced with "
  */
 struct expr_count_logical_operator {
 
-  constexpr expr_count_logical_operator() {}
+  constexpr expr_count_logical_operator() = default;
 
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>, Expr1 &e1,
              Expr2 &e2) {
-    std::size_t left =
-        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
-    std::size_t right =
-        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+    std::size_t right = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
     return left + right + 1u;
   }
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>,
              Expr1 &e1, Expr2 &e2) {
-    std::size_t left =
-        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
-    std::size_t right =
-        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+    std::size_t right = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
     return left + right + 1u;
   }
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less>, Expr1 &e1,
              Expr2 &e2) {
-    std::size_t left =
-        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
-    std::size_t right =
-        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+    std::size_t right = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
     return left + right + 1u;
   }
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less_equal>,
              Expr1 &e1, Expr2 &e2) {
-    std::size_t left =
-        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
-    std::size_t right =
-        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+    std::size_t right = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
     return left + right + 1u;
   }
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater>, Expr1 &e1,
              Expr2 &e2) {
-    std::size_t left =
-        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
-    std::size_t right =
-        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+    std::size_t right = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
     return left + right + 1u;
   }
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater_equal>,
              Expr1 &e1, Expr2 &e2) {
-    std::size_t left =
-        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
-    std::size_t right =
-        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+    std::size_t right = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
     return left + right + 1u;
   }
 
@@ -507,6 +509,119 @@ struct expr_count_logical_operator {
   operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>, Expr &) {
     return 0;
   }
+
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::plus>, Expr1 &e1,
+             Expr2 &e2) {
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+    std::size_t right = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+    return left + right;
+  }
+
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::minus>, Expr1 &e1,
+             Expr2 &e2) {
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+    std::size_t right = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+    return left + right;
+  }
+
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::multiplies>,
+             Expr1 &e1, Expr2 &e2) {
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+    std::size_t right = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+    return left + right;
+  }
+
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::divides>, Expr1 &e1,
+             Expr2 &e2) {
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+    std::size_t right = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+    return left + right;
+  }
+};
+
+/**
+ * @brief A stateful transform that sets the status to true if expression has
+ * `==` operator in it.
+ */
+
+struct expr_has_equal_to_operator {
+  constexpr expr_has_equal_to_operator() = default;
+
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>, Expr1 &e1,
+             Expr2 &e2) {
+    status = true;
+  }
+  bool status = false;
+};
+
+/**
+ * @brief A stateful transform that sets the status to true if expression has
+ * `!=` operator in it.
+ */
+struct expr_has_not_equal_operator {
+  constexpr expr_has_not_equal_operator() = default;
+
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>,
+             Expr1 &e1, Expr2 &e2) {
+    status = true;
+  }
+  bool status = false;
+};
+
+/**
+ * @brief If an expression has only one logical operator which is `==` or `!=`,
+ * this transformed is called and results whether the left and right side
+ * operands/expression have same extents. This is a stateful transform
+ *
+ * @note If called with an expression that has multiple logical operator, a
+ * compile time error from YAP is thrown.
+ */
+struct is_equality_or_non_equality_extent_same {
+  constexpr is_equality_or_non_equality_extent_same() = default;
+
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>,
+             Expr1 &e1, Expr2 &e2) {
+    auto left =
+        ::boost::yap::transform(::boost::yap::as_expr(e1), get_extents{});
+    auto right =
+        ::boost::yap::transform(::boost::yap::as_expr(e2), get_extents{});
+    status = left.is_free_scalar() || right.is_free_scalar() || left == right;
+  }
+
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>, Expr1 &e1,
+             Expr2 &e2) {
+    auto left =
+        ::boost::yap::transform(::boost::yap::as_expr(e1), get_extents{});
+    auto right =
+        ::boost::yap::transform(::boost::yap::as_expr(e2), get_extents{});
+    status = left.is_free_scalar() || right.is_free_scalar() || left == right;
+  }
+
+  bool status = false;
 };
 
 } // namespace boost::numeric::ublas::detail::transforms

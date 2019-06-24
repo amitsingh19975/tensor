@@ -233,7 +233,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_scalar, value,  te
 		BOOST_CHECK(  (bool)( tensor_type(e,2)+3 == 5) );
 		BOOST_CHECK(  (bool)( tensor_type(e,2)+3 != 6) );
 
-
+#if defined(__GNUC__)
 		BOOST_CHECK( !(bool)( 5 >  tensor_type(e,2)+3) );
 		BOOST_CHECK( !(bool)( 5 <  tensor_type(e,2)+3) );
 		BOOST_CHECK(  (bool)( 5 >= tensor_type(e,2)+3) );
@@ -256,7 +256,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_scalar, value,  te
 		BOOST_CHECK(  (bool)( 5 <= tensor_type(e,2)+tensor_type(e,3)) );
 		BOOST_CHECK(  (bool)( 5 == tensor_type(e,2)+tensor_type(e,3)) );
 		BOOST_CHECK(  (bool)( 6 != tensor_type(e,2)+tensor_type(e,3)) );
-
+#endif
 	};
 
 	for(auto const& e : extents)

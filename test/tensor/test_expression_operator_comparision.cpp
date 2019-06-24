@@ -10,7 +10,8 @@
 //
 
 
-#include <boost/numeric/ublas/tensor.hpp>
+#include <boost/numeric/ublas/tensor/tensor.hpp>
+#include <boost/numeric/ublas/tensor/expression_operator.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include "utility.hpp"
@@ -171,7 +172,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_tensor_expressions
 	bool b = false;
 
         // BOOST_CHECK_NO_THROW (b = tensor_type(e0) == (tensor_type(e0) + tensor_type(e0))  );
-#if defined(__GNUC__)
+//#if defined(__GNUC__)
 	BOOST_CHECK_NO_THROW (b = tensor_type(e1) == (tensor_type(e2) + tensor_type(e2))  );
 	BOOST_CHECK_NO_THROW (b = tensor_type(e0) == (tensor_type(e2) + 2) );
 	BOOST_CHECK_NO_THROW (b = tensor_type(e1) != (2 + tensor_type(e2)) );
@@ -180,7 +181,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_tensor_expressions
 	BOOST_CHECK_NO_THROW (b = (tensor_type(e2) + tensor_type(e2)) == tensor_type(e1) );
 	BOOST_CHECK_NO_THROW (b = (tensor_type(e2) + 2)               == tensor_type(e0) );
 	BOOST_CHECK_NO_THROW (b = (2 + tensor_type(e2))               != tensor_type(e1) );
-#endif
+//#endif
 	BOOST_CHECK_THROW    (b = tensor_type(e1) >= (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
 	BOOST_CHECK_THROW    (b = tensor_type(e1) <= (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
 	BOOST_CHECK_THROW    (b = tensor_type(e1) <  (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
@@ -233,7 +234,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_scalar, value,  te
 		BOOST_CHECK(  (bool)( tensor_type(e,2)+3 == 5) );
 		BOOST_CHECK(  (bool)( tensor_type(e,2)+3 != 6) );
 
-#if defined(__GNUC__)
+//#if defined(__GNUC__)
 		BOOST_CHECK( !(bool)( 5 >  tensor_type(e,2)+3) );
 		BOOST_CHECK( !(bool)( 5 <  tensor_type(e,2)+3) );
 		BOOST_CHECK(  (bool)( 5 >= tensor_type(e,2)+3) );
@@ -256,7 +257,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_scalar, value,  te
 		BOOST_CHECK(  (bool)( 5 <= tensor_type(e,2)+tensor_type(e,3)) );
 		BOOST_CHECK(  (bool)( 5 == tensor_type(e,2)+tensor_type(e,3)) );
 		BOOST_CHECK(  (bool)( 6 != tensor_type(e,2)+tensor_type(e,3)) );
-#endif
+//#endif
 	};
 
 	for(auto const& e : extents)

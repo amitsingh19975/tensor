@@ -101,18 +101,16 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    * empty.
    */
   operator bool() { // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
-    ::boost::numeric::ublas::detail::transforms::expr_has_logical_operator e;
-    ::boost::yap::transform(*this, e);
-    if (!e.status) {
-      throw std::runtime_error(
-          "Cannot convert the tensor expression to bool type. Only expression "
-          "with at least one-logical operator are convertible");
-    } else {
-      auto shape_expr = ::boost::yap::transform(*this, transforms::get_extents{});
-      for (auto i = 0u; i < shape_expr.product(); i++)
-        if (!(this->operator()(i)))
-          return false;
-    }
+    std::size_t count = ::boost::yap::transform(
+        *this, ::boost::numeric::ublas::detail::transforms::
+                   expr_count_logical_operator{});
+    if (count != 1)
+      throw std::runtime_error("A tensor expression is only convertible to "
+                               "bool if it has exactly one logical operator.");
+    auto shape_expr = ::boost::yap::transform(*this, transforms::get_extents{});
+    for (auto i = 0u; i < shape_expr.product(); i++)
+      if (!(this->operator()(i)))
+        return false;
     return true;
   }
 };

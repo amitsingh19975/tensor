@@ -88,8 +88,8 @@ struct at_index {
  * @brief This transform returns the extent of the expression.
  *
  * @note If any extent inconsistency is found, this transform throws a runtime
- * exception. Also note that for vector the returned extent is `{vec.size, 1}` and
- * for matrix it is `{mat.size1, mat.size2}`.
+ * exception. Also note that for vector the returned extent is `{vec.size, 1}`
+ * and for matrix it is `{mat.size1, mat.size2}`.
  */
 
 struct get_extents {
@@ -391,46 +391,122 @@ struct get_extents {
  * @note If this transform sets status to true then only the expression can be
  * implicitly converted to bool type.
  */
-struct expr_has_logical_operator {
+struct [[deprecated("This stateless transform has been replaced with "
+                    "expr_count_logical_operator")]] expr_has_logical_operator {
 
   template <class Expr1, class Expr2>
-  constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>, Expr1 &,
-             Expr2 &) {
+  constexpr decltype(auto) operator()(
+      ::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>, Expr1 &,
+      Expr2 &) {
     status = true;
   }
   template <class Expr1, class Expr2>
-  constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>,
-             Expr1 &, Expr2 &) {
+  constexpr decltype(auto) operator()(
+      ::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>, Expr1 &,
+      Expr2 &) {
     status = true;
   }
   template <class Expr1, class Expr2>
-  constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less>, Expr1 &,
-             Expr2 &) {
+  constexpr decltype(auto) operator()(
+      ::boost::yap::expr_tag<boost::yap::expr_kind::less>, Expr1 &, Expr2 &) {
     status = true;
   }
   template <class Expr1, class Expr2>
-  constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less_equal>, Expr1 &,
-             Expr2 &) {
+  constexpr decltype(auto) operator()(
+      ::boost::yap::expr_tag<boost::yap::expr_kind::less_equal>, Expr1 &,
+      Expr2 &) {
     status = true;
   }
   template <class Expr1, class Expr2>
-  constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater>, Expr1 &,
-             Expr2 &) {
+  constexpr decltype(auto) operator()(
+      ::boost::yap::expr_tag<boost::yap::expr_kind::greater>, Expr1 &,
+      Expr2 &) {
     status = true;
   }
   template <class Expr1, class Expr2>
-  constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater_equal>,
-             Expr1 &, Expr2 &) {
+  constexpr decltype(auto) operator()(
+      ::boost::yap::expr_tag<boost::yap::expr_kind::greater_equal>, Expr1 &,
+      Expr2 &) {
     status = true;
   }
 
   bool status = false;
+};
+
+/**
+ * @brief This transform counts the number of the logical operators that
+ * appeared in an expression.
+ */
+struct expr_count_logical_operator {
+
+  constexpr expr_count_logical_operator() {}
+
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>, Expr1 &e1,
+             Expr2 &e2) {
+    std::size_t left =
+        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
+    std::size_t right =
+        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    return left + right + 1u;
+  }
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>,
+             Expr1 &e1, Expr2 &e2) {
+    std::size_t left =
+        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
+    std::size_t right =
+        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    return left + right + 1u;
+  }
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less>, Expr1 &e1,
+             Expr2 &e2) {
+    std::size_t left =
+        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
+    std::size_t right =
+        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    return left + right + 1u;
+  }
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less_equal>,
+             Expr1 &e1, Expr2 &e2) {
+    std::size_t left =
+        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
+    std::size_t right =
+        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    return left + right + 1u;
+  }
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater>, Expr1 &e1,
+             Expr2 &e2) {
+    std::size_t left =
+        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
+    std::size_t right =
+        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    return left + right + 1u;
+  }
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater_equal>,
+             Expr1 &e1, Expr2 &e2) {
+    std::size_t left =
+        ::boost::yap::transform(::boost::yap::as_expr(e1), *this);
+    std::size_t right =
+        ::boost::yap::transform(::boost::yap::as_expr(e2), *this);
+    return left + right + 1u;
+  }
+
+  template <class Expr>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>, Expr &) {
+    return 0;
+  }
 };
 
 } // namespace boost::numeric::ublas::detail::transforms

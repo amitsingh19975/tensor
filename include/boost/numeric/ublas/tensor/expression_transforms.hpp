@@ -386,15 +386,15 @@ struct get_extents {
 
 /**
  * @brief A stateful transform that that sets status to true if the expression
- * to which it is applied has at-least one logical operator in it.
+ * to which it is applied has at-least one relational operator in it.
  *
  * @note If this transform sets status to true then only the expression can be
  * implicitly converted to bool type.
  *
- * @deprecated Please use `expr_count_logical_operator`.
+ * @deprecated Please use `expr_count_relational_operator`.
  */
 struct [[deprecated("This stateless transform has been replaced with "
-                    "expr_count_logical_operator")]] expr_has_logical_operator {
+                    "expr_count_relational_operator")]] expr_has_relational_operator {
 
   template <class Expr1, class Expr2>
   constexpr decltype(auto) operator()(
@@ -436,12 +436,12 @@ struct [[deprecated("This stateless transform has been replaced with "
 };
 
 /**
- * @brief This transform counts the number of the logical operators that
+ * @brief This transform counts the number of the relational operators that
  * appeared in an expression.
  */
-struct expr_count_logical_operator {
+struct expr_count_relational_operator {
 
-  constexpr expr_count_logical_operator() = default;
+  constexpr expr_count_relational_operator() = default;
 
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
@@ -589,11 +589,11 @@ struct expr_has_not_equal_operator {
 };
 
 /**
- * @brief If an expression has only one logical operator which is `==` or `!=`,
+ * @brief If an expression has only one relational operator which is `==` or `!=`,
  * this transformed is called and results whether the left and right side
  * operands/expression have same extents. This is a stateful transform
  *
- * @note If called with an expression that has multiple logical operator, a
+ * @note If called with an expression that has multiple relational operator, a
  * compile time error from YAP is thrown.
  */
 struct is_equality_or_non_equality_extent_same {

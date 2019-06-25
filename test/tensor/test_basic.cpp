@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/tensor.hpp>
+#include <boost/yap/print.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <complex>
 
@@ -30,6 +31,11 @@ template <class T> constexpr std::string_view type_name() {
 #endif
 }
 
+struct Zero_Like{};
+auto operator+(Zero_Like&, const int s){return s;}
+auto operator+(const int s, Zero_Like&){return s;}
+
+
 int main() {
   using namespace boost::numeric::ublas;
   using tensor_type = tensor<int>;
@@ -45,6 +51,15 @@ int main() {
   tensor<int> sas(expr);
   tensor<int> asms = expr;
 
+  auto new_expr = expr;
+
+  tensor_type kk(new_expr);
+  assert((bool)(kk == ssd));
+
   type+=2;
 
+  auto ecpr = ssd + Zero_Like{};
+  tensor_type xxxu = ecpr;
+
+  auto res = static_tensor_cast<float>();
 }

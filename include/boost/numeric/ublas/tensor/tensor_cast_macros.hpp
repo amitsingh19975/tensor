@@ -44,7 +44,6 @@
   template <class new_type, typename Tensor> auto func_name(Tensor &&e) {      \
     if constexpr (std::is_same<new_type, typename Tensor::value_type>::value)  \
       return e;                                                                \
-    using namespace boost::hana::literals;                                     \
     tensor<new_type, typename Tensor::layout_type,                             \
            std::vector<new_type, std::allocator<new_type>>>                    \
         result;                                                                \

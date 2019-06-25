@@ -97,15 +97,15 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    * @brief Implicitly converts this tensor_expression to a bool type.
    *
    * @note This conversion throws a runtime_error if the expression does not
-   * contain any logical operator. It returns true if tensor on both side are
+   * contain any relational operator. It returns true if tensor on both side are
    * empty.
    */
   operator bool() { // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
     std::size_t count = ::boost::yap::transform(
-        *this, transforms::expr_count_logical_operator{});
+        *this, transforms::expr_count_relational_operator{});
     if (count != 1)
       throw std::runtime_error("A tensor expression is only convertible to "
-                               "bool if it has exactly one logical operator.");
+                               "bool if it has exactly one relational operator.");
 
     auto a = transforms::expr_has_equal_to_operator{};
     auto b = transforms::expr_has_not_equal_operator{};

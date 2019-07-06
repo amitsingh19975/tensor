@@ -42,7 +42,12 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    */
   BOOST_UBLAS_INLINE decltype(auto) operator()(size_t i) {
     auto nth = ::boost::yap::transform(*this, transforms::at_index{i});
-    return ::boost::yap::evaluate(nth);
+    auto optimized = ::boost::yap::transform(*this, transforms::apply_distributive_law{});
+
+//    ::boost::yap::print(std::cerr, nth);
+//    ::boost::yap::print(std::cout, optimized);
+
+    return ::boost::yap::evaluate(optimized);
   }
   //  todo (coder3101) : Make eval() and eval_to() based on device.
 
@@ -104,8 +109,9 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
     std::size_t count = ::boost::yap::transform(
         *this, transforms::expr_count_relational_operator{});
     if (count != 1)
-      throw std::runtime_error("A tensor expression is only convertible to "
-                               "bool if it has exactly one relational operator.");
+      throw std::runtime_error(
+          "A tensor expression is only convertible to "
+          "bool if it has exactly one relational operator.");
 
     auto a = transforms::expr_has_equal_to_operator{};
     auto b = transforms::expr_has_not_equal_operator{};
@@ -113,11 +119,13 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
     ::boost::yap::transform(*this, a);
     ::boost::yap::transform(*this, b);
 
-    if(a.status || b.status){
+    if (a.status || b.status) {
       auto e = transforms::is_equality_or_non_equality_extent_same{};
       ::boost::yap::transform(*this, e);
-      if(!e.status && a.status) return false;
-      if(!e.status && b.status) return true;
+      if (!e.status && a.status)
+        return false;
+      if (!e.status && b.status)
+        return true;
     }
 
     auto shape_expr = ::boost::yap::transform(*this, transforms::get_extents{});

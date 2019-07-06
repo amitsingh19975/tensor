@@ -393,8 +393,9 @@ struct get_extents {
  *
  * @deprecated Please use `expr_count_relational_operator`.
  */
-struct [[deprecated("This stateless transform has been replaced with "
-                    "expr_count_relational_operator")]] expr_has_relational_operator {
+struct [[deprecated(
+    "This stateless transform has been replaced with "
+    "expr_count_relational_operator")]] expr_has_relational_operator {
 
   template <class Expr1, class Expr2>
   constexpr decltype(auto) operator()(
@@ -589,8 +590,8 @@ struct expr_has_not_equal_operator {
 };
 
 /**
- * @brief If an expression has only one relational operator which is `==` or `!=`,
- * this transformed is called and results whether the left and right side
+ * @brief If an expression has only one relational operator which is `==` or
+ * `!=`, this transformed is called and results whether the left and right side
  * operands/expression have same extents. This is a stateful transform
  *
  * @note If called with an expression that has multiple relational operator, a
@@ -622,6 +623,28 @@ struct is_equality_or_non_equality_extent_same {
   }
 
   bool status = false;
+};
+
+struct apply_distributive_law {
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(boost::yap::expr_tag<boost::yap::expr_kind::plus>, Expr1 &&e1,
+             Expr2 &&e2) {
+    return boost::yap::make_terminal(5);/*boost::yap::make_expression<
+        boost::numeric::ublas::detail::tensor_expression,
+        boost::yap::expr_kind::plus>(std::forward<Expr1>(e1),
+                                     std::forward<Expr2>(e2));*/
+  }
+
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(boost::yap::expr_tag<boost::yap::expr_kind::minus>, Expr1 &&e1,
+             Expr2 &&e2) {
+    return boost::yap::make_expression<
+        boost::numeric::ublas::detail::tensor_expression,
+        boost::yap::expr_kind::minus>(std::forward<Expr1>(e1),
+                                     std::forward<Expr2>(e2));
+  }
 };
 
 } // namespace boost::numeric::ublas::detail::transforms

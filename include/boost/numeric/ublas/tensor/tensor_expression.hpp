@@ -42,7 +42,7 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    */
   BOOST_UBLAS_INLINE decltype(auto) operator()(size_t i) {
     auto nth = ::boost::yap::transform(*this, transforms::at_index{i});
-    auto optimized = ::boost::yap::transform(*this, transforms::apply_distributive_law{});
+    auto optimized = ::boost::yap::transform(nth, transforms::apply_distributive_law{});
 
 //    ::boost::yap::print(std::cerr, nth);
 //    ::boost::yap::print(std::cout, optimized);

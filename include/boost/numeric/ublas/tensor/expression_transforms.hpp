@@ -630,10 +630,10 @@ struct apply_distributive_law {
   constexpr decltype(auto)
   operator()(boost::yap::expr_tag<boost::yap::expr_kind::plus>, Expr1 &&e1,
              Expr2 &&e2) {
-    return boost::yap::make_terminal(5);/*boost::yap::make_expression<
+    return boost::yap::make_expression<
         boost::numeric::ublas::detail::tensor_expression,
         boost::yap::expr_kind::plus>(std::forward<Expr1>(e1),
-                                     std::forward<Expr2>(e2));*/
+                                     std::forward<Expr2>(e2));
   }
 
   template <class Expr1, class Expr2>

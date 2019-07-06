@@ -12,10 +12,8 @@
 #ifndef BOOST_UBLAS_EXPRESSION_OPERATOR_HPP
 #define BOOST_UBLAS_EXPRESSION_OPERATOR_HPP
 
-#include "functions.hpp"
 #include "multi_index_utility.hpp"
 #include "tensor_cast_macros.hpp"
-#include "ublas_type_traits.hpp"
 #include <boost/yap/user_macros.hpp>
 
 namespace boost::numeric::ublas {

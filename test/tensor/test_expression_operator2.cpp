@@ -20,7 +20,7 @@
 
 using double_extended = boost::multiprecision::cpp_bin_float_double_extended;
 
-using test_types = zip<double,double_extended>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
+using test_types = zip<int,long,float,double,double_extended>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
 
 struct fixture
 {
@@ -42,76 +42,7 @@ struct fixture
     std::vector<extents_type> extents;
 };
 
-BOOST_AUTO_TEST_SUITE(test_expression_operator_decimals, * boost::unit_test::depends_on("test_tensor"))
-
-
-
-    BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_binary_arithmetic_operations, value,  test_types, fixture)
-    {
-        using namespace boost::numeric;
-        using value_type  = typename value::first_type;
-        using layout_type = typename value::second_type;
-        using tensor_type = ublas::tensor<value_type, layout_type>;
-
-
-        auto check = [](auto const& e)
-        {
-            auto t  = tensor_type (e);
-            auto t2 = tensor_type (e);
-            auto r  = tensor_type (e);
-            auto v  = value_type  {};
-
-            std::iota(t.begin(), t.end(), v);
-            std::iota(t2.begin(), t2.end(), v+2);
-
-            r = t + t + t + t2;
-
-            for(auto i = 0ul; i < t.size(); ++i)
-                BOOST_CHECK_EQUAL ( r(i), 3*t(i) + t2(i) );
-
-
-            r = t2 / (t+3) * (t+1) - t2; // r = ( t2/ ((t+3)*(t+1)) ) - t2
-
-            for(auto i = 0ul; i < t.size(); ++i)
-                BOOST_CHECK_EQUAL ( r(i), t2(i) / (t(i)+3)*(t(i)+1) - t2(i) );
-
-            r = 3+t2 / (t+3) * (t+1) * t - t2; // r = 3+( t2/ ((t+3)*(t+1)*t) ) - t2
-
-            for(auto i = 0ul; i < t.size(); ++i)
-                BOOST_CHECK_EQUAL ( r(i), 3+t2(i) / (t(i)+3)*(t(i)+1)*t(i) - t2(i) );
-
-            r = t2 - t + t2 - t;
-
-            for(auto i = 0ul; i < r.size(); ++i)
-                BOOST_CHECK_EQUAL ( r(i), 4 );
-
-
-            r = tensor_type (e,1) + tensor_type (e,1);
-
-            for(auto i = 0ul; i < r.size(); ++i)
-                BOOST_CHECK_EQUAL ( r(i), 2 );
-
-            r = t * t * t * t2;
-
-            for(auto i = 0ul; i < t.size(); ++i)
-                BOOST_CHECK_EQUAL ( r(i), t(i)*t(i)*t(i)*t2(i) );
-
-            r = (t2/t2) * (t2/t2);
-
-            for(auto i = 0ul; i < t.size(); ++i)
-                BOOST_CHECK_EQUAL ( r(i), 1 );
-        };
-
-        for(auto const& e : extents)
-            check(e);
-
-
-        // BOOST_CHECK_NO_THROW ( tensor_type t = tensor_type(extents.at(0)) + tensor_type(extents.at(0))  );
-        BOOST_CHECK_THROW    ( tensor_type t = tensor_type(extents.at(0)) + tensor_type(extents.at(2)), std::runtime_error  );
-        BOOST_CHECK_THROW    ( tensor_type t = tensor_type(extents.at(1)) + tensor_type(extents.at(2)), std::runtime_error  );
-
-
-    }
+BOOST_AUTO_TEST_SUITE(test_expression_operator2, * boost::unit_test::depends_on("test_tensor"))
 
 
 

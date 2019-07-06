@@ -14,6 +14,14 @@
 
 #include <boost/yap/yap.hpp>
 #include <type_traits>
+#include <vector>
+
+
+namespace boost::numeric::ublas{
+    template <class T, class F, class A>
+    class tensor;
+}
+
 
 // todo(@coder3101): Casting always return a new tensor with std::vector<T> as
 // internal container. Make this return the same container as passed in

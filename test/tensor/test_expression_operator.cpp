@@ -14,13 +14,11 @@
 #include <boost/numeric/ublas/tensor.hpp>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/multiprecision/cpp_bin_float.hpp>
 #include "utility.hpp"
 
 
-using double_extended = boost::multiprecision::cpp_bin_float_double_extended;
 
-using test_types = zip<int,long,float,double,double_extended>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
+using test_types = zip<int,long,float>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
 
 struct fixture
 {
@@ -42,7 +40,7 @@ struct fixture
 	std::vector<extents_type> extents;
 };
 
-BOOST_AUTO_TEST_SUITE(test_tensor_arithmetic_operations, * boost::unit_test::depends_on("test_tensor"))
+BOOST_AUTO_TEST_SUITE(test_expression_operator, * boost::unit_test::depends_on("test_tensor"))
 
 
 

@@ -13,13 +13,11 @@
 #include <boost/numeric/ublas/tensor/tensor.hpp>
 #include <boost/numeric/ublas/tensor/expression_operator.hpp>
 #include <boost/test/unit_test.hpp>
-#include <boost/multiprecision/cpp_bin_float.hpp>
 #include "utility.hpp"
 
 
-using double_extended = boost::multiprecision::cpp_bin_float_double_extended;
 
-using test_types = zip<int,long,float,double,double_extended>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
+using test_types = zip<int,long,float>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
 
 struct fixture {
 	using extents_type = boost::numeric::ublas::basic_extents<std::size_t>;
@@ -172,7 +170,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_tensor_expressions
 	bool b = false;
 
         // BOOST_CHECK_NO_THROW (b = tensor_type(e0) == (tensor_type(e0) + tensor_type(e0))  );
-#if defined(__GNUC__)
 	BOOST_CHECK_NO_THROW (b = tensor_type(e1) == (tensor_type(e2) + tensor_type(e2))  );
 	BOOST_CHECK_NO_THROW (b = tensor_type(e0) == (tensor_type(e2) + 2) );
 	BOOST_CHECK_NO_THROW (b = tensor_type(e1) != (2 + tensor_type(e2)) );
@@ -181,7 +178,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_tensor_expressions
 	BOOST_CHECK_NO_THROW (b = (tensor_type(e2) + tensor_type(e2)) == tensor_type(e1) );
 	BOOST_CHECK_NO_THROW (b = (tensor_type(e2) + 2)               == tensor_type(e0) );
 	BOOST_CHECK_NO_THROW (b = (2 + tensor_type(e2))               != tensor_type(e1) );
-#endif
 	BOOST_CHECK_THROW    (b = tensor_type(e1) >= (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
 	BOOST_CHECK_THROW    (b = tensor_type(e1) <= (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
 	BOOST_CHECK_THROW    (b = tensor_type(e1) <  (tensor_type(e2) + tensor_type(e2)), std::runtime_error  );
@@ -195,9 +191,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_tensor_expressions
 }
 
 
-#if defined(__GNUC__)
-// Disable this test on MSVC as this file is getting bigger and msvc is running out of heap
-// @todo: Split this testcase into 2 different files in future
 
 BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_scalar, value,  test_types, fixture)
 {
@@ -265,7 +258,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_scalar, value,  te
 		check(e);
 
 }
-#endif
 
 
 BOOST_AUTO_TEST_SUITE_END()

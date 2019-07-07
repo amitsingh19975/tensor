@@ -41,12 +41,12 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    */
   BOOST_UBLAS_INLINE decltype(auto) operator()(size_t i) {
     auto nth = ::boost::yap::transform(*this, transforms::at_index{i});
+#ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
     auto optimized = ::boost::yap::transform(nth, transforms::apply_distributive_law{});
-
-//    ::boost::yap::print(std::cerr, nth);
-//    ::boost::yap::print(std::cout, optimized);
-
     return ::boost::yap::evaluate(optimized);
+#else
+    return ::boost::yap::evaluate(nth);
+#endif
   }
   //  todo (coder3101) : Make eval() and eval_to() based on device.
 

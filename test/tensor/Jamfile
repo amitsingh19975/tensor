@@ -27,9 +27,9 @@ test-suite boost-ublas-tensor-test
     :
     [ run test_tensor.cpp
           test_strides.cpp
-          test_expression_comparision1.cpp
-          test_expression_comparision2.cpp
-	      test_expression_comparision3.cpp
+          test_expression_comparison1.cpp
+          test_expression_comparison2.cpp
+	      test_expression_comparison3.cpp
           test_expression_operator1.cpp
           test_expression_operator2.cpp
           test_multiplication.cpp

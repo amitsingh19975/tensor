@@ -598,7 +598,13 @@ struct is_equality_or_non_equality_extent_same {
   bool status = false;
 };
 
+/**
+ * @brief This transform applies the optimization for
+ */
 struct apply_distributive_law {
+
+  constexpr apply_distributive_law() = default;
+
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
   operator()(boost::yap::expr_tag<boost::yap::expr_kind::plus>, Expr1 &&e1,
@@ -625,6 +631,9 @@ struct apply_distributive_law {
                                          (operand3 * operand4));
 
     } else
+
+#ifndef BOOST_UBLAS_NO_RECURSIVE_OPTIMIZATION
+
       return boost::yap::make_expression<
           boost::numeric::ublas::detail::tensor_expression,
           boost::yap::expr_kind::plus>(
@@ -638,6 +647,13 @@ struct apply_distributive_law {
                   boost::numeric::ublas::detail::tensor_expression>(
                   std::forward<Expr2>(e2)),
               *this));
+#else
+
+      return boost::yap::make_expression<
+          boost::numeric::ublas::detail::tensor_expression,
+          boost::yap::expr_kind::plus>(std::forward<Expr1>(e1),
+                                       std::forward<Expr2>(e2));
+#endif
   }
 
   template <class Expr1, class Expr2>
@@ -665,6 +681,8 @@ struct apply_distributive_law {
                                          (operand3 * operand4));
 
     } else
+
+#ifndef BOOST_UBLAS_NO_RECURSIVE_OPTIMIZATION
       return boost::yap::make_expression<
           boost::numeric::ublas::detail::tensor_expression,
           boost::yap::expr_kind::minus>(
@@ -678,6 +696,13 @@ struct apply_distributive_law {
                   boost::numeric::ublas::detail::tensor_expression>(
                   std::forward<Expr2>(e2)),
               *this));
+#else
+
+      return boost::yap::make_expression<
+          boost::numeric::ublas::detail::tensor_expression,
+          boost::yap::expr_kind::minus>(std::forward<Expr1>(e1),
+                                        std::forward<Expr2>(e2));
+#endif
   }
 };
 

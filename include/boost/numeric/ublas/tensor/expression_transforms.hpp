@@ -1,12 +1,12 @@
-//  Copyright (c) 2018-2019
-//  Mohammad Ashar Khan
+//  Copyright (c) 2019-2020
+//  Mohammad Ashar Khan, ashar786khan@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer and Google in producing this work
+//  Google in producing this work
 //  which started as a Google Summer of Code project.
 
 #ifndef BOOST_UBLAS_TENSOR_EXPRESSION_TRANSFORM_HPP
@@ -603,6 +603,8 @@ struct apply_distributive_law {
   constexpr decltype(auto)
   operator()(boost::yap::expr_tag<boost::yap::expr_kind::plus>, Expr1 &&e1,
              Expr2 &&e2) {
+
+
     return boost::yap::make_expression<
         boost::numeric::ublas::detail::tensor_expression,
         boost::yap::expr_kind::plus>(std::forward<Expr1>(e1),

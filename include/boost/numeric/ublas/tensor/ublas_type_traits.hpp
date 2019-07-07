@@ -1,12 +1,12 @@
-//  Copyright (c) 2018-2019
-//  Mohammad Ashar Khan
+//  Copyright (c) 2019-2020
+//  Mohammad Ashar Khan, ashar786khan@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer and Google in producing this work
+//  Google in producing this work
 //  which started as a Google Summer of Code project.
 
 #ifndef BOOST_UBLAS_TENSOR_TYPE_TRAITS_HPP

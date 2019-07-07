@@ -1,4 +1,5 @@
-//  Copyright (c) 2018-2019 Mohammad Ashar Khan
+//  Copyright (c) 2019-2020
+//  Mohammad Ashar Khan, ashar786khan@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -7,7 +8,6 @@
 //  The authors gratefully acknowledge the support of
 //  Google in producing this work
 //  which started as a Google Summer of Code project.
-//
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/tensor.hpp>

@@ -29,7 +29,7 @@ test-suite boost-ublas-tensor-test
           test_strides.cpp
           test_expression_comparision1.cpp
           test_expression_comparision2.cpp
-	  test_expression_comparision3.cpp
+	      test_expression_comparision3.cpp
           test_expression_operator1.cpp
           test_expression_operator2.cpp
           test_multiplication.cpp

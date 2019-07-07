@@ -6,6 +6,8 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <complex>
 
+#include "expression_transforms_traits.hpp"
+
 /**
  *
  * This file is not run as test it is just for my local developement quick
@@ -31,10 +33,6 @@ template <class T> constexpr std::string_view type_name() {
 #endif
 }
 
-struct Zero_Like{};
-auto operator+(Zero_Like&, const int s){return s;}
-auto operator+(const int s, Zero_Like&){return s;}
-
 
 int main() {
   using namespace boost::numeric::ublas;
@@ -45,10 +43,17 @@ int main() {
   std::iota(sb.begin(), sb.end(), 1);
 
   tensor_type a{shape{50, 500}, sa}, b{shape{50, 500}, sb}, c{shape{50,500}, 1};
-  //tensor_type type;
-  //type = a + b;
-  for(int t=0;t<10;t++)
-	  if(a + b == c - 6);
+
+  auto expr = (a*b + a*c) + 1;
+
+  auto sub_expr = boost::yap::transform(expr, detail::transforms::at_index{2});
+
+  //static_assert(detail::transforms::is_multiply_operand<decltype(sub_expr)>::value);
+
+  boost::yap::print(std::cout, boost::yap::transform(sub_expr, detail::transforms::apply_distributive_law{}));
+
+  //std::cout<<type_name<decltype(sub_expr)>();
+
 
   //expr(3);
 }

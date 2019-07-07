@@ -12,6 +12,7 @@
 #ifndef BOOST_UBLAS_TENSOR_EXPRESSION_TRANSFORM_HPP
 #define BOOST_UBLAS_TENSOR_EXPRESSION_TRANSFORM_HPP
 
+#include "expression_transforms_traits.hpp"
 #include "extents.hpp"
 #include "ublas_type_traits.hpp"
 #include <boost/yap/yap.hpp>
@@ -561,7 +562,6 @@ struct expr_count_relational_operator {
   bool not_equal_to_found = false;
 };
 
-
 /**
  * @brief If an expression has only one relational operator which is `==` or
  * `!=`, this transformed is called and results whether the left and right side
@@ -604,21 +604,80 @@ struct apply_distributive_law {
   operator()(boost::yap::expr_tag<boost::yap::expr_kind::plus>, Expr1 &&e1,
              Expr2 &&e2) {
 
+    if constexpr (is_multiply_operand<std::remove_reference_t<Expr1>>::value &&
+                  is_multiply_operand<std::remove_reference_t<Expr2>>::value) {
 
-    return boost::yap::make_expression<
-        boost::numeric::ublas::detail::tensor_expression,
-        boost::yap::expr_kind::plus>(std::forward<Expr1>(e1),
-                                     std::forward<Expr2>(e2));
+      auto &operand1 = boost::yap::value(boost::yap::left(e1));
+      auto &operand2 = boost::yap::value(boost::yap::right(e1));
+      auto &operand3 = boost::yap::value(boost::yap::left(e2));
+      auto &operand4 = boost::yap::value(boost::yap::right(e2));
+
+      if (operand1 == operand3)
+        return boost::yap::make_terminal(operand1 * (operand2 + operand4));
+      else if (operand1 == operand4)
+        return boost::yap::make_terminal(operand1 * (operand2 + operand3));
+      else if (operand2 == operand3)
+        return boost::yap::make_terminal(operand2 * (operand1 + operand4));
+      else if (operand2 == operand4)
+        return boost::yap::make_terminal(operand2 * (operand1 + operand3));
+      else
+        return boost::yap::make_terminal((operand1 * operand2) +
+                                         (operand3 * operand4));
+
+    } else
+      return boost::yap::make_expression<
+          boost::numeric::ublas::detail::tensor_expression,
+          boost::yap::expr_kind::plus>(
+          boost::yap::transform(
+              boost::yap::as_expr<
+                  boost::numeric::ublas::detail::tensor_expression>(
+                  std::forward<Expr1>(e1)),
+              *this),
+          boost::yap::transform(
+              boost::yap::as_expr<
+                  boost::numeric::ublas::detail::tensor_expression>(
+                  std::forward<Expr2>(e2)),
+              *this));
   }
 
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
   operator()(boost::yap::expr_tag<boost::yap::expr_kind::minus>, Expr1 &&e1,
              Expr2 &&e2) {
-    return boost::yap::make_expression<
-        boost::numeric::ublas::detail::tensor_expression,
-        boost::yap::expr_kind::minus>(std::forward<Expr1>(e1),
-                                     std::forward<Expr2>(e2));
+    if constexpr (is_multiply_operand<std::remove_reference_t<Expr1>>::value &&
+                  is_multiply_operand<std::remove_reference_t<Expr2>>::value) {
+
+      auto &operand1 = boost::yap::value(boost::yap::left(e1));
+      auto &operand2 = boost::yap::value(boost::yap::right(e1));
+      auto &operand3 = boost::yap::value(boost::yap::left(e2));
+      auto &operand4 = boost::yap::value(boost::yap::right(e2));
+
+      if (operand1 == operand3)
+        return boost::yap::make_terminal(operand1 * (operand2 - operand4));
+      else if (operand1 == operand4)
+        return boost::yap::make_terminal(operand1 * (operand2 - operand3));
+      else if (operand2 == operand3)
+        return boost::yap::make_terminal(operand2 * (operand1 - operand4));
+      else if (operand2 == operand4)
+        return boost::yap::make_terminal(operand2 * (operand1 - operand3));
+      else
+        return boost::yap::make_terminal((operand1 * operand2) -
+                                         (operand3 * operand4));
+
+    } else
+      return boost::yap::make_expression<
+          boost::numeric::ublas::detail::tensor_expression,
+          boost::yap::expr_kind::minus>(
+          boost::yap::transform(
+              boost::yap::as_expr<
+                  boost::numeric::ublas::detail::tensor_expression>(
+                  std::forward<Expr1>(e1)),
+              *this),
+          boost::yap::transform(
+              boost::yap::as_expr<
+                  boost::numeric::ublas::detail::tensor_expression>(
+                  std::forward<Expr2>(e2)),
+              *this));
   }
 };
 

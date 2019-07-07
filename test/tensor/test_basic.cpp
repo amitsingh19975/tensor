@@ -40,13 +40,15 @@ int main() {
   using namespace boost::numeric::ublas;
 
   using tensor_type = tensor<int>;
-  std::vector<int> sa(25), sb(25);
+  std::vector<int> sa(50*500), sb(25000);
   std::iota(sa.begin(), sa.end(), 1);
   std::iota(sb.begin(), sb.end(), 1);
 
-  tensor_type a{shape{5, 5}, sa}, b{shape{5, 5}, sb}, c{shape{5,5}, 1};
+  tensor_type a{shape{50, 500}, sa}, b{shape{50, 500}, sb}, c{shape{50,500}, 1};
   //tensor_type type;
   //type = a + b;
-  auto expr = a*c + b*c;
-  expr(3);
+  for(int t=0;t<10;t++)
+	  if(a + b == c - 6);
+
+  //expr(3);
 }

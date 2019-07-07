@@ -106,25 +106,21 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    * empty.
    */
   operator bool() { // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+    auto meta_transform = transforms::expr_count_relational_operator{};
+
     std::size_t count = ::boost::yap::transform(
-        *this, transforms::expr_count_relational_operator{});
+        *this, meta_transform);
     if (count != 1)
       throw std::runtime_error(
           "A tensor expression is only convertible to "
           "bool if it has exactly one relational operator.");
 
-    auto a = transforms::expr_has_equal_to_operator{};
-    auto b = transforms::expr_has_not_equal_operator{};
-
-    ::boost::yap::transform(*this, a);
-    ::boost::yap::transform(*this, b);
-
-    if (a.status || b.status) {
+    if (meta_transform.equal_to_found || meta_transform.not_equal_to_found) {
       auto e = transforms::is_equality_or_non_equality_extent_same{};
       ::boost::yap::transform(*this, e);
-      if (!e.status && a.status)
+      if (!e.status && meta_transform.equal_to_found)
         return false;
-      if (!e.status && b.status)
+      if (!e.status && meta_transform.not_equal_to_found)
         return true;
     }
 

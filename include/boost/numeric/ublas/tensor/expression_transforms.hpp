@@ -452,6 +452,7 @@ struct expr_count_relational_operator {
         ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
     std::size_t right = ::boost::yap::transform(
         ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+    equal_to_found = true;
     return left + right + 1u;
   }
   template <class Expr1, class Expr2>
@@ -462,6 +463,7 @@ struct expr_count_relational_operator {
         ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
     std::size_t right = ::boost::yap::transform(
         ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+    not_equal_to_found = true;
     return left + right + 1u;
   }
   template <class Expr1, class Expr2>
@@ -554,40 +556,11 @@ struct expr_count_relational_operator {
         ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
     return left + right;
   }
+
+  bool equal_to_found = false;
+  bool not_equal_to_found = false;
 };
 
-/**
- * @brief A stateful transform that sets the status to true if expression has
- * `==` operator in it.
- */
-
-struct expr_has_equal_to_operator {
-  constexpr expr_has_equal_to_operator() = default;
-
-  template <class Expr1, class Expr2>
-  constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>, Expr1 &e1,
-             Expr2 &e2) {
-    status = true;
-  }
-  bool status = false;
-};
-
-/**
- * @brief A stateful transform that sets the status to true if expression has
- * `!=` operator in it.
- */
-struct expr_has_not_equal_operator {
-  constexpr expr_has_not_equal_operator() = default;
-
-  template <class Expr1, class Expr2>
-  constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>,
-             Expr1 &e1, Expr2 &e2) {
-    status = true;
-  }
-  bool status = false;
-};
 
 /**
  * @brief If an expression has only one relational operator which is `==` or

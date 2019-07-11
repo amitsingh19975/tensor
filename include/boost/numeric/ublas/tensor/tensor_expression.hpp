@@ -151,12 +151,14 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
     static_assert(
         traits::arity == 1,
         "The lambda passed to transform must take only one parameter.");
-    static_assert(
-        !std::is_same_v<typename traits::result_type, void>,
-        "The lambda passed to transform must not return void");
-    return boost::yap::make_expression<tensor_expression,
-                                       boost::yap::expr_kind::call>(
-        boost::yap::make_terminal<tensor_expression>(c), *this);
+    static_assert(!std::is_same_v<typename traits::result_type, void>,
+                  "The lambda passed to transform must not return void");
+    return boost::yap::make_expression<
+        boost::numeric::ublas::detail::tensor_expression,
+        boost::yap::expr_kind::call>(
+        boost::yap::make_terminal<
+            boost::numeric::ublas::detail::tensor_expression>(c),
+        *this);
   }
 };
 } // namespace boost::numeric::ublas::detail

@@ -30,8 +30,8 @@ template <class T, class F, class A> class tensor;
     if constexpr (std::is_same<new_type, typename Tensor::value_type>::value)  \
       return e;                                                                \
     tensor<new_type, typename Tensor::layout_type,                             \
-           typename storage_traits<Tensor::array_type>::template rebind<       \
-               new_type>>                                                      \
+           typename storage_traits<                                            \
+               typename Tensor::array_type>::template rebind<new_type>>        \
         result;                                                                \
     result.data_.resize(e.extents().product());                                \
     result.strides_ = e.strides();                                             \
@@ -44,8 +44,8 @@ template <class T, class F, class A> class tensor;
     if constexpr (std::is_same<new_type, typename Tensor::value_type>::value)  \
       return e;                                                                \
     tensor<new_type, typename Tensor::layout_type,                             \
-           typename storage_traits<Tensor::array_type>::template rebind<       \
-               new_type>>                                                      \
+           typename storage_traits<                                            \
+               typename Tensor::array_type>::template rebind<new_type>>        \
         result;                                                                \
     result.data_.resize(e.extents().product());                                \
     result.strides_ = std::move(e.strides());                                  \

@@ -23,5 +23,17 @@ int main() {
 
     auto expr = a * b + a * c;
 
-    tensor_type x = expr;
+    auto new_expr = expr.transform([](int const & s){});
+
+    //auto new_expr2 = boost::yap::transform(new_expr, detail::transforms::at_index{5});
+
+    //boost::yap::print(std::cout, new_expr2);
+
+    //std::cout<<boost::yap::evaluate(new_expr2);
+
+    //tensor_type z = expr;
+
+    //std::cout<<z;
+
+
 }

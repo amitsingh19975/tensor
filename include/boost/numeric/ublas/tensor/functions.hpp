@@ -394,7 +394,6 @@ auto trans(tensor<V, F, A> const &a, std::vector<std::size_t> const &tau) {
 
   return c;
 }
-/************* THESE THINGS ARE WIP IN YAP EXPRESSION TEMPLATE ***************/
 /**
  *
  * @brief Computes the frobenius nor of a tensor
@@ -429,123 +428,43 @@ template <class V, class F, class A> auto norm(tensor<V, F, A> const &a) {
  * expression
  *
  * @param[in] lhs tensor expression
- * @returns   unary tensor expression
+ * @returns   tensor expression
  */
-// template <boost::yap::expr_kind K, class T>
-// auto real(detail::tensor_expression<K, T> const &expr) {
-//  return detail::make_unary_tensor_expression<T>(
-//      expr(), [](auto const &l) { return std::real(l); });
-//}
-
-/** @brief Extract the real component of tensor elements within a tensor
- * expression
- *
- * @param[in] lhs tensor expression
- * @returns   unary tensor expression
- */
-// template <class V, class F, class A, class D>
-// auto real(
-//    detail::tensor_expression<tensor<std::complex<V>, F, A>, D> const &expr) {
-//  using tensor_complex_type = tensor<std::complex<V>, F, A>;
-//  using tensor_type =
-//      tensor<V, F, typename storage_traits<A>::template rebind<V>>;
-//
-//  if (detail::retrieve_extents(expr).empty())
-//    throw std::runtime_error(
-//        "error in boost::numeric::ublas::real: tensors should not be empty.");
-//
-//  auto a = tensor_complex_type(expr);
-//  auto c = tensor_type(a.extents());
-//
-//  std::transform(a.begin(), a.end(), c.begin(),
-//                 [](auto const &l) { return std::real(l); });
-//
-//  return c;
-//}
+template <boost::yap::expr_kind K, class T>
+auto real(detail::tensor_expression<K, T> &&expr) {
+  auto value = expr(0);
+  return expr.transform([](decltype(value) const& element){
+    return std::real(element);
+  });
+}
 
 /** @brief Extract the imaginary component of tensor elements within a tensor
  * expression
  *
  * @param[in] lhs tensor expression
- * @returns   unary tensor expression
+ * @returns   tensor expression
  */
-// template <class T, class D>
-// auto imag(detail::tensor_expression<T, D> const &lhs) {
-//  return detail::make_unary_tensor_expression<T>(
-//      lhs(), [](auto const &l) { return std::imag(l); });
-//}
-
-/** @brief Extract the imag component of tensor elements within a tensor
- * expression
- *
- * @param[in] lhs tensor expression
- * @returns   unary tensor expression
- */
-// template <class V, class A, class F, class D>
-// auto imag(
-//    detail::tensor_expression<tensor<std::complex<V>, F, A>, D> const &expr) {
-//  using tensor_complex_type = tensor<std::complex<V>, F, A>;
-//  using tensor_type =
-//      tensor<V, F, typename storage_traits<A>::template rebind<V>>;
-//
-//  if (detail::retrieve_extents(expr).empty())
-//    throw std::runtime_error(
-//        "error in boost::numeric::ublas::real: tensors should not be empty.");
-//
-//  auto a = tensor_complex_type(expr);
-//  auto c = tensor_type(a.extents());
-//
-//  std::transform(a.begin(), a.end(), c.begin(),
-//                 [](auto const &l) { return std::imag(l); });
-//
-//  return c;
-//}
-
-/** @brief Computes the complex conjugate component of tensor elements within a
- * tensor expression
- *
- * @param[in] expr tensor expression
- * @returns   complex tensor
- */
-// template <class T, class D>
-// auto conj(detail::tensor_expression<T, D> const &expr) {
-//  using tensor_type = T;
-//  using value_type = typename tensor_type::value_type;
-//  using layout_type = typename tensor_type::layout_type;
-//  using array_type = typename tensor_type::array_type;
-//
-//  using new_value_type = std::complex<value_type>;
-//  using new_array_type =
-//      typename storage_traits<array_type>::template rebind<new_value_type>;
-//
-//  using tensor_complex_type =
-//      tensor<new_value_type, layout_type, new_array_type>;
-//
-//  if (detail::retrieve_extents(expr).empty())
-//    throw std::runtime_error(
-//        "error in boost::numeric::ublas::conj: tensors should not be empty.");
-//
-//  auto a = tensor_type(expr);
-//  auto c = tensor_complex_type(a.extents());
-//
-//  std::transform(a.begin(), a.end(), c.begin(),
-//                 [](auto const &l) { return std::conj(l); });
-//
-//  return c;
-//}
+template <boost::yap::expr_kind K, class T>
+auto imag(detail::tensor_expression<K, T> &&expr) {
+  auto value = expr(0);
+  return expr.transform([](decltype(value) const& element){
+    return std::imag(element);
+  });
+}
 
 /** @brief Computes the complex conjugate component of tensor elements within a
  * tensor expression
  *
  * @param[in] lhs tensor expression
- * @returns   unary tensor expression
+ * @returns   tensor expression
  */
-// template <class V, class A, class F, class D>
-// auto conj(
-//    detail::tensor_expression<tensor<std::complex<V>, F, A>, D> const &expr) {
-//  return detail::make_unary_tensor_expression<tensor<std::complex<V>, F, A>>(
-//      expr(), [](auto const &l) { return std::conj(l); });
-//}
+template <boost::yap::expr_kind K, class T>
+auto conj(detail::tensor_expression<K, T> &&expr) {
+  auto value = expr(0);
+  return expr.transform([](decltype(value) const& element){
+    return std::conj(element);
+  });
+}
 
 } // namespace ublas
 } // namespace numeric

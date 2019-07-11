@@ -14,6 +14,7 @@
 
 #include "expression_transforms.hpp"
 #include "extents.hpp"
+#include "lambda_traits.hpp"
 #include "strides.hpp"
 #include <boost/config.hpp>
 #include <boost/yap/print.hpp>
@@ -42,7 +43,8 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
   BOOST_UBLAS_INLINE decltype(auto) operator()(size_t i) {
     auto nth = ::boost::yap::transform(*this, transforms::at_index{i});
 #ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
-    auto optimized = ::boost::yap::transform(nth, transforms::apply_distributive_law{});
+    auto optimized =
+        ::boost::yap::transform(nth, transforms::apply_distributive_law{});
     return ::boost::yap::evaluate(optimized);
 #else
     return ::boost::yap::evaluate(nth);
@@ -107,8 +109,7 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
   operator bool() { // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
     auto meta_transform = transforms::expr_count_relational_operator{};
 
-    std::size_t count = ::boost::yap::transform(
-        *this, meta_transform);
+    std::size_t count = ::boost::yap::transform(*this, meta_transform);
     if (count != 1)
       throw std::runtime_error(
           "A tensor expression is only convertible to "
@@ -128,6 +129,34 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
       if (!(this->operator()(i)))
         return false;
     return true;
+  }
+
+  /**
+   * @brief This is a transform that applies a lambda to the expression and
+   * returns a new expression.
+   *
+   * @tparam Callable The lambda type (deduced)
+   *
+   * @param c the lambda object
+   *
+   * @return the new expression
+   *
+   * @note This takes only lambdas. Please do not pass a functor.
+   *
+   * @warning Due to some compile-time checkups the lambda cannot be generic or
+   * template.
+   */
+  template <class Callable> decltype(auto) transform(Callable c) {
+    using traits = boost::numeric::ublas::detail::function_traits<Callable>;
+    static_assert(
+        traits::arity == 1,
+        "The lambda passed to transform must take only one parameter.");
+    static_assert(
+        !std::is_same_v<typename traits::result_type, void>,
+        "The lambda passed to transform must not return void");
+    return boost::yap::make_expression<tensor_expression,
+                                       boost::yap::expr_kind::call>(
+        boost::yap::make_terminal<tensor_expression>(c), *this);
   }
 };
 } // namespace boost::numeric::ublas::detail

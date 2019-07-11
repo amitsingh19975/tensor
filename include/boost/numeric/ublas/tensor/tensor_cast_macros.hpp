@@ -16,23 +16,13 @@
 #include <type_traits>
 #include <vector>
 
-
-namespace boost::numeric::ublas{
-    template <class T, class F, class A>
-    class tensor;
+namespace boost::numeric::ublas {
+template <class T, class F, class A> class tensor;
 }
-
-
-// todo(@coder3101): Casting always return a new tensor with std::vector<T> as
-// internal container. Make this return the same container as passed in
-// Tensor::array_type.
-// todo(@coder3101): Also Lazy cast that takes tensor_expression
 
 /**
  * @brief This MACRO defines a casting function. It eagerly casts the tensor
  * from one to other data type.
- *
- * @note Please note the casted tensor has underlying container as `std::vector`
  *
  */
 #define BOOST_UBLAS_EAGER_TENSOR_CAST(func_name, cast_name)                    \
@@ -40,7 +30,8 @@ namespace boost::numeric::ublas{
     if constexpr (std::is_same<new_type, typename Tensor::value_type>::value)  \
       return e;                                                                \
     tensor<new_type, typename Tensor::layout_type,                             \
-           std::vector<new_type, std::allocator<new_type>>>                    \
+           typename storage_traits<Tensor::array_type>::template rebind<       \
+               new_type>>                                                      \
         result;                                                                \
     result.data_.resize(e.extents().product());                                \
     result.strides_ = e.strides();                                             \
@@ -53,7 +44,8 @@ namespace boost::numeric::ublas{
     if constexpr (std::is_same<new_type, typename Tensor::value_type>::value)  \
       return e;                                                                \
     tensor<new_type, typename Tensor::layout_type,                             \
-           std::vector<new_type, std::allocator<new_type>>>                    \
+           typename storage_traits<Tensor::array_type>::template rebind<       \
+               new_type>>                                                      \
         result;                                                                \
     result.data_.resize(e.extents().product());                                \
     result.strides_ = std::move(e.strides());                                  \

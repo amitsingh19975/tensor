@@ -84,5 +84,56 @@ int main() {
     assert(x(0) == 5);
   }
 
+  {
+    /*
+     * Freedom of lazily applying lamdas to an expression. While older expression template did had such a capability,
+     * It was not very accessible since, it was wrapped into detail namespace and did not had any documentations governing 
+     * the use of it. In this new expression templates we however give the end-user a flexibility to do such thing in a modern goodlooking interface. 
+     */
+
+    tensor_int a = tensor_int{shape{5,5,3}, 56};
+    tensor_int b = tensor_int{shape{5,5,3}, 44};
+    auto expr = (a+b).transform([] (const int& val) { return sqrt(val); }); // ==> sqrt(a+b); All Lazy
+    tensor_float x = expr;
+
+    assert(x(0) == 10.0f);
+    assert(x == 10.0f);
+
+  }
+
+  {
+    /*
+     * Lazy relational operators. The new expression templates does not only provides lazy arithematic but even relational operators are lazy
+     * All the 6 relational operators are lazy and only evaluates to an boolean type once required. They all are implicitly converted to bool type
+     * as long as they have at least one relational operator.
+     */
+
+     tensor_int a = tensor_int{shape{5,5,3}, 56};
+     tensor_int b = tensor_int{shape{5,5,3}, 44};
+
+     auto expr = a - 12 == b;
+     // expr is still not evaluated. Maybe we don't need to know the complete result. So why should we waste evaluating everything.
+    
+    if(expr) // implicitly converted to bool. Causing an evaluation
+      std::cout<<"Yah.. Expr evaluated to true\n";
+
+    // The whole point of lazying the relational operator is to give user the freedom to only use unevaluated bool results in the expression to write effificent code.
+    // Consider this example:
+
+    auto iotafill = [](tensor_int &e, int v){ std::iota(e.begin(), e.end(), v); };
+
+    tensor_int c = tensor_int{shape{5,5,3}, 96};
+    
+    iotafill(a,1);
+    iotafill(b,1);
+    iotafill(c,46);
+
+    tensor_int d = (a == b) * c;
+    // d is the tensor that has:
+    // d(x) == c(x) iff a(x) == b(x); for all valid x; else d(x) == 0
+
+    // Making the relational operator lazy makes us evaluate this expression in the most efficient possible way.
+  }
+
 }
 

@@ -81,7 +81,7 @@ struct is_tensor_expression<detail::tensor_expression<K, Tuple>> {
  * @tparam T the type to check for if its matrix_expression or not.
  */
 template <class T> struct is_matrix_expression {
-  static constexpr bool value = std::is_base_of_v<matrix_expression<T>, T>;
+  static constexpr bool value = std::is_base_of<matrix_expression<T>, T>::value;
 };
 
 /**
@@ -91,7 +91,7 @@ template <class T> struct is_matrix_expression {
  * @tparam T the type to check for if its vector_expression or not.
  */
 template <class T> struct is_vector_expression {
-  static constexpr bool value = std::is_base_of_v<vector_expression<T>, T>;
+  static constexpr bool value = std::is_base_of<vector_expression<T>, T>::value;
 };
 
 /**

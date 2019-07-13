@@ -146,12 +146,12 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    * @warning Due to some compile-time checkups the lambda cannot be generic or
    * template.
    */
-  template <class Callable> decltype(auto) transform(Callable c) {
+  template <class Callable> decltype(auto) transform(Callable c) & {
     using traits = boost::numeric::ublas::detail::function_traits<Callable>;
     static_assert(
         traits::arity == 1,
         "The lambda passed to transform must take only one parameter.");
-    static_assert(!std::is_same_v<typename traits::result_type, void>,
+    static_assert(!std::is_same<typename traits::result_type, void>::value,
                   "The lambda passed to transform must not return void");
     return boost::yap::make_expression<
         boost::numeric::ublas::detail::tensor_expression,
@@ -159,6 +159,21 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
         boost::yap::make_terminal<
             boost::numeric::ublas::detail::tensor_expression>(c),
         *this);
+  }
+
+   template <class Callable> decltype(auto) transform(Callable c) && {
+    using traits = boost::numeric::ublas::detail::function_traits<Callable>;
+    static_assert(
+        traits::arity == 1,
+        "The lambda passed to transform must take only one parameter.");
+    static_assert(!std::is_same<typename traits::result_type, void>::value,
+                  "The lambda passed to transform must not return void");
+    return boost::yap::make_expression<
+        boost::numeric::ublas::detail::tensor_expression,
+        boost::yap::expr_kind::call>(
+        boost::yap::make_terminal<
+            boost::numeric::ublas::detail::tensor_expression>(c),
+        std::move(*this));
   }
 };
 } // namespace boost::numeric::ublas::detail

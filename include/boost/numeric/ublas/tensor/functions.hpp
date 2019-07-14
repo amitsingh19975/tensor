@@ -428,7 +428,7 @@ template <class V, class F, class A> auto norm(tensor<V, F, A> const &a) {
  * @param[in] lhs tensor expression
  * @returns   tensor expression
  */
-template <class Expr, class T> auto real(Expr &&expr) {
+template <class Expr> auto real(Expr &&expr) {
   return boost::numeric::ublas::for_each(
       std::forward<Expr>(expr), [](auto const &e) { return std::real(e); });
 }
@@ -439,7 +439,7 @@ template <class Expr, class T> auto real(Expr &&expr) {
  * @param[in] lhs tensor expression
  * @returns   tensor expression
  */
-template <class Expr, class T> auto imag(Expr &&expr) {
+template <class Expr> auto imag(Expr &&expr) {
   return boost::numeric::ublas::for_each(
       std::forward<Expr>(expr), [](auto const &e) { return std::imag(e); });
 }
@@ -450,7 +450,7 @@ template <class Expr, class T> auto imag(Expr &&expr) {
  * @param[in] lhs tensor expression
  * @returns   tensor expression
  */
-template <class Expr, class T> auto conj(Expr &&expr) {
+template <class Expr> auto conj(Expr &&expr) {
   return boost::numeric::ublas::for_each(
       std::forward<Expr>(expr), [](auto const &e) { return std::conj(e); });
 }

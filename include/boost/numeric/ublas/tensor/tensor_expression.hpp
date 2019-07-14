@@ -168,7 +168,7 @@ decltype(auto) for_each(Expr &&expr, Callable c) {
       "Invalid signature for the callable lambda. Callable must be a generic "
       "lambda that takes only one argument by const-reference");
 
-  std::function<signature> func = c;
+   ret_t(*func)(arg_t) = c;
 
   auto expr_t = boost::yap::as_expr(std::forward<Expr>(expr));
   return boost::yap::make_expression<detail::tensor_expression,

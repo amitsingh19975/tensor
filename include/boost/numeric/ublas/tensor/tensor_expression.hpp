@@ -130,52 +130,53 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
         return false;
     return true;
   }
-
-  /**
-   * @brief This is a transform that applies a lambda to the expression and
-   * returns a new expression.
-   *
-   * @tparam Callable The lambda type (deduced)
-   *
-   * @param c the lambda object
-   *
-   * @return the new expression
-   *
-   * @note This takes only lambdas. Please do not pass a functor.
-   *
-   * @warning Due to some compile-time checkups the lambda cannot be generic or
-   * template.
-   */
-  template <class Callable> decltype(auto) transform(Callable c) & {
-    using traits = boost::numeric::ublas::detail::function_traits<Callable>;
-    static_assert(
-        traits::arity == 1,
-        "The lambda passed to transform must take only one parameter.");
-    static_assert(!std::is_same<typename traits::result_type, void>::value,
-                  "The lambda passed to transform must not return void");
-    return boost::yap::make_expression<
-        boost::numeric::ublas::detail::tensor_expression,
-        boost::yap::expr_kind::call>(
-        boost::yap::make_terminal<
-            boost::numeric::ublas::detail::tensor_expression>(c),
-        *this);
-  }
-
-   template <class Callable> decltype(auto) transform(Callable c) && {
-    using traits = boost::numeric::ublas::detail::function_traits<Callable>;
-    static_assert(
-        traits::arity == 1,
-        "The lambda passed to transform must take only one parameter.");
-    static_assert(!std::is_same<typename traits::result_type, void>::value,
-                  "The lambda passed to transform must not return void");
-    return boost::yap::make_expression<
-        boost::numeric::ublas::detail::tensor_expression,
-        boost::yap::expr_kind::call>(
-        boost::yap::make_terminal<
-            boost::numeric::ublas::detail::tensor_expression>(c),
-        std::move(*this));
-  }
 };
 } // namespace boost::numeric::ublas::detail
+
+namespace boost::numeric::ublas {
+/**
+ * @brief Applies a lambda lazily on an expression.
+ *
+ * @tparam Expr The type of Expression (deduced)
+ *
+ * @tparam Callable The type of lambda (deduced)
+ *
+ * @param expr the expression to which the lambda is applied
+ *
+ * @param c the Generic Lamda to apply
+ *
+ * @return the new expression denoting the callable
+ *
+ * @note You must provide a generic lambda that takes only one argument by
+ * const-reference and returns non-void type.
+ */
+template <class Expr, typename Callable>
+decltype(auto) for_each(Expr &&expr, Callable c) {
+
+  auto arg = expr(0);
+
+  using arg_t = decltype(arg) const &;
+  using ret_t = decltype(c(arg));
+
+  using signature = ret_t(arg_t);
+
+  static_assert(!std::is_same_v<void, ret_t>,
+                "Callable must return non-void type");
+
+  static_assert(
+      std::is_convertible_v<Callable, std::function<signature>>,
+      "Invalid signature for the callable lambda. Callable must be a generic "
+      "lambda that takes only one argument by const-reference");
+
+  std::function<signature> func = c;
+
+  auto expr_t = boost::yap::as_expr(std::forward<Expr>(expr));
+  return boost::yap::make_expression<detail::tensor_expression,
+                                     boost::yap::expr_kind::call>(
+      boost::yap::make_terminal<detail::tensor_expression>(func),
+      std::forward<decltype(expr_t)>(expr_t));
+}
+
+} // namespace boost::numeric::ublas
 
 #endif

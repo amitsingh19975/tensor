@@ -32,6 +32,7 @@ int main() {
   using tensor_int = boost::numeric::ublas::tensor<int>;
   using tensor_float = boost::numeric::ublas::tensor<float>;
   using shape = boost::numeric::ublas::shape;
+  using boost::numeric::ublas::for_each;
 
   {
     /*
@@ -93,7 +94,7 @@ int main() {
 
     tensor_int a = tensor_int{shape{5,5,3}, 56};
     tensor_int b = tensor_int{shape{5,5,3}, 44};
-    auto expr = (a+b).transform([] (const int& val) { return sqrt(val); }); // ==> sqrt(a+b); All Lazy
+    auto expr = for_each( a+b ,[] (auto const& val) { return sqrt(val); }); // ==> sqrt(a+b); All Lazy
     tensor_float x = expr;
 
     assert(x(0) == 10.0f);

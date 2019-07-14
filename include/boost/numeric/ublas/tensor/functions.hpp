@@ -22,9 +22,7 @@
 #include "storage_traits.hpp"
 #include "tensor_expression.hpp"
 
-namespace boost {
-namespace numeric {
-namespace ublas {
+namespace boost::numeric::ublas {
 
 template <class Value, class Format, class Allocator> class tensor;
 
@@ -229,7 +227,7 @@ auto prod(tensor<V, F, A1> const &a, tensor<V, F, A2> const &b,
   // phia1.erase( std::remove(phia1.begin(), phia1.end(), phia.at(i)),
   // phia1.end() )  ;
 
-  //assert(phia1.size() == pa);
+  // assert(phia1.size() == pa);
 
   for (auto i = 0ul; i < r; ++i)
     nc[i] = na[phia1[i] - 1];
@@ -239,15 +237,15 @@ auto prod(tensor<V, F, A1> const &a, tensor<V, F, A2> const &b,
   // phib1.erase( std::remove(phib1.begin(), phib1.end(), phia.at(i)),
   // phib1.end() )  ;
 
-  //assert(phib1.size() == pb);
+  // assert(phib1.size() == pb);
 
   for (auto i = 0ul; i < s; ++i)
     nc[r + i] = nb[phib1[i] - 1];
 
   //	std::copy( phib.begin(), phib.end(), phib1.end()  );
 
-  //assert(phia1.size() == pa);
-  //assert(phib1.size() == pb);
+  // assert(phia1.size() == pa);
+  // assert(phib1.size() == pb);
 
   auto c = tensor_type(extents_type(nc), value_type{});
 
@@ -430,12 +428,9 @@ template <class V, class F, class A> auto norm(tensor<V, F, A> const &a) {
  * @param[in] lhs tensor expression
  * @returns   tensor expression
  */
-template <boost::yap::expr_kind K, class T>
-auto real(detail::tensor_expression<K, T> &&expr) {
-  auto value = expr(0);
-  return expr.transform([](decltype(value) const& element){
-    return std::real(element);
-  });
+template <class Expr, class T> auto real(Expr &&expr) {
+  return boost::numeric::ublas::for_each(
+      std::forward<Expr>(expr), [](auto const &e) { return std::real(e); });
 }
 
 /** @brief Extract the imaginary component of tensor elements within a tensor
@@ -444,12 +439,9 @@ auto real(detail::tensor_expression<K, T> &&expr) {
  * @param[in] lhs tensor expression
  * @returns   tensor expression
  */
-template <boost::yap::expr_kind K, class T>
-auto imag(detail::tensor_expression<K, T> &&expr) {
-  auto value = expr(0);
-  return expr.transform([](decltype(value) const& element){
-    return std::imag(element);
-  });
+template <class Expr, class T> auto imag(Expr &&expr) {
+  return boost::numeric::ublas::for_each(
+      std::forward<Expr>(expr), [](auto const &e) { return std::imag(e); });
 }
 
 /** @brief Computes the complex conjugate component of tensor elements within a
@@ -458,16 +450,11 @@ auto imag(detail::tensor_expression<K, T> &&expr) {
  * @param[in] lhs tensor expression
  * @returns   tensor expression
  */
-template <boost::yap::expr_kind K, class T>
-auto conj(detail::tensor_expression<K, T> &&expr) {
-  auto value = expr(0);
-  return expr.transform([](decltype(value) const& element){
-    return std::conj(element);
-  });
+template <class Expr, class T> auto conj(Expr &&expr) {
+  return boost::numeric::ublas::for_each(
+      std::forward<Expr>(expr), [](auto const &e) { return std::conj(e); });
 }
 
-} // namespace ublas
-} // namespace numeric
 } // namespace boost
 
 #endif

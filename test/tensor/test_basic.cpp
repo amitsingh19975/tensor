@@ -9,31 +9,31 @@
  */
 
 int main() {
-    using namespace boost::numeric::ublas;
+  using namespace boost::numeric::ublas;
 
-    using tensor_type = tensor<int>;
-    std::vector<int> sa(5000 * 500);
-    std::vector<int> sb(2500000);
-    std::iota(sa.begin(), sa.end(), 1);
-    std::iota(sb.begin(), sb.end(), 1);
+  using tensor_type = tensor<int>;
+  std::vector<int> sa(5000 * 500);
+  std::vector<int> sb(2500000);
+  std::iota(sa.begin(), sa.end(), 1);
+  std::iota(sb.begin(), sb.end(), 1);
 
-    tensor_type a{shape{500, 5000}, sa};
-    tensor_type b{shape{500, 5000}, sb};
-    tensor_type c{shape{500, 5000}, 1};
+  tensor_type a{shape{500, 5000}, sa};
+  tensor_type b{shape{500, 5000}, sb};
+  tensor_type c{shape{500, 5000}, 1};
 
-    auto expr = a * b + a * c;
+  auto expr = a * b + a * c;
 
-    auto new_expr = expr.transform([](int const & s){});
+  auto l = [](auto r) { return r + 1; };
+  auto new_expr = for_each(expr, [](auto const &s) { return 5; });
 
-    //auto new_expr2 = boost::yap::transform(new_expr, detail::transforms::at_index{5});
+  // auto new_expr2 = boost::yap::transform(new_expr,
+  // detail::transforms::at_index{5});
 
-    //boost::yap::print(std::cout, new_expr2);
+  boost::yap::print(std::cout, new_expr);
 
-    //std::cout<<boost::yap::evaluate(new_expr2);
+  // std::cout<<boost::yap::evaluate(new_expr2);
 
-    //tensor_type z = expr;
+  // tensor_type z = expr;
 
-    //std::cout<<z;
-
-
+  // std::cout<<z;
 }

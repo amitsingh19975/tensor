@@ -12,11 +12,14 @@
 #ifndef BOOST_UBLAS_EXPRESSION_RELATIONAL_OPERATOR_HPP
 #define BOOST_UBLAS_EXPRESSION_RELATIONAL_OPERATOR_HPP
 
+#include <boost/numeric/ublas/detail/config.hpp>
+
+
 #include "ublas_type_traits.hpp"
 #include <boost/yap/user_macros.hpp>
 
 namespace boost::numeric::ublas::detail {
-template <boost::yap::expr_kind K, typename A> struct tensor_expression;
+template <::boost::yap::expr_kind K, typename A> struct tensor_expression;
 
 } // namespace boost::numeric::ublas::detail
 

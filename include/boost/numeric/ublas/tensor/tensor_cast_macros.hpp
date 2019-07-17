@@ -12,6 +12,9 @@
 #ifndef BOOST_UBLAS_TENSOR_CAST_MACRO
 #define BOOST_UBLAS_TENSOR_CAST_MACRO
 
+#include <boost/numeric/ublas/detail/config.hpp>
+
+
 #include <boost/yap/yap.hpp>
 #include <type_traits>
 #include <vector>
@@ -26,7 +29,7 @@ template <class T, class F, class A> class tensor;
  *
  */
 #define BOOST_UBLAS_EAGER_TENSOR_CAST(func_name, cast_name)                    \
-  template <class new_type, typename Tensor> auto func_name(Tensor &e) {       \
+  template <class new_type, typename Tensor> decltype(auto) func_name(Tensor &e) {       \
     if constexpr (std::is_same<new_type, typename Tensor::value_type>::value)  \
       return e;                                                                \
     tensor<new_type, typename Tensor::layout_type,                             \
@@ -40,9 +43,9 @@ template <class T, class F, class A> class tensor;
       result.data_[i] = cast_name<new_type>(e.data_[i]);                       \
     return result;                                                             \
   }                                                                            \
-  template <class new_type, typename Tensor> auto func_name(Tensor &&e) {      \
+  template <class new_type, typename Tensor> decltype(auto) func_name(Tensor &&e) {      \
     if constexpr (std::is_same<new_type, typename Tensor::value_type>::value)  \
-      return e;                                                                \
+      return std::forward<Tensor>(e);                                                                \
     tensor<new_type, typename Tensor::layout_type,                             \
            typename storage_traits<                                            \
                typename Tensor::array_type>::template rebind<new_type>>        \
@@ -52,7 +55,7 @@ template <class T, class F, class A> class tensor;
     result.extents_ = std::move(e.extents());                                  \
     for (auto i = 0u; i < result.extents_.product(); i++)                      \
       result.data_[i] = cast_name<new_type>(e.data_[i]);                       \
-    return result;                                                             \
+    return std::forward<Tensor>(result);                                                             \
   }
 
 #endif

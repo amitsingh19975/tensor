@@ -12,9 +12,12 @@
 #ifndef BOOST_UBLAS_TENSOR_EXPRESSION_TRANSFORM_HPP
 #define BOOST_UBLAS_TENSOR_EXPRESSION_TRANSFORM_HPP
 
+#include <boost/numeric/ublas/detail/config.hpp>
+
 #include "expression_transforms_traits.hpp"
 #include "extents.hpp"
 #include "ublas_type_traits.hpp"
+#include <boost/type_traits/has_multiplies.hpp>
 #include <boost/yap/yap.hpp>
 
 namespace boost::numeric::ublas {
@@ -33,9 +36,6 @@ template <class T, class A> class vector;
 
 } // namespace boost::numeric::ublas
 
-/**
- * @brief This namespace contains all the transforms of YAP expression.
- */
 namespace boost::numeric::ublas::detail::transforms {
 
 /**
@@ -45,37 +45,39 @@ namespace boost::numeric::ublas::detail::transforms {
  * as tensor returns a new expression with terminal nodes as ith values of
  * tensor.
  *
+ * @todo(coder3101): Constexpr-ify these transforms.
+ *
  */
 struct at_index {
   template <class T, class F, class A>
-  decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+  BOOST_UBLAS_INLINE decltype(auto)
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
              ::boost::numeric::ublas::tensor<T, F, A> const &terminal) {
-    return boost::yap::make_terminal(terminal(index));
+    return ::boost::yap::make_terminal(terminal(index));
   }
   template <class T, class F, class A>
-  decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+  BOOST_UBLAS_INLINE decltype(auto)
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
              ::boost::numeric::ublas::matrix<T, F, A> const &terminal) {
-    return boost::yap::make_terminal(terminal(index));
+    return ::boost::yap::make_terminal(terminal(index));
   }
   template <class T, class A>
-  decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+  BOOST_UBLAS_INLINE decltype(auto)
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
              ::boost::numeric::ublas::vector<T, A> const &terminal) {
-    return boost::yap::make_terminal(terminal(index));
+    return ::boost::yap::make_terminal(terminal(index));
   }
   template <typename Expr>
-  constexpr decltype(auto)
+  BOOST_UBLAS_INLINE decltype(auto)
   operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
-             boost::numeric::ublas::matrix_expression<Expr> &terminal) {
-    return boost::yap::make_terminal(terminal()(index));
+             ::boost::numeric::ublas::matrix_expression<Expr> &terminal) {
+    return ::boost::yap::make_terminal(terminal()(index));
   }
   template <typename Expr>
-  constexpr decltype(auto)
+  BOOST_UBLAS_INLINE decltype(auto)
   operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
-             boost::numeric::ublas::vector_expression<Expr> &terminal) {
-    return boost::yap::make_terminal(terminal()(index));
+             ::boost::numeric::ublas::vector_expression<Expr> &terminal) {
+    return ::boost::yap::make_terminal(terminal()(index));
   }
   size_t index;
 };
@@ -97,33 +99,37 @@ struct get_extents {
 
   template <class T, class F, class A>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
              ::boost::numeric::ublas::tensor<T, F, A> &terminal) {
     return terminal.extents();
   }
   template <class T, class F, class A>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
              ::boost::numeric::ublas::matrix<T, F, A> &terminal) {
-    return boost::numeric::ublas::basic_extents<size_t>{terminal.size1(),
-                                                        terminal.size2()};
+    return ::boost::numeric::ublas::basic_extents<size_t>{terminal.size1(),
+                                                          terminal.size2()};
   }
   template <class T, class A>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
              ::boost::numeric::ublas::vector<T, A> &terminal) {
-    return boost::numeric::ublas::basic_extents<size_t>{terminal.size(), 1};
+    return ::boost::numeric::ublas::basic_extents<size_t>{terminal.size(), 1};
   }
 
   template <class LExpr, class RExpr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::minus>, LExpr &lexpr,
-             RExpr &rexpr) {
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::minus>,
+             LExpr &lexpr, RExpr &rexpr) {
 
-    auto left = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
-    auto right = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+    auto left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(lexpr),
+        *this);
+    auto right = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
+        *this);
     if (left.is_free_scalar() && right.is_free_scalar())
       return basic_extents<size_t>{1};
     else if (left.is_free_scalar())
@@ -141,13 +147,17 @@ struct get_extents {
 
   template <class LExpr, class RExpr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::multiplies>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::multiplies>,
              LExpr &lexpr, RExpr &rexpr) {
 
-    auto left = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
-    auto right = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+    auto left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(lexpr),
+        *this);
+    auto right = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
+        *this);
     if (left.is_free_scalar() && right.is_free_scalar())
       return basic_extents<size_t>{1};
     else if (left.is_free_scalar())
@@ -165,13 +175,17 @@ struct get_extents {
 
   template <class LExpr, class RExpr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::divides>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::divides>,
              LExpr &lexpr, RExpr &rexpr) {
 
-    auto left = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
-    auto right = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+    auto left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(lexpr),
+        *this);
+    auto right = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
+        *this);
     if (left.is_free_scalar() && right.is_free_scalar())
       return basic_extents<size_t>{1};
     else if (left.is_free_scalar())
@@ -189,12 +203,16 @@ struct get_extents {
 
   template <class LExpr, class RExpr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::plus>, LExpr &lexpr,
-             RExpr &rexpr) {
-    auto left = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
-    auto right = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::plus>,
+             LExpr &lexpr, RExpr &rexpr) {
+    auto left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(lexpr),
+        *this);
+    auto right = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
+        *this);
 
     if (left.is_free_scalar() && right.is_free_scalar())
       return basic_extents<size_t>{1};
@@ -213,28 +231,36 @@ struct get_extents {
 
   template <class Expr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::negate>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::negate>,
              Expr &expr) {
-    return boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(expr), *this);
+    return ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(expr),
+        *this);
   }
 
   template <class Expr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::unary_plus>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::unary_plus>,
              Expr &expr) {
-    return boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(expr), *this);
+    return ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(expr),
+        *this);
   }
 
   template <class LExpr, class RExpr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::equal_to>,
              LExpr &lexpr, RExpr &rexpr) {
-    auto left = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
-    auto right = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+    auto left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(lexpr),
+        *this);
+    auto right = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
+        *this);
 
     if (left.is_free_scalar() && right.is_free_scalar())
       return basic_extents<size_t>{1};
@@ -253,12 +279,16 @@ struct get_extents {
 
   template <class LExpr, class RExpr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::not_equal_to>,
              LExpr &lexpr, RExpr &rexpr) {
-    auto left = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
-    auto right = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+    auto left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(lexpr),
+        *this);
+    auto right = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
+        *this);
 
     if (left.is_free_scalar() && right.is_free_scalar())
       return basic_extents<size_t>{1};
@@ -276,12 +306,16 @@ struct get_extents {
   }
   template <class LExpr, class RExpr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less>, LExpr &lexpr,
-             RExpr &rexpr) {
-    auto left = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
-    auto right = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::less>,
+             LExpr &lexpr, RExpr &rexpr) {
+    auto left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(lexpr),
+        *this);
+    auto right = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
+        *this);
 
     if (left.is_free_scalar() && right.is_free_scalar())
       return basic_extents<size_t>{1};
@@ -299,12 +333,16 @@ struct get_extents {
   }
   template <class LExpr, class RExpr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::greater>,
              LExpr &lexpr, RExpr &rexpr) {
-    auto left = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
-    auto right = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+    auto left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(lexpr),
+        *this);
+    auto right = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
+        *this);
 
     if (left.is_free_scalar() && right.is_free_scalar())
       return basic_extents<size_t>{1};
@@ -322,12 +360,16 @@ struct get_extents {
   }
   template <class LExpr, class RExpr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater_equal>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::greater_equal>,
              LExpr &lexpr, RExpr &rexpr) {
-    auto left = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
-    auto right = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+    auto left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(lexpr),
+        *this);
+    auto right = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
+        *this);
 
     if (left.is_free_scalar() && right.is_free_scalar())
       return basic_extents<size_t>{1};
@@ -345,12 +387,16 @@ struct get_extents {
   }
   template <class LExpr, class RExpr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less_equal>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::less_equal>,
              LExpr &lexpr, RExpr &rexpr) {
-    auto left = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(lexpr), *this);
-    auto right = boost::yap::transform(
-        boost::yap::as_expr<detail::tensor_expression>(rexpr), *this);
+    auto left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(lexpr),
+        *this);
+    auto right = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
+        *this);
 
     if (left.is_free_scalar() && right.is_free_scalar())
       return basic_extents<size_t>{1};
@@ -369,10 +415,12 @@ struct get_extents {
 
   template <class Func, class Arg>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::call>, Func f,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::call>, Func f,
              Arg &e2) {
     auto right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
     return right;
   }
 
@@ -385,9 +433,10 @@ struct get_extents {
   constexpr decltype(auto)
   operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
              Expr &terminal) {
-    if constexpr (boost::numeric::ublas::is_vector_expression_v<Expr>) {
+    if constexpr (::boost::numeric::ublas::is_vector_expression_v<Expr>) {
       return basic_extents<size_t>{terminal.size(), 1};
-    } else if constexpr (boost::numeric::ublas::is_matrix_expression_v<Expr>) {
+    } else if constexpr (::boost::numeric::ublas::is_matrix_expression_v<
+                             Expr>) {
       return basic_extents<size_t>{terminal.size1(), terminal.size2()};
     } else
       return basic_extents<size_t>{1};
@@ -400,127 +449,193 @@ struct get_extents {
  */
 struct expr_count_relational_operator {
 
-  constexpr expr_count_relational_operator() = default;
-
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>, Expr1 &e1,
-             Expr2 &e2) {
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::equal_to>,
+             Expr1 &e1, Expr2 &e2) {
     std::size_t left = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e1),
+        *this);
     std::size_t right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
     equal_to_found = true;
     return left + right + 1u;
   }
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::not_equal_to>,
              Expr1 &e1, Expr2 &e2) {
     std::size_t left = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e1),
+        *this);
     std::size_t right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
     not_equal_to_found = true;
     return left + right + 1u;
   }
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less>, Expr1 &e1,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::less>, Expr1 &e1,
              Expr2 &e2) {
     std::size_t left = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e1),
+        *this);
     std::size_t right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
     return left + right + 1u;
   }
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::less_equal>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::less_equal>,
              Expr1 &e1, Expr2 &e2) {
     std::size_t left = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e1),
+        *this);
     std::size_t right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
     return left + right + 1u;
   }
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater>, Expr1 &e1,
-             Expr2 &e2) {
-    std::size_t left = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
-    std::size_t right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
-    return left + right + 1u;
-  }
-  template <class Expr1, class Expr2>
-  constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::greater_equal>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::greater>,
              Expr1 &e1, Expr2 &e2) {
     std::size_t left = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e1),
+        *this);
     std::size_t right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
+    return left + right + 1u;
+  }
+  template <class Expr1, class Expr2>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::greater_equal>,
+             Expr1 &e1, Expr2 &e2) {
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e1),
+        *this);
+    std::size_t right = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
     return left + right + 1u;
   }
 
   template <class Expr>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>, Expr &) {
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
+             Expr &) {
     return 0;
   }
 
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::plus>, Expr1 &e1,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::plus>, Expr1 &e1,
              Expr2 &e2) {
     std::size_t left = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e1),
+        *this);
     std::size_t right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
     return left + right;
   }
 
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::minus>, Expr1 &e1,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::minus>, Expr1 &e1,
              Expr2 &e2) {
     std::size_t left = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e1),
+        *this);
     std::size_t right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
     return left + right;
   }
 
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::multiplies>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::multiplies>,
              Expr1 &e1, Expr2 &e2) {
     std::size_t left = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e1),
+        *this);
     std::size_t right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
     return left + right;
   }
 
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::divides>, Expr1 &e1,
-             Expr2 &e2) {
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::divides>,
+             Expr1 &e1, Expr2 &e2) {
     std::size_t left = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e1), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e1),
+        *this);
     std::size_t right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
     return left + right;
+  }
+  template <class Expr1>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::negate>,
+             Expr1 &e1) {
+    using namespace ::boost::hana::literals;
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(
+            ::boost::yap::get(e1, 0_c)),
+        *this);
+    return left;
+  }
+
+  template <class Expr1>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::unary_plus>,
+             Expr1 &e1) {
+    using namespace ::boost::hana::literals;
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(
+            ::boost::yap::get(e1, 0_c)),
+        *this);
+    return left;
   }
 
   template <class Func, class Arg>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::call>, Func f,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::call>, Func f,
              Arg &e2) {
     std::size_t right = ::boost::yap::transform(
-        ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
+        ::boost::yap::as_expr<
+            ::boost::numeric::ublas::detail::tensor_expression>(e2),
+        *this);
     return right;
   }
 
@@ -541,7 +656,7 @@ struct is_equality_or_non_equality_extent_same {
 
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::not_equal_to>,
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::not_equal_to>,
              Expr1 &e1, Expr2 &e2) {
     auto left =
         ::boost::yap::transform(::boost::yap::as_expr(e1), get_extents{});
@@ -552,8 +667,8 @@ struct is_equality_or_non_equality_extent_same {
 
   template <class Expr1, class Expr2>
   constexpr decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::equal_to>, Expr1 &e1,
-             Expr2 &e2) {
+  operator()(::boost::yap::expr_tag<::boost::yap::expr_kind::equal_to>,
+             Expr1 &e1, Expr2 &e2) {
     auto left =
         ::boost::yap::transform(::boost::yap::as_expr(e1), get_extents{});
     auto right =
@@ -563,127 +678,6 @@ struct is_equality_or_non_equality_extent_same {
 
   bool status = false;
 };
-
-/**
- * @brief This transform applies the optimization for
- */
-struct apply_distributive_law {
-
-  constexpr apply_distributive_law() = default;
-
-  template <class Expr1, class Expr2>
-  constexpr decltype(auto)
-  operator()(boost::yap::expr_tag<boost::yap::expr_kind::plus>, Expr1 &&e1,
-             Expr2 &&e2) {
-
-    if constexpr (is_multiply_operand<std::remove_reference_t<Expr1>>::value &&
-                  is_multiply_operand<std::remove_reference_t<Expr2>>::value) {
-
-      auto &operand1 = boost::yap::value(boost::yap::left(e1));
-      auto &operand2 = boost::yap::value(boost::yap::right(e1));
-      auto &operand3 = boost::yap::value(boost::yap::left(e2));
-      auto &operand4 = boost::yap::value(boost::yap::right(e2));
-
-      if (operand1 == operand3)
-        return boost::yap::make_terminal(operand1 * (operand2 + operand4));
-      else if (operand1 == operand4)
-        return boost::yap::make_terminal(operand1 * (operand2 + operand3));
-      else if (operand2 == operand3)
-        return boost::yap::make_terminal(operand2 * (operand1 + operand4));
-      else if (operand2 == operand4)
-        return boost::yap::make_terminal(operand2 * (operand1 + operand3));
-      else
-        return boost::yap::make_terminal((operand1 * operand2) +
-                                         (operand3 * operand4));
-
-    } else
-
-#ifndef BOOST_UBLAS_NO_RECURSIVE_OPTIMIZATION
-
-      return boost::yap::make_expression<
-          boost::numeric::ublas::detail::tensor_expression,
-          boost::yap::expr_kind::plus>(
-          boost::yap::transform(
-              boost::yap::as_expr<
-                  boost::numeric::ublas::detail::tensor_expression>(
-                  std::forward<Expr1>(e1)),
-              *this),
-          boost::yap::transform(
-              boost::yap::as_expr<
-                  boost::numeric::ublas::detail::tensor_expression>(
-                  std::forward<Expr2>(e2)),
-              *this));
-#else
-
-      return boost::yap::make_expression<
-          boost::numeric::ublas::detail::tensor_expression,
-          boost::yap::expr_kind::plus>(std::forward<Expr1>(e1),
-                                       std::forward<Expr2>(e2));
-#endif
-  }
-
-  template <class Expr1, class Expr2>
-  constexpr decltype(auto)
-  operator()(boost::yap::expr_tag<boost::yap::expr_kind::minus>, Expr1 &&e1,
-             Expr2 &&e2) {
-    if constexpr (is_multiply_operand<std::remove_reference_t<Expr1>>::value &&
-                  is_multiply_operand<std::remove_reference_t<Expr2>>::value) {
-
-      auto &operand1 = boost::yap::value(boost::yap::left(e1));
-      auto &operand2 = boost::yap::value(boost::yap::right(e1));
-      auto &operand3 = boost::yap::value(boost::yap::left(e2));
-      auto &operand4 = boost::yap::value(boost::yap::right(e2));
-
-      if (operand1 == operand3)
-        return boost::yap::make_terminal(operand1 * (operand2 - operand4));
-      else if (operand1 == operand4)
-        return boost::yap::make_terminal(operand1 * (operand2 - operand3));
-      else if (operand2 == operand3)
-        return boost::yap::make_terminal(operand2 * (operand1 - operand4));
-      else if (operand2 == operand4)
-        return boost::yap::make_terminal(operand2 * (operand1 - operand3));
-      else
-        return boost::yap::make_terminal((operand1 * operand2) -
-                                         (operand3 * operand4));
-
-    } else
-
-#ifndef BOOST_UBLAS_NO_RECURSIVE_OPTIMIZATION
-      return boost::yap::make_expression<
-          boost::numeric::ublas::detail::tensor_expression,
-          boost::yap::expr_kind::minus>(
-          boost::yap::transform(
-              boost::yap::as_expr<
-                  boost::numeric::ublas::detail::tensor_expression>(
-                  std::forward<Expr1>(e1)),
-              *this),
-          boost::yap::transform(
-              boost::yap::as_expr<
-                  boost::numeric::ublas::detail::tensor_expression>(
-                  std::forward<Expr2>(e2)),
-              *this));
-#else
-
-      return boost::yap::make_expression<
-          boost::numeric::ublas::detail::tensor_expression,
-          boost::yap::expr_kind::minus>(std::forward<Expr1>(e1),
-                                        std::forward<Expr2>(e2));
-#endif
-  }
-};
-
-// @todo(coder3101): Make this a transform that does not evaluate contractions
-// rather just returns the data-type of contraction.
-struct make_dummy_type_expression {
-  template <typename Value>
-  decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-             Value const &v) {
-    // if constexpr(is_contraption_v<Value>) return decltype(v(0)){};
-    return boost::yap::make_terminal(Value{});
-  }
-};
-
 } // namespace boost::numeric::ublas::detail::transforms
 
 #endif

@@ -12,16 +12,19 @@
 #ifndef BOOST_UBLAS_EXPRESSION_OPERATOR_HPP
 #define BOOST_UBLAS_EXPRESSION_OPERATOR_HPP
 
+#include <boost/numeric/ublas/detail/config.hpp>
+
+#include <boost/yap/user_macros.hpp>
+#include "expression_relational_operator.hpp"
+#include "functions.hpp"
 #include "multi_index_utility.hpp"
 #include "tensor_cast_macros.hpp"
-#include "functions.hpp"
-#include "expression_relational_operator.hpp"
-#include <boost/yap/user_macros.hpp>
 
 namespace boost::numeric::ublas {
 
 namespace detail {
-template <boost::yap::expr_kind K, typename A> struct tensor_expression;
+template <::boost::yap::expr_kind K, typename A>
+struct tensor_expression;
 
 }
 
@@ -29,7 +32,7 @@ BOOST_UBLAS_EAGER_TENSOR_CAST(static_tensor_cast, static_cast)
 BOOST_UBLAS_EAGER_TENSOR_CAST(dynamic_tensor_cast, dynamic_cast)
 BOOST_UBLAS_EAGER_TENSOR_CAST(reinterpret_tensor_cast, reinterpret_cast)
 
-} // namespace boost::numeric::ublas
+}  // namespace boost::numeric::ublas
 
 // Tensor to expr
 BOOST_YAP_USER_UDT_UNARY_OPERATOR(
@@ -78,9 +81,9 @@ BOOST_YAP_USER_UNARY_OPERATOR(negate,
 // Tensor Contraction
 template <class tensor_type_left, class tuple_type_left,
           class tensor_type_right, class tuple_type_right>
-auto operator*(std::pair<tensor_type_left const &, tuple_type_left> lhs,
-               std::pair<tensor_type_right const &, tuple_type_right> rhs) {
-
+BOOST_UBLAS_INLINE decltype(auto) operator*(
+    std::pair<tensor_type_left const &, tuple_type_left> lhs,
+    std::pair<tensor_type_right const &, tuple_type_right> rhs) {
   using namespace boost::numeric::ublas;
 
   auto const &tensor_left = lhs.first;
@@ -109,7 +112,8 @@ auto operator*(std::pair<tensor_type_left const &, tuple_type_left> lhs,
 
 // Assign Operators
 template <class T, class F, class V, class Expr>
-auto operator+=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
+BOOST_UBLAS_INLINE decltype(auto) operator+=(
+    boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
           std::forward<Expr>(e));
@@ -126,7 +130,8 @@ auto operator+=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
 }
 
 template <class T, class F, class V, class Expr>
-auto operator-=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
+BOOST_UBLAS_INLINE decltype(auto) operator-=(
+    boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
           std::forward<Expr>(e));
@@ -142,7 +147,8 @@ auto operator-=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
   return lhs;
 }
 template <class T, class F, class V, class Expr>
-auto operator*=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
+BOOST_UBLAS_INLINE decltype(auto) operator*=(
+    boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
           std::forward<Expr>(e));
@@ -158,7 +164,8 @@ auto operator*=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
   return lhs;
 }
 template <class T, class F, class V, class Expr>
-auto operator/=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
+BOOST_UBLAS_INLINE decltype(auto) operator/=(
+    boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
           std::forward<Expr>(e));
@@ -175,7 +182,7 @@ auto operator/=(boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
 }
 
 template <boost::yap::expr_kind K, typename Tuple>
-bool operator!(
+BOOST_UBLAS_INLINE bool operator!(
     boost::numeric::ublas::detail::tensor_expression<K, Tuple> &&expr) {
   bool result = expr;
   return !result;

@@ -12,13 +12,19 @@
 #ifndef BOOST_UBLAS_TENSOR_YAP_EXPRESSIONS_HPP
 #define BOOST_UBLAS_TENSOR_YAP_EXPRESSIONS_HPP
 
-#include "expression_transforms.hpp"
-#include "extents.hpp"
-#include "lambda_traits.hpp"
-#include "strides.hpp"
-#include <boost/config.hpp>
+#include <boost/numeric/ublas/detail/config.hpp>
+
 #include <boost/yap/print.hpp>
 #include <boost/yap/yap.hpp>
+#include "expression_optimization.hpp"
+#include "expression_transforms.hpp"
+#include "expression_utils.hpp"
+#include "extents.hpp"
+#include "strides.hpp"
+
+namespace {
+struct deduced {};
+}  // namespace
 
 namespace boost::numeric::ublas::detail {
 
@@ -29,7 +35,8 @@ namespace boost::numeric::ublas::detail {
  *
  * @tparam Tuple the operands to which operation is performed.
  */
-template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
+template <::boost::yap::expr_kind Kind, typename Tuple>
+struct tensor_expression {
   const static ::boost::yap::expr_kind kind = Kind;
 
   Tuple elements;
@@ -43,15 +50,9 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    */
   BOOST_UBLAS_INLINE decltype(auto) operator()(size_t i) {
     auto nth = ::boost::yap::transform(*this, transforms::at_index{i});
-#ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
-    auto optimized =
-        ::boost::yap::transform(nth, transforms::apply_distributive_law{});
-    return ::boost::yap::evaluate(optimized);
-#else
     return ::boost::yap::evaluate(nth);
-#endif
   }
-  //  todo (coder3101) : Make eval() and eval_to() based on device.
+  //  Todo (coder3101) : Make eval() and eval_to() based on device.
 
   /**
    * @brief Completely evaluated this expression and returns a tensor.
@@ -64,18 +65,35 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    *
    * @return The tensor which contains the values of evaluated expresssion.
    */
-  template <class T, class F = ::boost::numeric::ublas::first_order,
+  template <class T = deduced, class F = ::boost::numeric::ublas::first_order,
             class A = std::vector<T, std::allocator<T>>>
-  auto eval() {
-    ::boost::numeric::ublas::tensor<T, F, A> result;
+  BOOST_UBLAS_INLINE auto eval() {
+    using value_type = std::conditional_t<std::is_same_v<T, deduced>,
+                                          decltype(this->operator()(0)), T>;
+    ::boost::numeric::ublas::tensor<value_type, F, A> result;
     auto shape_expr = ::boost::yap::transform(*this, transforms::get_extents{});
     result.extents_ = shape_expr;
     result.strides_ = basic_strides<std::size_t, F>{shape_expr};
     result.data_.resize(shape_expr.product());
+
+    // #ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
+
+    //     auto distributive_transform = transforms::apply_distributive_law{};
+    //     auto optimized_expr =
+    //         ::boost::yap::transform(*this, distributive_transform);
+
+    // #pragma omp parallel for
+    //     for (auto i = 0u; i < shape_expr.product(); i++)
+    //       result.data_[i] = distributive_transform.usable ? optimized_expr(i)
+    //                                                       :
+    //                                                       this->operator()(i);
+    // #else
+
 #pragma omp parallel for
     for (auto i = 0u; i < shape_expr.product(); i++)
       result.data_[i] = this->operator()(i);
-    return result;
+    // #endif
+    return std::move(result);
   }
   /**
    * @brief Completely evaluates this expression and fills values into target.
@@ -90,14 +108,31 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    */
 
   template <class T, class F, class A>
-  void eval_to(::boost::numeric::ublas::tensor<T, F, A> &target) {
+  BOOST_UBLAS_INLINE void eval_to(
+      ::boost::numeric::ublas::tensor<T, F, A> &target) {
     auto shape_expr = ::boost::yap::transform(*this, transforms::get_extents{});
     target.data_.resize(shape_expr.product());
     target.extents_ = shape_expr;
-    target.strides_ = basic_strides<std::size_t, F>{shape_expr};
+    target.strides_ =
+        ::boost::numeric::ublas::basic_strides<std::size_t, F>{shape_expr};
+
+    // #ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
+
+    //     auto distributive_transform = transforms::apply_distributive_law{};
+    //     auto optimized_expr =
+    //         ::boost::yap::transform(*this, distributive_transform);
+
+    // #pragma omp parallel for
+    //     for (auto i = 0u; i < shape_expr.product(); i++)
+    //       target.data_[i] = distributive_transform.usable ? optimized_expr(i)
+    //                                                       :
+    //                                                       this->operator()(i);
+    //#else
+
 #pragma omp parallel for
     for (auto i = 0u; i < shape_expr.product(); i++)
       target.data_[i] = this->operator()(i);
+    //#endif
   }
 
   /**
@@ -106,8 +141,12 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    * @note This conversion throws a runtime_error if the expression does not
    * contain any relational operator. It returns true if tensor on both side are
    * empty.
+   *
+   * @todo(coder3101): Maybe check for relational operator could be made to give
+   * static_assert instead of a std::runtime_error.
    */
-  operator bool() { // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+  BOOST_UBLAS_INLINE
+  operator bool() {  // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
     auto meta_transform = transforms::expr_count_relational_operator{};
 
     std::size_t count = ::boost::yap::transform(*this, meta_transform);
@@ -119,70 +158,43 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
     if (meta_transform.equal_to_found || meta_transform.not_equal_to_found) {
       auto e = transforms::is_equality_or_non_equality_extent_same{};
       ::boost::yap::transform(*this, e);
-      if (!e.status && meta_transform.equal_to_found)
-        return false;
-      if (!e.status && meta_transform.not_equal_to_found)
-        return true;
+      if (!e.status && meta_transform.equal_to_found) return false;
+      if (!e.status && meta_transform.not_equal_to_found) return true;
     }
 
     auto shape_expr = ::boost::yap::transform(*this, transforms::get_extents{});
     for (auto i = 0u; i < shape_expr.product(); i++)
-      if (!(this->operator()(i)))
-        return false;
+      if (!(this->operator()(i))) return false;
     return true;
   }
 };
-} // namespace boost::numeric::ublas::detail
+}  // namespace boost::numeric::ublas::detail
 
 namespace boost::numeric::ublas {
 /**
- * @brief Applies a lambda lazily on an expression.
+ * @brief Applies a lambda(s) lazily on an expression.
  *
  * @tparam Expr The type of Expression (deduced)
  *
- * @tparam Callable The type of lambda (deduced)
+ * @tparam Callable The type of lambda(s) (deduced)
  *
- * @param expr the expression to which the lambda is applied
+ * @param expr the expression to which the lambda(s) is/are applied
  *
- * @param c the Generic Lamda to apply
+ * @param c the Generic Lambda(s) to apply
  *
  * @return the new expression denoting the callable
  *
  * @note You must provide a generic lambda that takes only one argument by
  * const-reference and returns non-void type.
  */
-template <class Expr, typename Callable>
-decltype(auto) for_each(Expr &&e, Callable c) {
 
-  auto expr =
-      boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
-          std::forward<Expr>(e));
-
-  auto arg = boost::yap::evaluate(
-      boost::yap::transform(expr, detail::transforms::at_index{0},
-                            detail::transforms::make_dummy_type_expression{}));
-
-  using arg_t = decltype(arg) const &;
-  using ret_t = decltype(c(arg));
-
-  using signature = ret_t(arg_t);
-
-  static_assert(!std::is_same_v<void, ret_t>,
-                "Callable must return non-void type");
-
-  static_assert(
-      std::is_convertible_v<Callable, std::function<signature>>,
-      "Invalid signature for the callable lambda. Callable must be a generic "
-      "lambda that takes only one argument by const-reference");
-
-  ret_t (*func)(arg_t) = c;
-
-  return boost::yap::make_expression<detail::tensor_expression,
-                                     boost::yap::expr_kind::call>(
-      boost::yap::make_terminal<detail::tensor_expression>(func),
-      std::forward<decltype(expr)>(expr));
+template <class Expr, typename... Callable>
+BOOST_UBLAS_INLINE constexpr decltype(auto) apply(Expr &&e, Callable... c) {
+  static_assert(sizeof...(c) > 0,
+                "You must provide at least one callable to apply");
+  return detail::apply_impl(std::forward<Expr>(e), c...);
 }
 
-} // namespace boost::numeric::ublas
+}  // namespace boost::numeric::ublas
 
 #endif

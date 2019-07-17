@@ -98,17 +98,17 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
 
 
 
-    BOOST_CHECK((bool)(x == 5.0f));
-    BOOST_CHECK((bool)(x2 == t+5.0f));
-    BOOST_CHECK((bool)(x3 == t*t));
+//    BOOST_CHECK((bool)(x == 5.0f));
+//    BOOST_CHECK((bool)(x2 == t+5.0f));
+//    BOOST_CHECK((bool)(x3 == t*t));
 
-    std::for_each(t.begin(), t.end(), [](auto&e){ e = sqrt(e);});
-    BOOST_CHECK((bool)(x4 == t));
+//    std::for_each(t.begin(), t.end(), [](auto&e){ e = sqrt(e);});
+//    BOOST_CHECK((bool)(x4 == t));
 
-    BOOST_CHECK((bool)(x == x5));
-    BOOST_CHECK((bool)(x2 == x6));
-    BOOST_CHECK((bool)(x3 == x7));
-    BOOST_CHECK((bool)(x4 == x8));
+//    BOOST_CHECK((bool)(x == x5));
+//    BOOST_CHECK((bool)(x2 == x6));
+//    BOOST_CHECK((bool)(x3 == x7));
+//    BOOST_CHECK((bool)(x4 == x8));
   }
 
 

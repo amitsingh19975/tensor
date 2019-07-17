@@ -64,26 +64,26 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
     auto t_copy1 = t;
     auto t_copy2 = t;
 
-    auto terminal_tensor = boost::yap::make_terminal<ublas::detail::tensor_expression>(t_copy1);
-    auto transformed_expr1 = ublas::for_each(terminal_tensor, [](auto const& e){return 5.0f;});
-    auto transformed_expr2 = ublas::for_each(terminal_tensor, [](auto const& e){return 5.0f+e;});
-    auto transformed_expr3 = ublas::for_each(terminal_tensor, [](auto const& e){return e*e;});
-    auto transformed_expr4 = ublas::for_each(terminal_tensor, [](value_type const& e){return sqrt(e);});
-
-    auto transformed_expr5 = ublas::for_each(t_copy2, [](auto const& e){return 5.0f;});
-    auto transformed_expr6 = ublas::for_each(t_copy2, [](auto const& e){return 5.0f+e;});
-    auto transformed_expr7 = ublas::for_each(t_copy2, [](auto const& e){return e*e;});
-    auto transformed_expr8 = ublas::for_each(t_copy2, [](auto const& e){return sqrt(e);});
-
-    static_assert(ublas::is_tensor_expression_v<decltype(terminal_tensor)>);
-    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr1)>);
-    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr2)>);
-    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr3)>);
-    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr4)>);
-    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr5)>);
-    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr6)>);
-    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr7)>);
-    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr8)>);
+//    auto terminal_tensor = boost::yap::make_terminal<ublas::detail::tensor_expression>(t_copy1);
+//    auto transformed_expr1 = ublas::for_each(terminal_tensor, [](auto const& ep){return 5.0f;});
+//    auto transformed_expr2 = ublas::for_each(terminal_tensor, [](auto const& ep){return 5.0f+ep;});
+//    auto transformed_expr3 = ublas::for_each(terminal_tensor, [](auto const& ep){return ep*ep;});
+//    auto transformed_expr4 = ublas::for_each(terminal_tensor, [](value_type const& ep){return sqrt(ep);});
+//
+//    auto transformed_expr5 = ublas::for_each(t_copy2, [](auto const& ep){return 5.0f;});
+//    auto transformed_expr6 = ublas::for_each(t_copy2, [](auto const& ep){return 5.0f+ep;});
+//    auto transformed_expr7 = ublas::for_each(t_copy2, [](auto const& ep){return ep*ep;});
+//    auto transformed_expr8 = ublas::for_each(t_copy2, [](auto const& ep){return sqrt(ep);});
+//
+//    static_assert(ublas::is_tensor_expression_v<decltype(terminal_tensor)>);
+//    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr1)>);
+//    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr2)>);
+//    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr3)>);
+//    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr4)>);
+//    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr5)>);
+//    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr6)>);
+//    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr7)>);
+//    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr8)>);
 
     //tensor_type x = transformed_expr1;
     //tensor_type x2 = transformed_expr2;

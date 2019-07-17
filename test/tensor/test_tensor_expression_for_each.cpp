@@ -61,53 +61,54 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
       v += value_type{1};
     }
 
+    auto t_copy1 = t;
+    auto t_copy2 = t;
 
-  auto terminal_tensor = boost::yap::make_terminal<ublas::detail::tensor_expression>(t);
-  auto transformed_expr1 = ublas::for_each(terminal_tensor, [](auto const& e){return 5.0f;});
-  auto transformed_expr2 = ublas::for_each(terminal_tensor, [](auto const& e){return 5.0f+e;});
-  auto transformed_expr3 = ublas::for_each(terminal_tensor, [](auto const& e){return e*e;});
-  auto transformed_expr4 = ublas::for_each(terminal_tensor, [](value_type const& e){return sqrt(e);});
+    auto terminal_tensor = boost::yap::make_terminal<ublas::detail::tensor_expression>(t_copy);
+    auto transformed_expr1 = ublas::for_each(terminal_tensor, [](auto const& e){return 5.0f;});
+    auto transformed_expr2 = ublas::for_each(terminal_tensor, [](auto const& e){return 5.0f+e;});
+    auto transformed_expr3 = ublas::for_each(terminal_tensor, [](auto const& e){return e*e;});
+    auto transformed_expr4 = ublas::for_each(terminal_tensor, [](value_type const& e){return sqrt(e);});
 
-  auto transformed_expr5 = ublas::for_each(t, [](auto const& e){return 5.0f;});
-  auto transformed_expr6 = ublas::for_each(t, [](auto const& e){return 5.0f+e;});
-  auto transformed_expr7 = ublas::for_each(t, [](auto const& e){return e*e;});
-  auto transformed_expr8 = ublas::for_each(t, [](auto const& e){return sqrt(e);});
+    auto transformed_expr5 = ublas::for_each(t_copy2, [](auto const& e){return 5.0f;});
+    auto transformed_expr6 = ublas::for_each(t_copy2, [](auto const& e){return 5.0f+e;});
+    auto transformed_expr7 = ublas::for_each(t_copy2, [](auto const& e){return e*e;});
+    auto transformed_expr8 = ublas::for_each(t_copy2, [](auto const& e){return sqrt(e);});
 
-  static_assert(ublas::is_tensor_expression_v<decltype(terminal_tensor)>);
-
-  static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr1)>);
-  static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr2)>);
-  static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr3)>);
-  static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr4)>);
-  static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr5)>);
-  static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr6)>);
-  static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr7)>);
-  static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr8)>);
-
-
-  tensor_type x = transformed_expr1;
-  tensor_type x2 = transformed_expr2;
-  tensor_type x3 = transformed_expr3;
-  tensor_type x4 = transformed_expr4;
-
-  tensor_type x5 = transformed_expr5;
-  tensor_type x6 = transformed_expr6;
-  tensor_type x7 = transformed_expr7;
-  tensor_type x8 = transformed_expr8;
+    static_assert(ublas::is_tensor_expression_v<decltype(terminal_tensor)>);
+    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr1)>);
+    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr2)>);
+    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr3)>);
+    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr4)>);
+    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr5)>);
+    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr6)>);
+    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr7)>);
+    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr8)>);
 
 
+    tensor_type x = transformed_expr1;
+    tensor_type x2 = transformed_expr2;
+    tensor_type x3 = transformed_expr3;
+    tensor_type x4 = transformed_expr4;
 
-  BOOST_CHECK((bool)(x == 5.0f));
-  BOOST_CHECK((bool)(x2 == t+5.0f));
-  BOOST_CHECK((bool)(x3 == t*t));
+    tensor_type x5 = transformed_expr5;
+    tensor_type x6 = transformed_expr6;
+    tensor_type x7 = transformed_expr7;
+    tensor_type x8 = transformed_expr8;
 
-  std::for_each(t.begin(), t.end(), [](auto&e){ e = sqrt(e);});
-  BOOST_CHECK((bool)(x4 == t));
 
-  BOOST_CHECK((bool)(x == x5));
-  BOOST_CHECK((bool)(x2 == x6));
-  BOOST_CHECK((bool)(x3 == x7));
-  BOOST_CHECK((bool)(x4 == x8));
+
+    BOOST_CHECK((bool)(x == 5.0f));
+    BOOST_CHECK((bool)(x2 == t+5.0f));
+    BOOST_CHECK((bool)(x3 == t*t));
+
+    std::for_each(t.begin(), t.end(), [](auto&e){ e = sqrt(e);});
+    BOOST_CHECK((bool)(x4 == t));
+
+    BOOST_CHECK((bool)(x == x5));
+    BOOST_CHECK((bool)(x2 == x6));
+    BOOST_CHECK((bool)(x3 == x7));
+    BOOST_CHECK((bool)(x4 == x8));
   }
 
 

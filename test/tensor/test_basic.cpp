@@ -17,27 +17,45 @@ int main() {
   using namespace boost::numeric::ublas;
 
   using tensor_type = tensor<int>;
-  std::vector<int> sa(50 * 50);
-  std::vector<int> sb(2500);
-  std::iota(sa.begin(), sa.end(), 1);
-  std::iota(sb.begin(), sb.end(), 1);
+  using value_type = int;
+//  std::vector<int> sa(50 * 50);
+//  std::vector<int> sb(2500);
+//  std::iota(sa.begin(), sa.end(), 1);
+//  std::iota(sb.begin(), sb.end(), 1);
+//
+//  tensor_type a{shape{50, 50}, sa};
+//  tensor_type b{shape{50, 50}, sb};
+//  tensor_type c{shape{50, 50}, 1};
+//
+//  auto expr = a * b + a * c;
 
-  tensor_type a{shape{50, 50}, sa};
-  tensor_type b{shape{50, 50}, sb};
-  tensor_type c{shape{50, 50}, 1};
+  auto e = shape{{5,5,3}};
+  auto t = tensor_type(e);
+  auto v = value_type{0};
 
-  auto expr = a * b + a * c;
+  for (auto &tt : t) {
+    tt = v;
+    v += value_type{1};
+  }
 
-  auto l = [](auto r) { return r + 1; };
-  auto new_expr = for_each(expr, [](auto const &s) { return 5.0f + s; });
+  auto t_copy1 = t;
+  auto t_copy2 = t;
 
-  // auto new_expr2 = boost::yap::transform(new_expr,
-  // detail::transforms::at_index{5});
+  auto d = t;
+  std::reverse(d.begin(), d.end());
 
-  // boost::yap::print(std::cout, new_expr);
+  auto terminal_tensor = boost::yap::make_terminal(d);
+
+  auto transformed_expr1 = for_each(terminal_tensor, [](auto const& ep){return 5.0f;});
+  auto transformed_expr2 = for_each(terminal_tensor, [](auto const& ep){return 5.0f+ep;});
+  auto transformed_expr3 = for_each(terminal_tensor, [](auto const& ep){return ep*ep;});
+  auto transformed_expr4 = for_each(terminal_tensor, [](auto const& ep){return sqrt(ep);});
+
+  auto transformed_expr5 = for_each(d, [](auto const& ep){return 5.0f;});
+  auto transformed_expr6 = for_each(d, [](auto const& ep){return 5.0f+ep;});
+  auto transformed_expr7 = for_each(d, [](auto const& ep){return ep*ep;});
+  auto transformed_expr8 = for_each(d, [](auto const& ep){return sqrt(ep);});
 
 
-  // std::cout<<boost::yap::evaluate(new_expr2);
 
-  // std::cout<<z;
 }

@@ -29,7 +29,7 @@ int main() {
   auto expr = a * b + a * c;
 
   auto l = [](auto r) { return r + 1; };
-  auto new_expr = for_each(a, [](auto const &s) { return 5.0f + s; });
+  auto new_expr = for_each(expr, [](auto const &s) { return 5.0f + s; });
 
   // auto new_expr2 = boost::yap::transform(new_expr,
   // detail::transforms::at_index{5});
@@ -38,21 +38,6 @@ int main() {
 
 
   // std::cout<<boost::yap::evaluate(new_expr2);
-
-  tensor_type z = new_expr;
-  assert((bool)(z == 5+a));
-
-  auto i1 = boost::yap::transform(
-      expr, detail::transforms::at_index{5});
-
-  auto optimized1 = boost::yap::transform(i1, detail::transforms::apply_distributive_law{});
-
-  func(optimized1);
-
-
-//  auto kl = boost::yap::make_terminal(l);
-//  auto e = kl(56);
-//  boost::yap::print(std::cout, e);
 
   // std::cout<<z;
 }

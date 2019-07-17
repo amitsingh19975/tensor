@@ -159,7 +159,7 @@ decltype(auto) for_each(Expr &&e, Callable c) {
           std::forward<Expr>(e));
 
   auto temp1 = boost::yap::transform(expr, detail::transforms::at_index{0});
-  auto arg = boost::yap::evaluate(boost::yap::transform(expr, detail::transforms::make_dummy_type_expression{}));
+  auto arg = boost::yap::evaluate(boost::yap::transform(temp1, detail::transforms::make_dummy_type_expression{}));
 
   using arg_t = decltype(arg) const &;
   using ret_t = decltype(c(arg));

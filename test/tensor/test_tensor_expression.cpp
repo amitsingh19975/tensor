@@ -172,8 +172,10 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_optimizer, value,
 
       BOOST_CHECK((bool)(boost::yap::evaluate(optimized1) ==
                          boost::yap::evaluate(optimized_expr1)));
-      BOOST_CHECK((bool)(optimized2 == optimized_expr2));
-      BOOST_CHECK((bool)(optimized3 == optimized_expr3));
+      BOOST_CHECK((bool)(boost::yap::evaluate(optimized2) ==
+                         boost::yap::evaluate(optimized_expr2)));
+      BOOST_CHECK((bool)(boost::yap::evaluate(optimized3) ==
+                         boost::yap::evaluate(optimized_expr3)));
     }
   }
 }

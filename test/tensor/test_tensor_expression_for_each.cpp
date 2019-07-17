@@ -129,49 +129,49 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
 
 }
 
-//BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_expression,
-//                                 value, test_types, fixture) {
-//  using namespace boost::numeric;
-//  using value_type = typename value::first_type;
-//  using layout_type = typename value::second_type;
-//  using tensor_type = ublas::tensor<value_type, layout_type>;
-//
-//  for (auto const &e : extents) {
-//
-//    auto t = tensor_type(e);
-//    auto v = value_type{0};
-//
-//    for (auto &tt : t) {
-//      tt = v;
-//      v += value_type{1};
-//    }
-//
-//    auto reverse_t = t;
-//    std::reverse(reverse_t.begin(), reverse_t.end());
-//
-//    auto expr = reverse_t - t + value_type{5};
-//
-//    auto m_expr2 = ublas::for_each(expr, [](auto const &e){return e*e;});
-//    auto m_expr3 = ublas::for_each(expr, [](auto const &e){return value_type{2}*e-value_type{8};});
-//    auto m_expr4 = ublas::for_each(expr, [](auto const &e){return e == value_type{0} ? value_type{1}:value_type{0};}); // compliment function
-//    auto m_expr5 = ublas::for_each(expr, [](auto const &e){return value_type{1};});
-//
-//    tensor_type x2 = m_expr2;
-//    tensor_type x3 = m_expr3;
-//    tensor_type x4 = m_expr4;
-//    tensor_type x5 = m_expr5;
-//
-//    tensor_type k = expr;
-//    BOOST_CHECK((bool)(x2 == k*k));
-//    BOOST_CHECK((bool)(x3 == value_type{2}*k-value_type{8}));
-//    BOOST_CHECK((bool)(x5 == value_type{1}));
-//
-//    std::for_each(k.begin(), k.end(), [](auto &x){ if(x == value_type{0}) x = value_type{1}; else x = value_type{0};});
-//    BOOST_CHECK((bool)(x4 == k));
-//
-//  }
-//
-//
-//
-//
-//}
+BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_expression,
+                                 value, test_types, fixture) {
+  using namespace boost::numeric;
+  using value_type = typename value::first_type;
+  using layout_type = typename value::second_type;
+  using tensor_type = ublas::tensor<value_type, layout_type>;
+
+  for (auto const &e : extents) {
+
+    auto t = tensor_type(e);
+    auto v = value_type{0};
+
+    for (auto &tt : t) {
+      tt = v;
+      v += value_type{1};
+    }
+
+    auto reverse_t = t;
+    std::reverse(reverse_t.begin(), reverse_t.end());
+
+    auto expr = reverse_t - t + value_type{5};
+
+    auto m_expr2 = ublas::for_each(expr, [](auto const &e){return e*e;});
+    auto m_expr3 = ublas::for_each(expr, [](auto const &e){return value_type{2}*e-value_type{8};});
+    auto m_expr4 = ublas::for_each(expr, [](auto const &e){return e == value_type{0} ? value_type{1}:value_type{0};}); // compliment function
+    auto m_expr5 = ublas::for_each(expr, [](auto const &e){return value_type{1};});
+
+    tensor_type x2 = m_expr2;
+    tensor_type x3 = m_expr3;
+    tensor_type x4 = m_expr4;
+    tensor_type x5 = m_expr5;
+
+    tensor_type k = expr;
+    BOOST_CHECK((bool)(x2 == k*k));
+    BOOST_CHECK((bool)(x3 == value_type{2}*k-value_type{8}));
+    BOOST_CHECK((bool)(x5 == value_type{1}));
+
+    std::for_each(k.begin(), k.end(), [](auto &x){ if(x == value_type{0}) x = value_type{1}; else x = value_type{0};});
+    BOOST_CHECK((bool)(x4 == k));
+
+  }
+
+
+
+
+}

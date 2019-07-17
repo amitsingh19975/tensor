@@ -73,7 +73,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
 //    auto transformed_expr5 = ublas::for_each(t_copy2, [](auto const& ep){return 5.0f;});
 //    auto transformed_expr6 = ublas::for_each(t_copy2, [](auto const& ep){return 5.0f+ep;});
 //    auto transformed_expr7 = ublas::for_each(t_copy2, [](auto const& ep){return ep*ep;});
-//    auto transformed_expr8 = ublas::for_each(t_copy2, [](auto const& ep){return sqrt(ep);});
+//     auto transformed_expr8 = ublas::for_each(t_copy2, [](auto const& ep){return sqrt(ep);});
 //
 //    static_assert(ublas::is_tensor_expression_v<decltype(terminal_tensor)>);
 //    static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr1)>);

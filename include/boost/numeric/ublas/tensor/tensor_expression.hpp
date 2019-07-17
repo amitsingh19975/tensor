@@ -33,6 +33,7 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
   const static ::boost::yap::expr_kind kind = Kind;
 
   Tuple elements;
+
   /**
    * @brief Evaluates the tensor_expression lazily. one index at a time.
    *
@@ -151,9 +152,15 @@ namespace boost::numeric::ublas {
  * const-reference and returns non-void type.
  */
 template <class Expr, typename Callable>
-decltype(auto) for_each(Expr &&expr, Callable c) {
+decltype(auto) for_each(Expr &&e, Callable c) {
 
-  auto arg = expr(0);
+  auto expr =
+      boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
+          std::forward<Expr>(e));
+
+  auto arg = boost::yap::evaluate(
+      boost::yap::transform(expr, detail::transforms::at_index{0},
+                            detail::transforms::make_dummy_type_expression{}));
 
   using arg_t = decltype(arg) const &;
   using ret_t = decltype(c(arg));
@@ -168,13 +175,12 @@ decltype(auto) for_each(Expr &&expr, Callable c) {
       "Invalid signature for the callable lambda. Callable must be a generic "
       "lambda that takes only one argument by const-reference");
 
-   ret_t(*func)(arg_t) = c;
+  ret_t (*func)(arg_t) = c;
 
-  auto expr_t = boost::yap::as_expr(std::forward<Expr>(expr));
   return boost::yap::make_expression<detail::tensor_expression,
                                      boost::yap::expr_kind::call>(
       boost::yap::make_terminal<detail::tensor_expression>(func),
-      std::forward<decltype(expr_t)>(expr_t));
+      std::forward<decltype(expr)>(expr));
 }
 
 } // namespace boost::numeric::ublas

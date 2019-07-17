@@ -85,16 +85,15 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
     static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr7)>);
     static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr8)>);
 
+    //tensor_type x = transformed_expr1;
+    //tensor_type x2 = transformed_expr2;
+    //tensor_type x3 = transformed_expr3;
+    //tensor_type x4 = transformed_expr4;
 
-    tensor_type x = transformed_expr1;
-    tensor_type x2 = transformed_expr2;
-    tensor_type x3 = transformed_expr3;
-    tensor_type x4 = transformed_expr4;
-
-    tensor_type x5 = transformed_expr5;
-    tensor_type x6 = transformed_expr6;
-    tensor_type x7 = transformed_expr7;
-    tensor_type x8 = transformed_expr8;
+    //tensor_type x5 = transformed_expr5;
+    //tensor_type x6 = transformed_expr6;
+    //tensor_type x7 = transformed_expr7;
+    //tensor_type x8 = transformed_expr8;
 
 
 

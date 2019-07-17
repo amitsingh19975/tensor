@@ -24,7 +24,7 @@ using test_types = zip<int, long, float, double, std::complex<float>>::with_t<
 struct fixture {
   using extents_type = boost::numeric::ublas::shape;
   fixture()
-      : extents{extents_type{}, // 0
+      : extents{//extents_type{}, // 0
 
                 extents_type{1, 1}, // 1
                 extents_type{1, 2}, // 2
@@ -74,7 +74,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_call_operator, value,
   }
 }
 
-
 BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_bool_operator, value,
                                  test_types, fixture) {
   using namespace boost::numeric;
@@ -114,7 +113,67 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_bool_operator, value,
       bool result2 = expr2;
       BOOST_CHECK(result2);
 
-      BOOST_CHECK_THROW(static_cast<bool>(t-t), std::runtime_error);
+      BOOST_CHECK_THROW(static_cast<bool>(t - t), std::runtime_error);
+    }
+  }
+}
+
+BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_optimizer, value,
+                                 test_types, fixture) {
+  using namespace boost::numeric;
+  using value_type = typename value::first_type;
+  using layout_type = typename value::second_type;
+  using tensor_type = ublas::tensor<value_type, layout_type>;
+
+  for (auto const &e : extents) {
+
+    auto a = tensor_type(e);
+    auto v = value_type{0};
+    for (auto &tt : a) {
+      tt = v;
+      v += value_type{1};
+    }
+
+    auto b = a;
+    std::reverse(b.begin(), b.end());
+    tensor_type c = a + b;
+
+    auto expr1 = a * b + c * a;
+    auto expr2 = a * c + c * b;
+    auto expr3 = a * b - a * c;
+
+    for (auto i = 0u; i < a.size(); i++) {
+
+      auto i1 =
+          boost::yap::transform(expr1, ublas::detail::transforms::at_index{i});
+      auto optimized1 = boost::yap::transform(
+          i1, ublas::detail::transforms::apply_distributive_law{});
+
+      auto i2 =
+          boost::yap::transform(expr2, ublas::detail::transforms::at_index{i});
+      auto optimized2 = boost::yap::transform(
+          i2, ublas::detail::transforms::apply_distributive_law{});
+
+      auto i3 =
+          boost::yap::transform(expr3, ublas::detail::transforms::at_index{i});
+      auto optimized3 = boost::yap::transform(
+          i3, ublas::detail::transforms::apply_distributive_law{});
+
+      auto optimized_expr1 = boost::yap::make_terminal(a(i) * (b(i) + c(i)));
+      auto optimized_expr2 = boost::yap::make_terminal(c(i) * (b(i) + a(i)));
+      auto optimized_expr3 = boost::yap::make_terminal(a(i) * (b(i) - c(i)));
+
+      static_assert(
+          std::is_same_v<decltype(optimized1), decltype(optimized_expr1)>);
+      static_assert(
+          std::is_same_v<decltype(optimized2), decltype(optimized_expr2)>);
+      static_assert(
+          std::is_same_v<decltype(optimized3), decltype(optimized_expr3)>);
+
+      BOOST_CHECK((bool)(boost::yap::evaluate(optimized1) ==
+                         boost::yap::evaluate(optimized_expr1)));
+      BOOST_CHECK((bool)(optimized2 == optimized_expr2));
+      BOOST_CHECK((bool)(optimized3 == optimized_expr3));
     }
   }
 }

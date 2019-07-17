@@ -158,9 +158,8 @@ decltype(auto) for_each(Expr &&e, Callable c) {
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
           std::forward<Expr>(e));
 
-  auto arg = boost::yap::evaluate(
-      boost::yap::transform(expr, detail::transforms::at_index{0},
-                            detail::transforms::make_dummy_type_expression{}));
+  auto temp1 = boost::yap::transform(expr, detail::transforms::at_index{0});
+  auto arg = boost::yap::evaluate(boost::yap::transform(expr, detail::transforms::make_dummy_type_expression{}));
 
   using arg_t = decltype(arg) const &;
   using ret_t = decltype(c(arg));

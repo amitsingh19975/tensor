@@ -64,7 +64,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
     auto t_copy1 = t;
     auto t_copy2 = t;
 
-    auto terminal_tensor = boost::yap::make_terminal<ublas::detail::tensor_expression>(t_copy);
+    auto terminal_tensor = boost::yap::make_terminal<ublas::detail::tensor_expression>(t_copy1);
     auto transformed_expr1 = ublas::for_each(terminal_tensor, [](auto const& e){return 5.0f;});
     auto transformed_expr2 = ublas::for_each(terminal_tensor, [](auto const& e){return 5.0f+e;});
     auto transformed_expr3 = ublas::for_each(terminal_tensor, [](auto const& e){return e*e;});

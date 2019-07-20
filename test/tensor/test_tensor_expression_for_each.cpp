@@ -65,7 +65,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
     tensor_type t_copy1 = t;
     tensor_type t_copy2 = t;
 
-    std::cout << "Extent is : " << e.to_string() << "\n";
+    BOOST_TEST_MESSAGE("Extent on for_each tensor : "+ e.to_string());
+
+
     if (!e.empty()) {
 
       auto terminal_tensor = boost::yap::make_terminal<ublas::detail::tensor_expression>(t);
@@ -112,8 +114,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
           BOOST_CHECK((bool)(x3 == x7));
           BOOST_CHECK((bool)(x4 == x8));
     }
-    else
-      std::cout<<"Empty extent.. Skipped\n";
   }
 
 
@@ -134,14 +134,13 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_expression,
       v += value_type{1};
     }
 
-    std::cout<<"Extent is : "<<e.to_string()<<"\n";
+    BOOST_TEST_MESSAGE("Extent on for_each expr : "+ e.to_string());
+
     if(!e.empty()) {
       auto reverse_t = t;
       std::reverse(reverse_t.begin(), reverse_t.end());
 
       auto expr = reverse_t - t + value_type{5};
-
-      auto result2 = expr(0);
 
       auto m_expr2 = ublas::for_each(expr, [](auto const &e) { return e * e; });
 
@@ -174,8 +173,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_expression,
 
       BOOST_CHECK((bool)(x4 == k));
 
-    } else
-      std::cout<<"Skipped because of empty extent...\n";
+    }
 
   }
 

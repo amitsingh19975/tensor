@@ -55,7 +55,7 @@ int main() {
 //  auto transformed_expr3 = for_each(terminal_tensor, [](auto const& ep){return ep*ep;});
 //  auto transformed_expr4 = for_each(terminal_tensor, [](auto const& ep){return sqrt(ep);});
 
-  auto transformed_expr5 = for_each(d, func<int>);
+  auto transformed_expr5 = for_each2(d, foobar);
 //  auto transformed_expr6 = for_each(d, [](auto const& ep){return 5.0f+ep;});
 //  auto transformed_expr7 = for_each(d, [](auto const& ep){return ep*ep;});
 //  auto transformed_expr8 = for_each(d, [](auto const& ep){return sqrt(ep);});

@@ -67,7 +67,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
     BOOST_TEST_CHECKPOINT("Running with " + e.to_string());
 
     BOOST_TEST_PASSPOINT();
-    auto terminal_tensor = boost::yap::make_terminal<ublas::detail::tensor_expression>(t_copy1);
+    auto terminal_tensor = boost::yap::make_terminal<ublas::detail::tensor_expression>(std::move(t));
     BOOST_TEST_PASSPOINT();
     auto transformed_expr1 = ublas::for_each2(terminal_tensor, [](auto const& ep){return 5.0f;});
     BOOST_TEST_PASSPOINT();
@@ -77,14 +77,14 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
     BOOST_TEST_PASSPOINT();
     auto transformed_expr4 = ublas::for_each2(terminal_tensor, [](value_type const& ep){return sqrt(ep);});
 
-    BOOST_TEST_PASSPOINT();
-    auto transformed_expr5 = ublas::for_each2(t_copy2, [](auto const& ep){return 5.0f;});
-    BOOST_TEST_PASSPOINT();
-    auto transformed_expr6 = ublas::for_each2(t_copy2, [](auto const& ep){return 5.0f+ep;});
-    BOOST_TEST_PASSPOINT();
-    auto transformed_expr7 = ublas::for_each2(t_copy2, [](auto const& ep){return ep*ep;});
-    BOOST_TEST_PASSPOINT();
-    auto transformed_expr8 = ublas::for_each2(t_copy2, [](auto const& ep){return sqrt(ep);});
+//    BOOST_TEST_PASSPOINT();
+//    auto transformed_expr5 = ublas::for_each2(t_copy2, [](auto const& ep){return 5.0f;});
+//    BOOST_TEST_PASSPOINT();
+//    auto transformed_expr6 = ublas::for_each2(t_copy2, [](auto const& ep){return 5.0f+ep;});
+//    BOOST_TEST_PASSPOINT();
+//    auto transformed_expr7 = ublas::for_each2(t_copy2, [](auto const& ep){return ep*ep;});
+//    BOOST_TEST_PASSPOINT();
+//    auto transformed_expr8 = ublas::for_each2(t_copy2, [](auto const& ep){return sqrt(ep);});
 
     BOOST_TEST_PASSPOINT();
     static_assert(ublas::is_tensor_expression_v<decltype(terminal_tensor)>);

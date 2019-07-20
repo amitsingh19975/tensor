@@ -185,37 +185,6 @@ decltype(auto) for_each(Expr &&e, Callable c) {
       std::forward<decltype(expr)>(expr));
 }
 
-template <class Expr, typename Callable>
-decltype(auto) for_each2(Expr &&e, Callable c) {
-
-//  auto expr =
-//      boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
-//          std::forward<Expr>(e));
-
-//  auto temp1 = boost::yap::transform(expr, boost::numeric::ublas::detail::transforms::at_index{0});
-//  auto arg = boost::yap::evaluate(boost::yap::transform(
-//      temp1, boost::numeric::ublas::detail::transforms::make_dummy_type_expression{}));
- auto arg = e(0);
-
-//  using arg_t = decltype(arg) const &;
-//  using ret_t = decltype(c(arg));
-//
-//  using signature = ret_t(arg_t);
-//
-//  static_assert(!std::is_same_v<void, ret_t>,
-//                "Callable must return non-void type");
-//
-//  static_assert(
-//      std::is_convertible_v<Callable, std::function<signature>>,
-//      "Invalid signature for the callable, expression value_type cannot be "
-//      "converted to callable's formal parameter. You can make Callable a generic "
-//      "lambda that takes only one argument by const-reference");
-//
-//  ret_t (*func)(arg_t) = c;
-
-  return e;
-}
-
 } // namespace boost::numeric::ublas
 
 #endif

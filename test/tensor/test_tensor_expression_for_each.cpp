@@ -13,6 +13,7 @@
 #include <boost/numeric/ublas/tensor/tensor.hpp>
 #include <boost/numeric/ublas/tensor/tensor_expression.hpp>
 #include <boost/test/unit_test.hpp>
+#include <iostream>
 
 #include "utility.hpp"
 
@@ -24,7 +25,7 @@ using test_types = zip<int, long, float, double, std::complex<float>>::with_t<
 struct fixture {
   using extents_type = boost::numeric::ublas::shape;
   fixture()
-      : extents{//extents_type{}, // 0
+      : extents{
 
                 extents_type{1, 1}, // 1
                 extents_type{1, 2}, // 2
@@ -65,6 +66,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
     tensor_type t_copy2 = t;
 
     BOOST_TEST_CHECKPOINT("Running with " + e.to_string());
+    std::cout<<"Extent is : "<<e.to_string()<<"\n";
 
     BOOST_TEST_PASSPOINT();
     auto terminal_tensor = boost::yap::make_terminal<ublas::detail::tensor_expression>(t);

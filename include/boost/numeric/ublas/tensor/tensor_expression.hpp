@@ -159,7 +159,8 @@ decltype(auto) for_each(Expr &&e, Callable c) {
           std::forward<Expr>(e));
 
   auto temp1 = boost::yap::transform(expr, detail::transforms::at_index{0});
-  auto arg = boost::yap::evaluate(boost::yap::transform(temp1, detail::transforms::make_dummy_type_expression{}));
+  auto arg = boost::yap::evaluate(boost::yap::transform(
+      temp1, detail::transforms::make_dummy_type_expression{}));
 
   using arg_t = decltype(arg) const &;
   using ret_t = decltype(c(arg));
@@ -171,7 +172,8 @@ decltype(auto) for_each(Expr &&e, Callable c) {
 
   static_assert(
       std::is_convertible_v<Callable, std::function<signature>>,
-      "Invalid signature for the callable lambda. Callable must be a generic "
+      "Invalid signature for the callable, expression value_type cannot be "
+      "converted to callable's formal parameter. You can make Callable a generic "
       "lambda that takes only one argument by const-reference");
 
   ret_t (*func)(arg_t) = c;

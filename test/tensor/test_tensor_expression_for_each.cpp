@@ -26,7 +26,7 @@ struct fixture {
   fixture()
       : extents{//extents_type{}, // 0
 
-                extents_type{1, 1}, // 1
+                //extents_type{1, 1}, // 1
                 extents_type{1, 2}, // 2
                 extents_type{2, 1}, // 3
 

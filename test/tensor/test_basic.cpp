@@ -9,8 +9,12 @@
  */
 
 template <class T>
-void func(T s){
-  std::cout<<__PRETTY_FUNCTION__;
+auto func(T s){
+  return s;
+}
+
+auto foobar(int const &e){
+    return e+1;
 }
 
 int main() {
@@ -46,15 +50,17 @@ int main() {
 
   auto terminal_tensor = boost::yap::make_terminal(d);
 
-  auto transformed_expr1 = for_each(terminal_tensor, [](auto const& ep){return 5.0f;});
-  auto transformed_expr2 = for_each(terminal_tensor, [](auto const& ep){return 5.0f+ep;});
-  auto transformed_expr3 = for_each(terminal_tensor, [](auto const& ep){return ep*ep;});
-  auto transformed_expr4 = for_each(terminal_tensor, [](auto const& ep){return sqrt(ep);});
+//  auto transformed_expr1 = for_each(terminal_tensor, [](auto const& ep){return 5.0f;});
+//  auto transformed_expr2 = for_each(terminal_tensor, [](auto const& ep){return 5.0f+ep;});
+//  auto transformed_expr3 = for_each(terminal_tensor, [](auto const& ep){return ep*ep;});
+//  auto transformed_expr4 = for_each(terminal_tensor, [](auto const& ep){return sqrt(ep);});
 
-  auto transformed_expr5 = for_each(d, [](auto const& ep){return 5.0f;});
-  auto transformed_expr6 = for_each(d, [](auto const& ep){return 5.0f+ep;});
-  auto transformed_expr7 = for_each(d, [](auto const& ep){return ep*ep;});
-  auto transformed_expr8 = for_each(d, [](auto const& ep){return sqrt(ep);});
+  auto transformed_expr5 = for_each(d, func<int>);
+//  auto transformed_expr6 = for_each(d, [](auto const& ep){return 5.0f+ep;});
+//  auto transformed_expr7 = for_each(d, [](auto const& ep){return ep*ep;});
+//  auto transformed_expr8 = for_each(d, [](auto const& ep){return sqrt(ep);});
+
+tensor_type  sas = transformed_expr5;
 
 
 

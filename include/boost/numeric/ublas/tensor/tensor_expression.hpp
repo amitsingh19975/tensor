@@ -195,7 +195,7 @@ decltype(auto) for_each2(Expr &&e, Callable c) {
 //  auto temp1 = boost::yap::transform(expr, boost::numeric::ublas::detail::transforms::at_index{0});
 //  auto arg = boost::yap::evaluate(boost::yap::transform(
 //      temp1, boost::numeric::ublas::detail::transforms::make_dummy_type_expression{}));
-  auto arg = expr(0);
+// auto arg = expr(0);
 
 //  using arg_t = decltype(arg) const &;
 //  using ret_t = decltype(c(arg));

@@ -106,10 +106,10 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_for_each_tensor, value,
     BOOST_TEST_PASSPOINT();
     tensor_type x4 = transformed_expr4;
 
-    tensor_type x5 = transformed_expr5;
-    tensor_type x6 = transformed_expr6;
-    tensor_type x7 = transformed_expr7;
-    tensor_type x8 = transformed_expr8;
+//    tensor_type x5 = transformed_expr5;
+//    tensor_type x6 = transformed_expr6;
+//    tensor_type x7 = transformed_expr7;
+//    tensor_type x8 = transformed_expr8;
 
 
 

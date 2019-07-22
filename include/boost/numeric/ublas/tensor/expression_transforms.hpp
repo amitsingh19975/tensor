@@ -514,6 +514,28 @@ struct expr_count_relational_operator {
         ::boost::yap::as_expr<detail::tensor_expression>(e2), *this);
     return left + right;
   }
+  template <class Expr1>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::negate>, Expr1 &e1) {
+    using namespace boost::hana::literals;
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(
+            boost::yap::get(e1, 0_c)),
+        *this);
+    return left;
+  }
+
+  template <class Expr1>
+  constexpr decltype(auto)
+  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::unary_plus>,
+             Expr1 &e1) {
+    using namespace boost::hana::literals;
+    std::size_t left = ::boost::yap::transform(
+        ::boost::yap::as_expr<detail::tensor_expression>(
+            boost::yap::get(e1, 0_c)),
+        *this);
+    return left;
+  }
 
   template <class Func, class Arg>
   constexpr decltype(auto)
@@ -669,18 +691,6 @@ struct apply_distributive_law {
           boost::yap::expr_kind::minus>(std::forward<Expr1>(e1),
                                         std::forward<Expr2>(e2));
 #endif
-  }
-};
-
-// @todo(coder3101): Make this a transform that does not evaluate contractions
-// rather just returns the data-type of contraction.
-struct make_dummy_type_expression {
-  template <typename Value>
-  decltype(auto)
-  operator()(::boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
-             Value const &v) {
-    // if constexpr(is_contraption_v<Value>) return decltype(v(0)){};
-    return boost::yap::make_terminal(Value{});
   }
 };
 

@@ -30,11 +30,12 @@ int main() {
   matrix<double> sd{50,50,2};
 
 
-  auto expr = for_each(a * b + a * c, [](auto const &e){return 5.0f;}) - sd;
+  auto expr = -for_each(a * b + a * c, [](auto const &e){return 5.0f;}) - sd > 5;
 
-  using namespace boost::hana::literals;
+  auto result = boost::yap::transform(expr, detail::transforms::expr_count_relational_operator{});
+  assert(result == 1);
+
   auto res = boost::numeric::ublas::detail::get_type(expr);
-  //boost::yap::print(std::cout, boost::yap::value(boost::yap::get(expr, 0_c)));
   preety(res);
   tensor_type z = expr;
 

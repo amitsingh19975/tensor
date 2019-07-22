@@ -32,6 +32,8 @@ template <class R, class A> struct function_return<R (*)(A)> {
 
 template <class Expr> decltype(auto) get_type(Expr &&e) {
 
+  using namespace boost::hana::literals;
+
   auto expr = boost::yap::as_expr<tensor_expression>(std::forward<Expr>(e));
   using Expr_t = decltype(expr);
 
@@ -47,13 +49,20 @@ template <class Expr> decltype(auto) get_type(Expr &&e) {
 
   else if constexpr (Expr_t::kind != boost::yap::expr_kind::call) {
 
-    auto left_t = get_type(boost::yap::left(expr));
-    auto right_t = get_type(boost::yap::right(expr));
+    if constexpr (Expr_t::kind == boost::yap::expr_kind::negate ||
+                  Expr_t::kind == boost::yap::expr_kind::unary_plus) {
+      auto left_t = get_type(boost::yap::get(expr, 0_c));
+      return -left_t;
 
-    return boost::yap::evaluate(
-        boost::yap::make_expression<Expr_t::kind>(left_t, right_t));
+    } else {
+
+      auto left_t = get_type(boost::yap::left(expr));
+      auto right_t = get_type(boost::yap::right(expr));
+
+      return boost::yap::evaluate(
+          boost::yap::make_expression<Expr_t::kind>(left_t, right_t));
+    }
   } else {
-    using namespace boost::hana::literals;
     using ret_t = typename function_return<std::remove_reference_t<decltype(
         boost::yap::value(boost::yap::get(expr, 0_c)))>>::type;
     return ret_t{};

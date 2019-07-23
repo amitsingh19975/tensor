@@ -12,6 +12,7 @@
 #ifndef BOOST_UBLAS_EXPRESSION_TRANSFORMS_TRAITS_HPP
 #define BOOST_UBLAS_EXPRESSION_TRANSFORMS_TRAITS_HPP
 
+#include "ublas_type_traits.hpp"
 #include <boost/yap/yap.hpp>
 #include <type_traits>
 
@@ -27,11 +28,14 @@ template <class T> struct is_multiply_operand {
 template <class operandA, class operandB>
 struct is_multiply_operand<boost::numeric::ublas::detail::tensor_expression<
     boost::yap::expr_kind::multiplies,
-    boost::hana::tuple<boost::yap::expression<boost::yap::expr_kind::terminal,
-                                              boost::hana::tuple<operandA>>,
-                       boost::yap::expression<boost::yap::expr_kind::terminal,
-                                              boost::hana::tuple<operandB>>>>> {
-  static constexpr bool value = true;
+    boost::hana::tuple<
+        boost::numeric::ublas::detail::tensor_expression<
+            boost::yap::expr_kind::terminal, boost::hana::tuple<operandA>>,
+        boost::numeric::ublas::detail::tensor_expression<
+            boost::yap::expr_kind::terminal, boost::hana::tuple<operandB>>>>> {
+  static constexpr bool value =
+      is_tensor_v<std::remove_reference_t<operandA>> &&
+      is_tensor_v<std::remove_reference_t<operandB>>;
 };
 
 } // namespace boost::numeric::ublas::detail::transforms

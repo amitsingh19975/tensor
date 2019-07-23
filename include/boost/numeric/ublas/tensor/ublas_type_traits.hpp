@@ -139,6 +139,45 @@ constexpr bool is_matrix_expression_v = is_matrix_expression<T>::value;
 template <class T>
 constexpr bool is_vector_expression_v = is_vector_expression<T>::value;
 
+/**
+ * @brief static constexpr `value` is resolved to true if template type is a
+ * either a ublas::matrix, ublas::vector or ublas::tensor.
+ *
+ * @tparam T the type to check
+ */
+template <class T> struct is_ublas_type {
+  constexpr static bool value =
+      is_tensor_v<T> || is_matrix_v<T> || is_vector_v<T>;
+};
+
+/**
+ * @brief static constexpr `value` is resolved to true if template type is a
+ * either a ublas::matrix_expression, ublas::vector_expression or
+ * ublas::tensor_expression.
+ *
+ * @tparam T the type to check
+ */
+template <class T> struct is_ublas_expression {
+  constexpr static bool value = is_tensor_expression_v<T> ||
+                                is_matrix_expression_v<T> ||
+                                is_vector_expression_v<T>;
+};
+
+/**
+ * @brief true is T type is a any ublas type
+ *
+ * @tparam T the type to test
+ */
+template <class T> constexpr bool is_ublas_type_v = is_ublas_type<T>::value;
+
+/**
+ * @brief true is T type is a ublas expression
+ *
+ * @tparam T the type to test
+ */
+template <class T>
+constexpr bool is_ublas_expression_v = is_ublas_expression<T>::value;
+
 } // namespace boost::numeric::ublas
 
 #endif // BOOST_UBLAS_TENSOR_TYPE_TRAITS_HPP

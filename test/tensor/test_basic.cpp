@@ -1,7 +1,9 @@
-#include <boost/numeric/ublas/tensor.hpp>
-#include <boost/yap/print.hpp>
+//#define BOOST_UBLAS_NO_RECURSIVE_OPTIMIZATION
+
 #include "expression_utils.hpp"
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/tensor.hpp>
+#include <boost/yap/print.hpp>
 /**
  *
  * This file is not run as test it is just for my local development quick
@@ -9,10 +11,7 @@
  *
  */
 
-template <class T>
-void preety(T e){
-  std::cout<<__PRETTY_FUNCTION__;
-}
+template <class T> void preety(T e) { std::cout << __PRETTY_FUNCTION__; }
 
 int main() {
   using namespace boost::numeric::ublas;
@@ -25,18 +24,16 @@ int main() {
   std::iota(sb.begin(), sb.end(), 1);
 
   tensor_type a{shape{50, 50}, sa};
-  tensor_type b{shape{50, 50}, sb};
+  tensor_type b{shape{50, 50}, 5};
   tensor_type c{shape{50, 50}, 1};
-  matrix<double> sd{50,50,2};
+  matrix<double> sd{50, 50, 2};
 
-
-  auto expr = -for_each(a * b + a * c, [](auto const &e){return 5.0f;}) - sd > 5;
-
-  auto result = boost::yap::transform(expr, detail::transforms::expr_count_relational_operator{});
-  assert(result == 1);
-
-  auto res = boost::numeric::ublas::detail::get_type(expr);
-  preety(res);
-  tensor_type z = expr;
-
+  auto expr = (a * b +  c * a) + ( a * b +  b * 1);
+  auto xform = detail::transforms::apply_distributive_law{};
+  auto optimized = boost::yap::transform(expr, xform);
+  if (xform.usable)
+    boost::yap::print(std::cout, optimized);
+  else
+    std::cout << "Optimize Failed: Falling back to use old expression";
+  return 0;
 }

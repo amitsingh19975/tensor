@@ -38,6 +38,7 @@ test-suite boost-ublas-tensor-test
           test_functions.cpp
           test_extents.cpp
           test_tensor_expression.cpp
+          test_expression_optimization.cpp
           test_tensor_expression_eval.cpp
           test_tensor_expression_for_each.cpp
           test_einstein_notation.cpp

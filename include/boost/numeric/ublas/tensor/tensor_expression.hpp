@@ -12,14 +12,18 @@
 #ifndef BOOST_UBLAS_TENSOR_YAP_EXPRESSIONS_HPP
 #define BOOST_UBLAS_TENSOR_YAP_EXPRESSIONS_HPP
 
+#include "expression_optimization.hpp"
 #include "expression_transforms.hpp"
-#include "extents.hpp"
-#include "lambda_traits.hpp"
 #include "expression_utils.hpp"
+#include "extents.hpp"
 #include "strides.hpp"
 #include <boost/config.hpp>
 #include <boost/yap/print.hpp>
 #include <boost/yap/yap.hpp>
+
+namespace {
+struct deduced {};
+} // namespace
 
 namespace boost::numeric::ublas::detail {
 
@@ -44,15 +48,9 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    */
   BOOST_UBLAS_INLINE decltype(auto) operator()(size_t i) {
     auto nth = ::boost::yap::transform(*this, transforms::at_index{i});
-#ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
-    auto optimized =
-        ::boost::yap::transform(nth, transforms::apply_distributive_law{});
-    return ::boost::yap::evaluate(optimized);
-#else
     return ::boost::yap::evaluate(nth);
-#endif
   }
-  //  todo (coder3101) : Make eval() and eval_to() based on device.
+  //  Todo (coder3101) : Make eval() and eval_to() based on device.
 
   /**
    * @brief Completely evaluated this expression and returns a tensor.
@@ -65,18 +63,34 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
    *
    * @return The tensor which contains the values of evaluated expresssion.
    */
-  template <class T, class F = ::boost::numeric::ublas::first_order,
+  template <class T = deduced, class F = ::boost::numeric::ublas::first_order,
             class A = std::vector<T, std::allocator<T>>>
   auto eval() {
-    ::boost::numeric::ublas::tensor<T, F, A> result;
+    using value_type = std::conditional_t<std::is_same_v<T, deduced>,
+                                          decltype(this->operator()(0)), T>;
+    ::boost::numeric::ublas::tensor<value_type, F, A> result;
     auto shape_expr = ::boost::yap::transform(*this, transforms::get_extents{});
     result.extents_ = shape_expr;
     result.strides_ = basic_strides<std::size_t, F>{shape_expr};
     result.data_.resize(shape_expr.product());
+
+#ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
+
+    auto distributive_transform = transforms::apply_distributive_law{};
+    auto optimized_expr =
+        ::boost::yap::transform(*this, distributive_transform);
+
 #pragma omp parallel for
     for (auto i = 0u; i < shape_expr.product(); i++)
+      result.data_[i] = distributive_transform.usable ? optimized_expr(i)
+                                                      : this->operator()(i);
+#else
+
+    #pragma omp parallel for
+    for (auto i = 0u; i < shape_expr.product(); i++)
       result.data_[i] = this->operator()(i);
-    return result;
+#endif
+    return std::move(result);
   }
   /**
    * @brief Completely evaluates this expression and fills values into target.
@@ -96,9 +110,23 @@ template <boost::yap::expr_kind Kind, typename Tuple> struct tensor_expression {
     target.data_.resize(shape_expr.product());
     target.extents_ = shape_expr;
     target.strides_ = basic_strides<std::size_t, F>{shape_expr};
+
+#ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
+
+    auto distributive_transform = transforms::apply_distributive_law{};
+    auto optimized_expr =
+        ::boost::yap::transform(*this, distributive_transform);
+
+#pragma omp parallel for
+    for (auto i = 0u; i < shape_expr.product(); i++)
+      target.data_[i] = distributive_transform.usable ? optimized_expr(i)
+                                                      : this->operator()(i);
+#else
+
 #pragma omp parallel for
     for (auto i = 0u; i < shape_expr.product(); i++)
       target.data_[i] = this->operator()(i);
+#endif
   }
 
   /**
@@ -171,7 +199,8 @@ decltype(auto) for_each(Expr &&e, Callable c) {
   static_assert(
       std::is_convertible_v<Callable, std::function<signature>>,
       "Invalid signature for the callable, expression value_type cannot be "
-      "converted to callable's formal parameter. You can make Callable a generic "
+      "converted to callable's formal parameter. You can make Callable a "
+      "generic "
       "lambda that takes only one argument by const-reference");
 
   ret_t (*func)(arg_t) = c;

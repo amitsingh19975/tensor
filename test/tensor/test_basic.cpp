@@ -2,6 +2,7 @@
 
 #include "expression_utils.hpp"
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/type_traits/has_multiplies.hpp>
 #include <boost/numeric/ublas/tensor.hpp>
 #include <boost/yap/print.hpp>
 /**
@@ -12,6 +13,13 @@
  */
 
 template <class T> void preety(T e) { std::cout << __PRETTY_FUNCTION__; }
+
+struct Spy{
+  //int operator*(int r){return 0;}
+};
+
+
+int operator* (Spy &S, const int &b){return 0;}
 
 int main() {
   using namespace boost::numeric::ublas;
@@ -35,5 +43,6 @@ int main() {
     boost::yap::print(std::cout, optimized);
   else
     std::cout << "Optimize Failed: Falling back to use old expression";
+
   return 0;
 }

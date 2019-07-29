@@ -49,11 +49,12 @@ template <class Expr> decltype(auto) get_type(Expr &&e) {
 
   else if constexpr (Expr_t::kind != boost::yap::expr_kind::call) {
 
-    if constexpr (Expr_t::kind == boost::yap::expr_kind::negate ||
-                  Expr_t::kind == boost::yap::expr_kind::unary_plus) {
+    if constexpr (Expr_t::kind == boost::yap::expr_kind::negate) {
       auto left_t = get_type(boost::yap::get(expr, 0_c));
       return -left_t;
 
+    } else if constexpr (Expr_t::kind == boost::yap::expr_kind::unary_plus) {
+        return get_type(boost::yap::get(expr, 0_c));
     } else {
 
       auto left_t = get_type(boost::yap::left(expr));

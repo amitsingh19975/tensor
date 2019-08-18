@@ -10,16 +10,14 @@
  *
  */
 
-template <class T> void preety(T e) { std::cout << __PRETTY_FUNCTION__; }
-
-int incremented(const int &input){
-  return input+1;
+template <class T>
+void preety(T e) {
+  std::cout << __PRETTY_FUNCTION__;
 }
 
-int decremented(const int &input){
-  return input-1;
-}
+int incremented(const int &input) { return input + 1; }
 
+int decremented(const int &input) { return input - 1; }
 
 int main() {
   using namespace boost::numeric::ublas;
@@ -28,21 +26,19 @@ int main() {
   using value_type = int;
   std::vector<int> sa(50 * 50);
   std::vector<int> sb(2500);
+
   std::iota(sa.begin(), sa.end(), 1);
   std::iota(sb.begin(), sb.end(), 1);
 
-  tensor_type a{shape{50, 50}, sa};
+  tensor_type a{shape{50, 50, 30}, 3};
   tensor_type b{shape{50, 50}, 5};
   tensor_type c{shape{50, 50}, 1};
-  matrix<int> sd{50, 50, 2};
 
-  auto essp = 3*sd;
-  //auto expr = for_each(essp, incremented);
-  //boost::yap::print(std::cout, essp);
+  using namespace boost::numeric::ublas::index;
   
-  matrix<int> x = essp;
-  tensor_type y = 3*sd;
-  std::cout<<essp(0,0)<<"\n"<<y(0);
-
+  auto expr = c(_i, _j) * b(_i, _k) * a(_i, _j, _k);
+  
+  boost::yap::print(std::cout, expr);
+  //tensor_type result = expr;
   return 0;
 }

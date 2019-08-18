@@ -92,21 +92,25 @@ BOOST_UBLAS_INLINE decltype(auto) operator*(
   auto multi_index_left = lhs.second;
   auto multi_index_right = rhs.second;
 
-  static constexpr auto num_equal_ind =
+  constexpr auto num_equal_ind =
       number_equal_indexes<tuple_type_left, tuple_type_right>::value;
 
   if constexpr (num_equal_ind == 0) {
-    return tensor_left * tensor_right;
+    return boost::yap::make_expression<detail::tensor_expression,
+                                       boost::yap::expr_kind::multiplies>(
+        tensor_left, tensor_right);
   } else if constexpr (num_equal_ind ==
                            std::tuple_size<tuple_type_left>::value &&
                        std::is_same<tuple_type_left, tuple_type_right>::value) {
-    return boost::numeric::ublas::inner_prod(tensor_left, tensor_right);
+    return boost::yap::make_terminal<detail::tensor_expression>(
+        boost::numeric::ublas::inner_prod(tensor_left, tensor_right));
   } else {
     auto array_index_pairs =
         index_position_pairs(multi_index_left, multi_index_right);
     auto index_pairs = array_to_vector(array_index_pairs);
-    return boost::numeric::ublas::prod(tensor_left, tensor_right,
-                                       index_pairs.first, index_pairs.second);
+    return boost::yap::make_terminal<detail::tensor_expression>(
+        boost::numeric::ublas::prod(tensor_left, tensor_right,
+                                    index_pairs.first, index_pairs.second));
   }
 }
 

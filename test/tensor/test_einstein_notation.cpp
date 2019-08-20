@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_einstein_multiplication, value,  test_types 
 
 
 
-		auto AB = A(_,_e) * B(_e,_);
+		tensor_type AB = A(_,_e) * B(_e,_);
 
 		//		std::cout << "A = " << A << std::endl;
 		//		std::cout << "B = " << B << std::endl;
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_einstein_multiplication, value,  test_types 
 				for(auto i = 0u; i < B.extents().at(0); ++i)
 					B.at( i,j,k ) = value_type(i+1);
 
-		auto AB = A(_d,_,_f) * B(_f,_d,_);
+		tensor_type AB = A(_d,_,_f) * B(_f,_d,_);
 
 		//		std::cout << "A = " << A << std::endl;
 		//		std::cout << "B = " << B << std::endl;
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_einstein_multiplication, value,  test_types 
 				for(auto i = 0u; i < B.extents().at(0); ++i)
 					B.at( i,j,k ) = value_type(i+1);
 
-		auto AB = A(_d,_f) * B(_f,_d,_);
+		tensor_type AB = A(_d,_f) * B(_f,_d,_);
 
 		// n*(n+1)/2;
 		auto const nf = ( B.extents().at(0) * (B.extents().at(0)+1) / 2 );

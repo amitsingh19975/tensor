@@ -76,23 +76,9 @@ struct tensor_expression {
     result.strides_ = basic_strides<std::size_t, F>{shape_expr};
     result.data_.resize(shape_expr.product());
 
-    // #ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
-
-    //     auto distributive_transform = transforms::apply_distributive_law{};
-    //     auto optimized_expr =
-    //         ::boost::yap::transform(*this, distributive_transform);
-
-    // #pragma omp parallel for
-    //     for (auto i = 0u; i < shape_expr.product(); i++)
-    //       result.data_[i] = distributive_transform.usable ? optimized_expr(i)
-    //                                                       :
-    //                                                       this->operator()(i);
-    // #else
-
 #pragma omp parallel for
     for (auto i = 0u; i < shape_expr.product(); i++)
       result.data_[i] = this->operator()(i);
-    // #endif
     return std::move(result);
   }
   /**
@@ -116,23 +102,9 @@ struct tensor_expression {
     target.strides_ =
         ::boost::numeric::ublas::basic_strides<std::size_t, F>{shape_expr};
 
-    // #ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
-
-    //     auto distributive_transform = transforms::apply_distributive_law{};
-    //     auto optimized_expr =
-    //         ::boost::yap::transform(*this, distributive_transform);
-
-    // #pragma omp parallel for
-    //     for (auto i = 0u; i < shape_expr.product(); i++)
-    //       target.data_[i] = distributive_transform.usable ? optimized_expr(i)
-    //                                                       :
-    //                                                       this->operator()(i);
-    //#else
-
 #pragma omp parallel for
     for (auto i = 0u; i < shape_expr.product(); i++)
       target.data_[i] = this->operator()(i);
-    //#endif
   }
 
   /**

@@ -83,6 +83,30 @@ struct at_index {
       ::boost::numeric::ublas::vector_expression<Expr> &terminal) {
     return ::boost::yap::make_terminal(terminal()(index));
   }
+  template <class Optimized, class Unoptimized>
+  constexpr decltype(auto) operator()(
+      ::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
+      std::variant<Optimized, Unoptimized> &variant) {
+    auto visitor_lambda = [this](auto &&subexpr) {
+      return boost::yap::transform(
+          boost::yap::as_expr<detail::tensor_expression>(
+              std::forward<decltype(subexpr)>(subexpr)),
+          *this);
+    };
+
+    using return_optimized_t = decltype(
+        std::declval<decltype(visitor_lambda)>()(std::declval<Optimized>()));
+
+    using return_un_optimized_t = decltype(
+        std::declval<decltype(visitor_lambda)>()(std::declval<Unoptimized>()));
+
+    return boost::yap::make_terminal(std::visit(
+        [&](auto &&e)
+            -> std::variant<return_optimized_t, return_un_optimized_t> {
+          return visitor_lambda(std::forward<decltype(e)>(e));
+        },
+        variant));
+  }
   size_t index;
 };
 
@@ -132,6 +156,18 @@ struct get_extents {
       ::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
       ::boost::numeric::ublas::vector<T, A> &terminal) {
     return ::boost::numeric::ublas::basic_extents<size_t>{terminal.size(), 1};
+  }
+
+  template <class Optimized, class Unoptimized>
+  constexpr decltype(auto) operator()(
+      ::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
+      std::variant<Optimized, Unoptimized> &variant) {
+    return std::visit(
+        [this](auto &&subexpr) {
+          return boost::yap::transform(std::forward<decltype(subexpr)>(subexpr),
+                                       *this);
+        },
+        variant);
   }
 
   template <class LExpr, class RExpr>
@@ -645,6 +681,18 @@ struct expr_count_relational_operator {
     return right;
   }
 
+  template <class Optimized, class Unoptimized>
+  constexpr decltype(auto) operator()(
+      ::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
+      std::variant<Optimized, Unoptimized> &variant) {
+    return std::visit(
+        [this](auto &&subexpr) {
+          return boost::yap::transform(std::forward<decltype(subexpr)>(subexpr),
+                                       *this);
+        },
+        variant);
+  }
+
   bool equal_to_found = false;
   bool not_equal_to_found = false;
 };
@@ -682,7 +730,65 @@ struct is_equality_or_non_equality_extent_same {
     status = left.is_free_scalar() || right.is_free_scalar() || left == right;
   }
 
+  template <class Optimized, class Unoptimized>
+  constexpr decltype(auto) operator()(
+      ::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
+      std::variant<Optimized, Unoptimized> &variant) {
+    return std::visit(
+        [this](auto &&subexpr) {
+          return boost::yap::transform(std::forward<decltype(subexpr)>(subexpr),
+                                       *this);
+        },
+        variant);
+  }
+
   bool status = false;
+};
+
+struct evaluate_with_variant {
+  template <class termA, class termB>
+  decltype(auto) operator()(
+      boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+      std::variant<termA, termB> &v) {
+    return std::visit(
+        [this](auto &&subexpr) {
+          return boost::yap::transform(
+              boost::yap::as_expr(std::forward<decltype(subexpr)>(subexpr)),
+              *this);
+        },
+        v);
+  }
+
+#define BINARY_MAKE_RECURSE_OVERLOAD(op_name, symbol)                    \
+  template <class Lexpr, class Rexpr>                                    \
+  decltype(auto) operator()(                                             \
+      boost::yap::expr_tag<boost::yap::expr_kind::op_name>, Lexpr &&lhs, \
+      Rexpr &&rhs) {                                                     \
+    return boost::yap::transform(                                        \
+        boost::yap::as_expr(std::forward<Lexpr>(lhs)), *this)            \
+        symbol boost::yap::transform(                                    \
+            boost::yap::as_expr(std::forward<Rexpr>(rhs)), *this);       \
+  }
+
+  BINARY_MAKE_RECURSE_OVERLOAD(plus, +);
+  BINARY_MAKE_RECURSE_OVERLOAD(minus, -);
+  BINARY_MAKE_RECURSE_OVERLOAD(multiplies, *);
+  BINARY_MAKE_RECURSE_OVERLOAD(divides, /);
+
+  BINARY_MAKE_RECURSE_OVERLOAD(equal_to, ==);
+  BINARY_MAKE_RECURSE_OVERLOAD(not_equal_to, !=);
+  BINARY_MAKE_RECURSE_OVERLOAD(greater, >);
+  BINARY_MAKE_RECURSE_OVERLOAD(greater_equal, >=);
+  BINARY_MAKE_RECURSE_OVERLOAD(less, <);
+  BINARY_MAKE_RECURSE_OVERLOAD(less_equal, <=);
+
+  template <class T>
+  auto operator()(boost::yap::expr_tag<boost::yap::expr_kind::terminal>,
+                  T &&t) {
+    return std::forward<T>(t);
+  }
+
+  // Todo(coder3101): Implement for call operator and Unary has been left off.
 };
 }  // namespace boost::numeric::ublas::detail::transforms
 

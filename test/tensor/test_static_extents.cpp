@@ -717,9 +717,9 @@ BOOST_AUTO_TEST_CASE(test_static_extents_exception)
   
   basic_static_extents<size_t,3,1,2,3> e1;
   for(auto i = e1.size(); i < 100; i++){
-    BOOST_REQUIRE_THROW(e1.at(i),std::out_of_range);
+    BOOST_REQUIRE_THROW((void)e1.at(i),std::out_of_range);
   }
-  BOOST_REQUIRE_THROW(e1.at(std::numeric_limits<size_t>::max()),std::out_of_range);
+  BOOST_REQUIRE_THROW((void)e1.at(std::numeric_limits<size_t>::max()),std::out_of_range);
   
   for(auto i = 0; i < 10; i++){
     std::vector<size_t> v;

@@ -22,5 +22,8 @@
 #include <boost/numeric/ublas/tensor/tensor.hpp>
 #include <boost/numeric/ublas/tensor/expression_operator.hpp>
 #include <boost/numeric/ublas/tensor/ublas_type_traits.hpp>
+#include <boost/numeric/ublas/tensor/operators_arithmetic.hpp>
+#include <boost/numeric/ublas/tensor/operators_comparison.hpp>
+#include <boost/numeric/ublas/tensor/subtensor.hpp>
 
 #endif // BOOST_NUMERIC_UBLAS_TENSOR_HPP

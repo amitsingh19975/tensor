@@ -112,7 +112,7 @@ struct basic_extents_impl<R, basic_shape<dynamic_extent, E...>>
 
   static constexpr bool IsDynamic = true;
   // stores dynamic extent
-  ptrdiff_t N{-1};
+  ptrdiff_t N{0};
 
   /**
    * @param k index of extent

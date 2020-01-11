@@ -23,6 +23,7 @@ template <class int_type, ptrdiff_t... E> struct basic_static_extents;
 
 template <class __int_type, class __layout> class basic_strides;
 
+template<class T, class L> class basic_strides;
 
 template <class E, typename> constexpr bool valid(E const &e);
 
@@ -69,6 +70,12 @@ template <class T, class E, class F, class A> class tensor;
 template <class T, class F, class A> class matrix;
 
 template <class T, class A> class vector;
+
+template <class A> struct storage_traits;
+
+template<class index_type, class tuple_type> struct has_index;
+
+template<class tupe_type> struct valid_multi_index;
 
 } // namespace boost::numeric::ublas
 
@@ -167,6 +174,16 @@ template <typename V, typename F, typename A> struct tensor_mode_result;
 
 template <::boost::yap::expr_kind, typename> struct tensor_expression;
 
+template<boost::yap::expr_kind Kind, class D> struct tensor_expression;
+
+template<class T, class EL, class ER, class OP> struct binary_tensor_expression;
+
+template<class T, class E, class OP> struct unary_tensor_expression;
+
+template<class ... index_types> struct has_index_impl;
+
+template<class ... index_types> struct valid_multi_index_impl;
+
 // TODO: Future
 // template <typename V, typename E1, typename E2, typename F, typename A>
 // struct tensor_result;
@@ -199,5 +216,12 @@ template <typename T> struct is_dense_storage;
 } // namespace detail
 
 } // namespace boost::numeric::ublas::storage
+
+namespace boost::numeric::ublas::index{
+    
+    template<std::size_t I> struct index_type;
+
+
+}
 
 #endif

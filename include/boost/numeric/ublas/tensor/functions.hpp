@@ -443,7 +443,7 @@ BOOST_UBLAS_INLINE decltype(auto) outer_prod(tensor<V, E1, F, A1> const &a, tens
 		throw std::runtime_error(
 			"error in boost::numeric::ublas::outer_prod: "
 			"tensors should not be empty.");
-	
+			
 	auto nc = typename extents_type_1::base_type(a.rank() + b.rank());
 	for(auto i = 0u; i < a.rank(); ++i)
 		nc.at(i) = a.extents().at(i);

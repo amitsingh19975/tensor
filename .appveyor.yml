@@ -24,7 +24,8 @@ environment:
       CXXSTD: 11
 
 # cache:
-  #- c:\tools\vcpkg\installed\
+  # - c:\tools\vcpkg\installed\
+
 install:
   - cd "C:\Tools\vcpkg"
   - git pull

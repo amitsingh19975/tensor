@@ -29,7 +29,7 @@ using test_types2 = zip<V, B, C>::with_t<boost::numeric::ublas::first_order,
                                          boost::numeric::ublas::last_order>;
 
 struct fixture {
-  using extents_type = boost::numeric::ublas::shape;
+  using extents_type = boost::numeric::ublas::dynamic_extents<>;
   fixture()
       : extents{extents_type{1, 1},             // 1
                 extents_type{1, 2},             // 2
@@ -45,7 +45,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_static_cast, value, test_types,
   using namespace boost::numeric;
   using value_type = typename value::first_type;
   using layout_type = typename value::second_type;
-  using tensor_type = ublas::tensor<value_type, layout_type>;
+  using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
   for (auto const &e : extents) {
 
@@ -130,7 +130,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_dynamic_cast, value, test_types2,
 
   using value_type = typename value::first_type;
   using layout_type = typename value::second_type;
-  using tensor_type = ublas::tensor<value_type *, layout_type>;
+  using tensor_type = ublas::tensor<value_type *, ublas::dynamic_extents<>, layout_type>;
 
   for (auto const &e : extents) {
     auto val = value_type{};
@@ -161,7 +161,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_reinterpret_cast, value,
 
   using value_type = typename value::first_type;
   using layout_type = typename value::second_type;
-  using tensor_type = ublas::tensor<value_type, layout_type>;
+  using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
   for (auto const &e : extents) {
     auto val = value_type{1};

@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_SUITE(test_expression_operator2, * boost::unit_test::depends_on(
         using namespace boost::numeric;
         using value_type  = typename value::first_type;
         using layout_type = typename value::second_type;
-        using tensor_type = ublas::tensor<value_type, layout_type>;
+        using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
 
         auto check = [](auto const& e)
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_SUITE(test_expression_operator2, * boost::unit_test::depends_on(
         using namespace boost::numeric;
         using value_type  = typename value::first_type;
         using layout_type = typename value::second_type;
-        using tensor_type = ublas::tensor<value_type, layout_type>;
+        using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
 
         auto check = [](auto const& e)

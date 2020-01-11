@@ -101,11 +101,11 @@ template <class Expr> BOOST_UBLAS_INLINE decltype(auto) get_type(Expr &&e) {
   if constexpr (is_terminal_type_expr<std::remove_reference_t<Expr_t>>::value) {
     using type = typename is_terminal_type_expr<
         std::remove_reference_t<Expr_t>>::value_type;
-    if constexpr (::boost::numeric::ublas::is_tensor_v<type> ||
-                  ::boost::numeric::ublas::is_vector_v<type> ||
-                  ::boost::numeric::ublas::is_matrix_v<type> ||
-                  ::boost::numeric::ublas::is_matrix_expression_v<type> ||
-                  ::boost::numeric::ublas::is_vector_expression_v<type>) {
+    if constexpr (::boost::numeric::ublas::detail::is_tensor_v<type> ||
+                  ::boost::numeric::ublas::detail::is_vector_v<type> ||
+                  ::boost::numeric::ublas::detail::is_matrix_v<type> ||
+                  ::boost::numeric::ublas::detail::is_matrix_expression_v<type> ||
+                  ::boost::numeric::ublas::detail::is_vector_expression_v<type>) {
       typename type::value_type s{};
       return s;
     } else
@@ -154,9 +154,9 @@ template <class Expr> constexpr void assert_no_ublas_terminal(Expr &&e) {
     using type = typename is_terminal_type_expr<
         std::remove_reference_t<Expr_t>>::value_type;
     static_assert(
-        !(::boost::numeric::ublas::is_matrix_expression_v<
+        !(::boost::numeric::ublas::detail::is_matrix_expression_v<
               std::remove_reference_t<type>> ||
-          ::boost::numeric::ublas::is_vector_expression_v<
+          ::boost::numeric::ublas::detail::is_vector_expression_v<
               std::remove_reference_t<type>>),
         "This Tensor Expression contains ublas expressions like vector/matrix "
         "expression. Hence this operation cannot be performed.");

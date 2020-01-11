@@ -23,17 +23,13 @@
 #include "multiplication.hpp"
 #include "storage_traits.hpp"
 #include "tensor_expression.hpp"
+#include "extents_functions.hpp"
+#include "extents.hpp"
+#include "strides.hpp"
+#include "fwd.hpp"
 
-namespace boost::numeric::ublas {
-
-template <class Value, class Format, class Allocator>
-class tensor;
-
-template <class Value, class Format, class Allocator>
-class matrix;
-
-template <class Value, class Allocator>
-class vector;
+namespace boost::numeric::ublas
+{
 
 /** @brief Computes the m-mode tensor-times-vector product
  *
@@ -45,55 +41,71 @@ class vector;
  * @param[in] a tensor object A with order p
  * @param[in] b vector object B
  *
- * @returns tensor object C with order p-1, the same storage format and
- * allocator type as A
- */
-template <class V, class F, class A1, class A2>
-BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, F, A1> const &a,
-                                       vector<V, A2> const &b,
-                                       const std::size_t m) {
-  using tensor_type = tensor<V, F, A1>;
-  using extents_type = typename tensor_type::extents_type;
-  using ebase_type = typename extents_type::base_type;
-  using value_type = typename tensor_type::value_type;
-  using size_type = typename extents_type::value_type;
+ * @returns tensor object C with order p-1, the same storage format and allocator type as A
+*/
+template <class V, class E, class F, class A1, class A2>
+BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, E, F, A1> const &a, vector<V, A2> const &b, const std::size_t m)
+{
 
-  auto const p = std::size_t(a.rank());
+	using tensor_type = tensor<V, E, F, A1>;
+	using extents_type = typename tensor_type::extents_type;
+	using ebase_type = typename extents_type::base_type;
+	using value_type = typename tensor_type::value_type;
+	using size_type = typename extents_type::size_type;
+	using result_tensor_type = tensor_mode_result_t<V, F, A1>;
 
-  if (m == 0)
-    throw std::length_error(
-        "error in boost::numeric::ublas::prod(ttv): "
-        "contraction mode must be greater than zero.");
+	auto const p = std::size_t(a.rank());
 
-  if (p < m)
-    throw std::length_error(
-        "error in boost::numeric::ublas::prod(ttv): rank of tensor must be "
-        "greater than or equal to the modus.");
+	if (m == 0)
+		throw std::length_error(
+			"error in boost::numeric::ublas::prod(ttv): "
+			"contraction mode must be greater than zero.");
 
-  if (a.empty())
-    throw std::length_error(
-        "error in boost::numeric::ublas::prod(ttv): first "
-        "argument tensor should not be empty.");
+	if (p < m)
+		throw std::length_error(
+			"error in boost::numeric::ublas::prod(ttv): rank of tensor must be "
+			"greater than or equal to the modus.");
 
-  if (b.size() == 0)
-    throw std::length_error(
-        "error in boost::numeric::ublas::prod(ttv): second "
-        "argument vector should not be empty.");
+	if (a.empty())
+		throw std::length_error(
+			"error in boost::numeric::ublas::prod(ttv): first "
+			"argument tensor should not be empty.");
 
-  auto nc = ebase_type(std::max(p - 1, size_type(2)), size_type(1));
-  auto nb = ebase_type{b.size(), 1};
+	if (b.size() == 0)
+		throw std::length_error(
+			"error in boost::numeric::ublas::prod(ttv): second "
+			"argument vector should not be empty.");
 
-  for (auto i = 0u, j = 0u; i < p; ++i)
-    if (i != m - 1) nc[j++] = a.extents().at(i);
+	auto nc = ebase_type(std::max(p - 1, size_type(2)), size_type(1));
+	auto nb = ebase_type{b.size(), 1};
 
-  auto c = tensor_type(extents_type(nc), value_type{});
+	for (auto i = 0u, j = 0u; i < p; ++i)
+		if (i != m - 1)
+			nc[j++] = a.extents().at(i);
 
-  auto bb = &(b(0));
+	auto c = result_tensor_type(dynamic_extents<>(nc), value_type{});
 
-  ttv(m, p, c.data(), c.extents().data(), c.strides().data(), a.data(),
-      a.extents().data(), a.strides().data(), bb, nb.data(), nb.data());
+	auto bb = &(b(0));
 
-  return c;
+	if constexpr (detail::is_static_extents<extents_type>::value)
+	{
+		auto a_static_extents = a.extents().base();
+		auto a_static_strides = a.strides().base();
+		ttv(m, p,
+			c.data(), c.extents().data(), c.strides().data(),
+			a.data(), a_static_extents.data(), a_static_strides.data(),
+			bb, nb.data(), nb.data());
+	}
+	else
+	{
+
+		ttv(m, p,
+			c.data(), c.extents().data(), c.strides().data(),
+			a.data(), a.extents().data(), a.strides().data(),
+			bb, nb.data(), nb.data());
+	}
+
+	return c;
 }
 
 /** @brief Computes the m-mode tensor-times-matrix product
@@ -106,54 +118,68 @@ BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, F, A1> const &a,
  * @param[in] b vector object B
  * @param[in] m contraction dimension with 1 <= m <= p
  *
- * @returns tensor object C with order p, the same storage format and allocator
- * type as A
- */
-template <class V, class F, class A1, class A2>
-BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, F, A1> const &a,
-                                       matrix<V, F, A2> const &b,
-                                       const std::size_t m) {
-  using tensor_type = tensor<V, F, A1>;
-  using extents_type = typename tensor_type::extents_type;
-  using strides_type = typename tensor_type::strides_type;
-  using value_type = typename tensor_type::value_type;
+ * @returns tensor object C with order p, the same storage format and allocator type as A
+*/
+template <class V, class E, class F, class A1, class A2>
+BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, E, F, A1> const &a, matrix<V, F, A2> const &b, const std::size_t m)
+{
 
-  auto const p = a.rank();
+	using tensor_type = tensor<V, E, F, A1>;
+	using extents_type = typename tensor_type::extents_type;
+	using dynamic_strides_type = strides<F>;
+	using value_type = typename tensor_type::value_type;
+	using result_tensor_type = tensor_mode_result_t<V, F, A1>;
 
-  if (m == 0)
-    throw std::length_error(
-        "error in boost::numeric::ublas::prod(ttm): "
-        "contraction mode must be greater than zero.");
+	auto const p = a.rank();
 
-  if (p < m || m > a.extents().size())
-    throw std::length_error(
-        "error in boost::numeric::ublas::prod(ttm): rank "
-        "of the tensor must be greater equal the modus.");
+	if (m == 0)
+		throw std::length_error(
+			"error in boost::numeric::ublas::prod(ttm): "
+			"contraction mode must be greater than zero.");
 
-  if (a.empty())
-    throw std::length_error(
-        "error in boost::numeric::ublas::prod(ttm): first "
-        "argument tensor should not be empty.");
+	if (p < m || m > a.extents().size())
+		throw std::length_error(
+			"error in boost::numeric::ublas::prod(ttm): rank "
+			"of the tensor must be greater equal the modus.");
 
-  if (b.size1() * b.size2() == 0)
-    throw std::length_error(
-        "error in boost::numeric::ublas::prod(ttm): second "
-        "argument matrix should not be empty.");
+	if (a.empty())
+		throw std::length_error(
+			"error in boost::numeric::ublas::prod(ttm): first "
+			"argument tensor should not be empty.");
 
-  auto nc = a.extents().base();
-  auto nb = extents_type{b.size1(), b.size2()};
-  auto wb = strides_type(nb);
+	if (b.size1() * b.size2() == 0)
+		throw std::length_error(
+			"error in boost::numeric::ublas::prod(ttm): second "
+			"argument matrix should not be empty.");
 
-  nc[m - 1] = nb[0];
+	auto nc = a.extents().base();
+	auto nb = dynamic_extents<>{b.size1(), b.size2()};
+	auto wb = dynamic_strides_type(nb);
 
-  auto c = tensor_type(extents_type(nc), value_type{});
+	nc[m - 1] = nb[0];
 
-  auto bb = &(b(0, 0));
+	auto c = result_tensor_type(dynamic_extents<>(nc), value_type{});
 
-  ttm(m, p, c.data(), c.extents().data(), c.strides().data(), a.data(),
-      a.extents().data(), a.strides().data(), bb, nb.data(), wb.data());
+	auto bb = &(b(0, 0));
 
-  return c;
+	if constexpr (detail::is_static_extents<extents_type>::value)
+	{
+		auto a_static_extents = a.extents().base();
+		auto a_static_strides = a.strides().base();
+		ttm(m, p,
+			c.data(), c.extents().data(), c.strides().data(),
+			a.data(), a_static_extents.data(), a_static_strides.data(),
+			bb, nb.data(), wb.data());
+	}
+	else
+	{
+		ttm(m, p,
+			c.data(), c.extents().data(), c.strides().data(),
+			a.data(), a.extents().data(), a.strides().data(),
+			bb, nb.data(), wb.data());
+	}
+
+	return c;
 }
 
 /** @brief Computes the q-mode tensor-times-tensor product
@@ -171,100 +197,132 @@ BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, F, A1> const &a,
  * @param[in]  a  left-hand side tensor with order r+q
  * @param[in]  b  right-hand side tensor with order s+q
  * @result     tensor with order r+s
- */
-template <class V, class F, class A1, class A2>
-BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, F, A1> const &a,
-                                       tensor<V, F, A2> const &b,
-                                       std::vector<std::size_t> const &phia,
-                                       std::vector<std::size_t> const &phib) {
-  using tensor_type = tensor<V, F, A1>;
-  using extents_type = typename tensor_type::extents_type;
-  using value_type = typename tensor_type::value_type;
-  using size_type = typename extents_type::value_type;
+*/
+template <class V, class E1, class E2, class F, class A1, class A2>
+BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, E1, F, A1> const &a, tensor<V, E2, F, A2> const &b,
+									   std::vector<std::size_t> const &phia, std::vector<std::size_t> const &phib)
+{
 
-  auto const pa = a.rank();
-  auto const pb = b.rank();
+	using tensor_type = tensor<V, E1, F, A1>;
+	using extents_type_1 = E1;
+	using extents_type_2 = E2;
+	using value_type = typename tensor_type::value_type;
+	using size_type = typename extents_type_1::value_type;
+	using result_tensor_type = tensor_mode_result_t<V, F, A1>;
 
-  auto const q = size_type(phia.size());
+	auto const pa = a.rank();
+	auto const pb = b.rank();
 
-  if (pa == 0ul)
-    throw std::runtime_error(
-        "error in ublas::prod: order of left-hand side "
-        "tensor must be greater than 0.");
-  if (pb == 0ul)
-    throw std::runtime_error(
-        "error in ublas::prod: order of right-hand side "
-        "tensor must be greater than 0.");
-  if (pa < q)
-    throw std::runtime_error(
-        "error in ublas::prod: number of contraction dimensions cannot be "
-        "greater than the order of the left-hand side tensor.");
-  if (pb < q)
-    throw std::runtime_error(
-        "error in ublas::prod: number of contraction dimensions cannot be "
-        "greater than the order of the right-hand side tensor.");
+	auto const q = size_type(phia.size());
 
-  if (q != phib.size())
-    throw std::runtime_error(
-        "error in ublas::prod: permutation tuples must have the same length.");
+	if (pa == 0ul)
+		throw std::runtime_error("error in ublas::prod: order of left-hand side tensor must be greater than 0.");
+	if (pb == 0ul)
+		throw std::runtime_error("error in ublas::prod: order of right-hand side tensor must be greater than 0.");
+	if (pa < q)
+		throw std::runtime_error("error in ublas::prod: number of contraction dimensions cannot be greater than the order of the left-hand side tensor.");
+	if (pb < q)
+		throw std::runtime_error("error in ublas::prod: number of contraction dimensions cannot be greater than the order of the right-hand side tensor.");
 
-  if (pa < phia.size())
-    throw std::runtime_error(
-        "error in ublas::prod: permutation tuple for the left-hand side tensor "
-        "cannot be greater than the corresponding order.");
-  if (pb < phib.size())
-    throw std::runtime_error(
-        "error in ublas::prod: permutation tuple for the right-hand side "
-        "tensor cannot be greater than the corresponding order.");
+	if (q != phib.size())
+		throw std::runtime_error("error in ublas::prod: permutation tuples must have the same length.");
 
-  auto const &na = a.extents();
-  auto const &nb = b.extents();
+	if (pa < phia.size())
+		throw std::runtime_error("error in ublas::prod: permutation tuple for the left-hand side tensor cannot be greater than the corresponding order.");
+	if (pb < phib.size())
+		throw std::runtime_error("error in ublas::prod: permutation tuple for the right-hand side tensor cannot be greater than the corresponding order.");
 
-  for (auto i = 0ul; i < q; ++i)
-    if (na.at(phia.at(i) - 1) != nb.at(phib.at(i) - 1))
-      throw std::runtime_error(
-          "error in ublas::prod: permutations of the extents are not correct.");
+	auto const &na = a.extents();
+	auto const &nb = b.extents();
 
-  auto const r = pa - q;
-  auto const s = pb - q;
+	for (auto i = 0ul; i < q; ++i)
+		if (na.at(phia.at(i) - 1) != nb.at(phib.at(i) - 1))
+			throw std::runtime_error("error in ublas::prod: permutations of the extents are not correct.");
 
-  std::vector<std::size_t> phia1(pa), phib1(pb);
-  std::iota(phia1.begin(), phia1.end(), 1ul);
-  std::iota(phib1.begin(), phib1.end(), 1ul);
+	auto const r = pa - q;
+	auto const s = pb - q;
 
-  std::vector<std::size_t> nc(std::max(r + s, size_type(2)), size_type(1));
+	std::vector<std::size_t> phia1(pa), phib1(pb);
+	std::iota(phia1.begin(), phia1.end(), 1ul);
+	std::iota(phib1.begin(), phib1.end(), 1ul);
 
-  for (auto i = 0ul; i < phia.size(); ++i)
-    *std::remove(phia1.begin(), phia1.end(), phia.at(i)) = phia.at(i);
+	std::vector<std::size_t> nc(std::max(r + s, size_type(2)), size_type(1));
 
-  // phia1.erase( std::remove(phia1.begin(), phia1.end(), phia.at(i)),
-  // phia1.end() )  ;
+	for (auto i = 0ul; i < phia.size(); ++i)
+		*std::remove(phia1.begin(), phia1.end(), phia.at(i)) = phia.at(i);
 
-  // assert(phia1.size() == pa);
+	//phia1.erase( std::remove(phia1.begin(), phia1.end(), phia.at(i)),  phia1.end() )  ;
 
-  for (auto i = 0ul; i < r; ++i) nc[i] = na[phia1[i] - 1];
+	assert(phia1.size() == pa);
 
-  for (auto i = 0ul; i < phib.size(); ++i)
-    *std::remove(phib1.begin(), phib1.end(), phib.at(i)) = phib.at(i);
-  // phib1.erase( std::remove(phib1.begin(), phib1.end(), phia.at(i)),
-  // phib1.end() )  ;
+	for (auto i = 0ul; i < r; ++i)
+		nc[i] = na[phia1[i] - 1];
 
-  // assert(phib1.size() == pb);
+	for (auto i = 0ul; i < phib.size(); ++i)
+		*std::remove(phib1.begin(), phib1.end(), phib.at(i)) = phib.at(i);
+	//phib1.erase( std::remove(phib1.begin(), phib1.end(), phia.at(i)), phib1.end() )  ;
 
-  for (auto i = 0ul; i < s; ++i) nc[r + i] = nb[phib1[i] - 1];
+	assert(phib1.size() == pb);
 
-  //	std::copy( phib.begin(), phib.end(), phib1.end()  );
+	for (auto i = 0ul; i < s; ++i)
+		nc[r + i] = nb[phib1[i] - 1];
 
-  // assert(phia1.size() == pa);
-  // assert(phib1.size() == pb);
+	//	std::copy( phib.begin(), phib.end(), phib1.end()  );
 
-  auto c = tensor_type(extents_type(nc), value_type{});
+	assert(phia1.size() == pa);
+	assert(phib1.size() == pb);
 
-  ttt(pa, pb, q, phia1.data(), phib1.data(), c.data(), c.extents().data(),
-      c.strides().data(), a.data(), a.extents().data(), a.strides().data(),
-      b.data(), b.extents().data(), b.strides().data());
+	auto c = result_tensor_type(dynamic_extents<>(nc), value_type{});
 
-  return c;
+	if constexpr (detail::is_static_extents<extents_type_1>::value &&
+				  detail::is_static_extents<extents_type_2>::value)
+	{
+
+		auto a_static_extents = a.extents().base();
+		auto a_static_strides = a.strides().base();
+		auto b_static_extents = b.extents().base();
+		auto b_static_strides = b.strides().base();
+		ttt(pa, pb, q,
+			phia1.data(), phib1.data(),
+			c.data(), c.extents().data(), c.strides().data(),
+			a.data(), a_static_extents.data(), a_static_strides.data(),
+			b.data(), b_static_extents.data(), b_static_strides.data());
+	}
+	else if constexpr (detail::is_static_extents<extents_type_1>::value &&
+					   !detail::is_static_extents<extents_type_2>::value)
+	{
+
+		auto a_static_extents = a.extents().base();
+		auto a_static_strides = a.strides().base();
+		ttt(pa, pb, q,
+			phia1.data(), phib1.data(),
+			c.data(), c.extents().data(), c.strides().data(),
+			a.data(), a_static_extents.data(), a_static_strides.data(),
+			b.data(), b.extents().data(), b.strides().data());
+	}
+	else if constexpr (!detail::is_static_extents<extents_type_1>::value &&
+					   detail::is_static_extents<extents_type_2>::value)
+	{
+
+		auto b_static_extents = b.extents().base();
+		auto b_static_strides = b.strides().base();
+		ttt(pa, pb, q,
+			phia1.data(), phib1.data(),
+			c.data(), c.extents().data(), c.strides().data(),
+			a.data(), a.extents().data(), a.strides().data(),
+			b.data(), b_static_extents.data(), b_static_strides.data());
+	}
+	else
+	{
+
+		ttt(pa, pb, q,
+			phia1.data(), phib1.data(),
+			c.data(), c.extents().data(), c.strides().data(),
+			a.data(), a.extents().data(), a.strides().data(),
+			b.data(), b.extents().data(), b.strides().data());
+	}
+
+	return c;
 }
 
 // template<class V, class F, class A1, class A2, std::size_t N, std::size_t M>
@@ -284,12 +342,12 @@ BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, F, A1> const &a,
  * @param[in]  a  left-hand side tensor with order r+q
  * @param[in]  b  right-hand side tensor with order s+q
  * @result     tensor with order r+s
- */
-template <class V, class F, class A1, class A2>
-BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, F, A1> const &a,
-                                       tensor<V, F, A2> const &b,
-                                       std::vector<std::size_t> const &phi) {
-  return prod(a, b, phi, phi);
+*/
+template <class V, class E1, class E2, class F, class A1, class A2>
+BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, E1, F, A1> const &a, tensor<V, E2, F, A2> const &b,
+									   std::vector<std::size_t> const &phi)
+{
+	return prod(a, b, phi, phi);
 }
 
 /** @brief Computes the inner product of two tensors
@@ -302,29 +360,63 @@ BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, F, A1> const &a,
  * @param[in] b tensor object B
  *
  * @returns a value type.
- */
-template <class V, class F, class A1, class A2>
-BOOST_UBLAS_INLINE decltype(auto) inner_prod(tensor<V, F, A1> const &a,
-                                             tensor<V, F, A2> const &b) {
-  using value_type = typename tensor<V, F, A1>::value_type;
+*/
+template <class V, class E1, class E2, class F, class A1, class A2>
+BOOST_UBLAS_INLINE decltype(auto) inner_prod(tensor<V, E1, F, A1> const &a, tensor<V, E2, F, A2> const &b)
+{
+	using value_type = typename tensor<V, E1, F, A1>::value_type;
+	using extents_type_1 = E1;
+	using extents_type_2 = E2;
 
-  if (a.rank() != b.rank())
-    throw std::length_error(
-        "error in boost::numeric::ublas::inner_prod: Rank "
-        "of both tensors must be the same.");
+	if (a.rank() != b.rank())
+		throw std::length_error("error in boost::numeric::ublas::inner_prod: Rank of both tensors must be the same.");
 
-  if (a.empty() || b.empty())
-    throw std::length_error(
-        "error in boost::numeric::ublas::inner_prod: "
-        "Tensors should not be empty.");
+	if (a.empty() || b.empty())
+		throw std::length_error("error in boost::numeric::ublas::inner_prod: Tensors should not be empty.");
 
-  if (a.extents() != b.extents())
-    throw std::length_error(
-        "error in boost::numeric::ublas::inner_prod: "
-        "Tensor extents should be the same.");
+	if (a.extents() != b.extents())
+		throw std::length_error("error in boost::numeric::ublas::inner_prod: Tensor extents should be the same.");
 
-  return inner(a.rank(), a.extents().data(), a.data(), a.strides().data(),
-               b.data(), b.strides().data(), value_type{0});
+	if constexpr (detail::is_static_extents<extents_type_1>::value &&
+				  detail::is_static_extents<extents_type_2>::value)
+	{
+
+		auto a_static_extents = a.extents().base();
+		auto a_static_strides = a.strides().base();
+		auto b_static_strides = b.strides().base();
+
+		return inner(a.rank(), a_static_extents.data(),
+					 a.data(), a_static_strides.data(),
+					 b.data(), b_static_strides.data(), value_type{0});
+	}
+	else if constexpr (detail::is_static_extents<extents_type_1>::value &&
+					   !detail::is_static_extents<extents_type_2>::value)
+	{
+
+		auto a_static_extents = a.extents().base();
+		auto a_static_strides = a.strides().base();
+
+		return inner(a.rank(), a_static_extents.data(),
+					 a.data(), a_static_strides.data(),
+					 b.data(), b.strides().data(), value_type{0});
+	}
+	else if constexpr (!detail::is_static_extents<extents_type_1>::value &&
+					   detail::is_static_extents<extents_type_2>::value)
+	{
+
+		auto b_static_strides = b.strides().base();
+
+		return inner(a.rank(), a.extents().data(),
+					 a.data(), a.strides().data(),
+					 b.data(), b_static_strides.data(), value_type{0});
+	}
+	else
+	{
+
+		return inner(a.rank(), a.extents().data(),
+					 a.data(), a.strides().data(),
+					 b.data(), b.strides().data(), value_type{0});
+	}
 }
 
 /** @brief Computes the outer product of two tensors
@@ -337,30 +429,74 @@ BOOST_UBLAS_INLINE decltype(auto) inner_prod(tensor<V, F, A1> const &a,
  * @param[in] b tensor object B
  *
  * @returns tensor object C with the same storage format F and allocator type A1
- */
-template <class V, class F, class A1, class A2>
-BOOST_UBLAS_INLINE decltype(auto) outer_prod(tensor<V, F, A1> const &a,
-                                             tensor<V, F, A2> const &b) {
-  using tensor_type = tensor<V, F, A1>;
-  using extents_type = typename tensor_type::extents_type;
+*/
+template <class V, class E1, class E2, class F, class A1, class A2>
+BOOST_UBLAS_INLINE decltype(auto) outer_prod(tensor<V, E1, F, A1> const &a, tensor<V, E2, F, A2> const &b)
+{
+	using tensor_type_1 = tensor<V, E1, F, A1>;
+	using tensor_type_2 = tensor<V, E2, F, A2>;
+	using extents_type_1 = typename tensor_type_1::extents_type;
+	using extents_type_2 = typename tensor_type_2::extents_type;
+	using result_tensor_type = tensor_mode_result_t<V, F, A1>;
 
-  if (a.empty() || b.empty())
-    throw std::runtime_error(
-        "error in boost::numeric::ublas::outer_prod: "
-        "tensors should not be empty.");
+	if (a.empty() || b.empty())
+		throw std::runtime_error(
+			"error in boost::numeric::ublas::outer_prod: "
+			"tensors should not be empty.");
+	
+	auto nc = typename extents_type_1::base_type(a.rank() + b.rank());
+	for(auto i = 0u; i < a.rank(); ++i)
+		nc.at(i) = a.extents().at(i);
 
-  auto nc = typename extents_type::base_type(a.rank() + b.rank());
-  for (auto i = 0u; i < a.rank(); ++i) nc.at(i) = a.extents().at(i);
+	for(auto i = 0u; i < b.rank(); ++i)
+		nc.at(a.rank()+i) = b.extents().at(i);
+	
+	auto c = result_tensor_type(dynamic_extents<>(nc));
 
-  for (auto i = 0u; i < b.rank(); ++i) nc.at(a.rank() + i) = b.extents().at(i);
+	if constexpr (detail::is_static_extents<extents_type_1>::value &&
+				  detail::is_static_extents<extents_type_2>::value)
+	{
 
-  auto c = tensor_type(extents_type(nc));
+		auto a_static_extents = a.extents().base();
+		auto a_static_strides = a.strides().base();
+		auto b_static_extents = b.extents().base();
+		auto b_static_strides = b.strides().base();
 
-  outer(c.data(), c.rank(), c.extents().data(), c.strides().data(), a.data(),
-        a.rank(), a.extents().data(), a.strides().data(), b.data(), b.rank(),
-        b.extents().data(), b.strides().data());
+		outer(c.data(), c.rank(), c.extents().data(), c.strides().data(),
+			  a.data(), a.rank(), a_static_extents.data(), a_static_strides.data(),
+			  b.data(), b.rank(), b_static_extents.data(), b_static_strides.data());
+	}
+	else if constexpr (detail::is_static_extents<extents_type_1>::value &&
+					   !detail::is_static_extents<extents_type_2>::value)
+	{
 
-  return c;
+		auto a_static_extents = a.extents().base();
+		auto a_static_strides = a.strides().base();
+
+		outer(c.data(), c.rank(), c.extents().data(), c.strides().data(),
+			  a.data(), a.rank(), a_static_extents.data(), a_static_strides.data(),
+			  b.data(), b.rank(), b.extents().data(), b.strides().data());
+	}
+	else if constexpr (!detail::is_static_extents<extents_type_1>::value &&
+					   detail::is_static_extents<extents_type_2>::value)
+	{
+
+		auto b_static_extents = b.extents().base();
+		auto b_static_strides = b.strides().base();
+
+		outer(c.data(), c.rank(), c.extents().data(), c.strides().data(),
+			  a.data(), a.rank(), a.extents().data(), a.strides().data(),
+			  b.data(), b.rank(), b_static_extents.data(), b_static_strides.data());
+	}
+	else
+	{
+
+		outer(c.data(), c.rank(), c.extents().data(), c.strides().data(),
+			  a.data(), a.rank(), a.extents().data(), a.strides().data(),
+			  b.data(), b.rank(), b.extents().data(), b.strides().data());
+	}
+
+	return c;
 }
 
 /** @brief Transposes a tensor according to a permutation tuple
@@ -371,41 +507,56 @@ BOOST_UBLAS_INLINE decltype(auto) outer_prod(tensor<V, F, A1> const &a,
  *
  * @param[in] a    tensor object of rank p
  * @param[in] tau  one-based permutation tuple of length p
- * @returns        a transposed tensor object with the same storage format F and
- * allocator type A
- */
-template <class V, class F, class A>
-BOOST_UBLAS_INLINE decltype(auto) trans(tensor<V, F, A> const &a,
-                                        std::vector<std::size_t> const &tau) {
-  using tensor_type = tensor<V, F, A>;
-  using extents_type = typename tensor_type::extents_type;
-  //	using strides_type = typename tensor_type::strides_type;
+ * @returns        a transposed tensor object with the same storage format F and allocator type A
+*/
+template <class V, class E, class F, class A>
+BOOST_UBLAS_INLINE decltype(auto) trans(tensor<V, E, F, A> const &a, std::vector<std::size_t> const &tau)
+{
+	using tensor_type = tensor<V, E, F, A>;
+	using extents_type = typename tensor_type::extents_type;
+	using result_tensor_type = tensor_mode_result_t<V, F, A>;
+	//	using strides_type = typename tensor_type::strides_type;
 
-  if (a.empty()) return tensor<V, F, A>{};
+	if (a.empty())
+		return result_tensor_type{};
 
-  auto const p = a.rank();
-  auto const &na = a.extents();
+	auto const p = a.rank();
+	auto const &na = a.extents();
 
-  auto nc = typename extents_type::base_type(p);
-  for (auto i = 0u; i < p; ++i) nc.at(tau.at(i) - 1) = na.at(i);
+	auto nc = typename dynamic_extents<>::base_type(p);
+	for (auto i = 0u; i < p; ++i)
+		nc.at(tau.at(i) - 1) = na.at(i);
 
-  //	auto wc = strides_type(extents_type(nc));
+	//	auto wc = strides_type(extents_type(nc));
+	auto c = result_tensor_type(dynamic_extents<>(nc));
 
-  auto c = tensor_type(extents_type(nc));
+	if constexpr (detail::is_static_extents<extents_type>::value)
+	{
 
-  trans(a.rank(), a.extents().data(), tau.data(), c.data(), c.strides().data(),
-        a.data(), a.strides().data());
+		auto a_static_extents = a.extents().base();
+		auto a_static_strides = a.strides().base();
 
-  //	auto wc_pi = typename strides_type::base_type (p);
-  //	for(auto i = 0u; i < p; ++i)
-  //		wc_pi.at(tau.at(i)-1) = c.strides().at(i);
+		trans(a.rank(), a_static_extents.data(), tau.data(),
+			  c.data(), c.strides().data(),
+			  a.data(), a_static_strides.data());
+	}
+	else
+	{
+		trans(a.rank(), a.extents().data(), tau.data(),
+			  c.data(), c.strides().data(),
+			  a.data(), a.strides().data());
+	}
 
-  // copy(a.rank(),
-  //		 a.extents().data(),
-  //		 c.data(), wc_pi.data(),
-  //		 a.data(), a.strides().data() );
+	//	auto wc_pi = typename strides_type::base_type (p);
+	//	for(auto i = 0u; i < p; ++i)
+	//		wc_pi.at(tau.at(i)-1) = c.strides().at(i);
 
-  return c;
+	// copy(a.rank(),
+	//		 a.extents().data(),
+	//		 c.data(), wc_pi.data(),
+	//		 a.data(), a.strides().data() );
+
+	return c;
 }
 /**
  *
@@ -422,20 +573,36 @@ BOOST_UBLAS_INLINE decltype(auto) trans(tensor<V, F, A> const &a,
  * @param a the tensor whose norm is expected of rank p.
  * @return the frobenius norm of a tensor.
  */
-template <class V, class F, class A>
-BOOST_UBLAS_INLINE decltype(auto) norm(tensor<V, F, A> const &a) {
-  static_assert(std::is_default_constructible<V>::value,
-                "Value type of tensor must be default construct able in order "
-                "to call boost::numeric::ublas::norm");
-  if (a.empty()) {
-    throw std::runtime_error(
-        "error in boost::numeric::ublas::norm: tensors should not be empty.");
-  }
-  return std::sqrt(
-      accumulate(a.order(), a.extents().data(), a.data(), a.strides().data(),
-                 V{}, [](auto const &l, auto const &r) { return l + r * r; }));
-  // fixme: Why --^^ ?? Let's ask user to provide this maybe non-default
-  // constructed value.
+template <class V, class E, class F, class A>
+BOOST_UBLAS_INLINE decltype(auto) norm(tensor<V, E, F, A> const &a)
+{
+	using tensor_type = tensor<V, E, F, A>;
+	using extents_type = typename tensor_type::extents_type;
+	using value_type = typename tensor_type::value_type;
+	
+	static_assert(std::is_default_constructible<V>::value,
+				  "Value type of tensor must be default construct able in order "
+				  "to call boost::numeric::ublas::norm");
+	if (a.empty())
+	{
+		throw std::runtime_error(
+			"error in boost::numeric::ublas::norm: tensors should not be empty.");
+	}
+
+	if constexpr (detail::is_static_extents<extents_type>::value)
+	{
+
+		auto a_static_extents = a.extents().base();
+		auto a_static_strides = a.strides().base();
+
+		return std::sqrt(accumulate(a.order(), a_static_extents.data(), a.data(), a_static_strides.data(), value_type{},
+									[](auto const &l, auto const &r) { return l + r * r; }));
+	}
+	else
+	{
+		return std::sqrt(accumulate(a.order(), a.extents().data(), a.data(), a.strides().data(), value_type{},
+									[](auto const &l, auto const &r) { return l + r * r; }));
+	}
 }
 
 /** @brief Extract the real component of tensor elements within a tensor
@@ -445,9 +612,10 @@ BOOST_UBLAS_INLINE decltype(auto) norm(tensor<V, F, A> const &a) {
  * @returns   tensor expression
  */
 template <class Expr>
-BOOST_UBLAS_INLINE decltype(auto) real(Expr &&expr) {
-  return ::boost::numeric::ublas::apply(
-      std::forward<Expr>(expr), [](auto const &e) { return std::real(e); });
+BOOST_UBLAS_INLINE decltype(auto) real(Expr &&expr)
+{
+	return ::boost::numeric::ublas::apply(
+		std::forward<Expr>(expr), [](auto const &e) { return std::real(e); });
 }
 
 /** @brief Extract the imaginary component of tensor elements within a tensor
@@ -457,9 +625,10 @@ BOOST_UBLAS_INLINE decltype(auto) real(Expr &&expr) {
  * @returns   tensor expression
  */
 template <class Expr>
-BOOST_UBLAS_INLINE decltype(auto) imag(Expr &&expr) {
-  return ::boost::numeric::ublas::apply(
-      std::forward<Expr>(expr), [](auto const &e) { return std::imag(e); });
+BOOST_UBLAS_INLINE decltype(auto) imag(Expr &&expr)
+{
+	return ::boost::numeric::ublas::apply(
+		std::forward<Expr>(expr), [](auto const &e) { return std::imag(e); });
 }
 
 /** @brief Computes the complex conjugate component of tensor elements within a
@@ -469,11 +638,12 @@ BOOST_UBLAS_INLINE decltype(auto) imag(Expr &&expr) {
  * @returns   tensor expression
  */
 template <class Expr>
-BOOST_UBLAS_INLINE decltype(auto) conj(Expr &&expr) {
-  return ::boost::numeric::ublas::apply(
-      std::forward<Expr>(expr), [](auto const &e) { return std::conj(e); });
+BOOST_UBLAS_INLINE decltype(auto) conj(Expr &&expr)
+{
+	return ::boost::numeric::ublas::apply(
+		std::forward<Expr>(expr), [](auto const &e) { return std::conj(e); });
 }
 
-}  // namespace boost::numeric::ublas
+} // namespace boost::numeric::ublas
 
 #endif

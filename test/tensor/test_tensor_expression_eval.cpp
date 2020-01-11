@@ -22,7 +22,7 @@ using test_types = zip<int, long, float, double, std::complex<float>>::with_t<
     boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
 
 struct fixture {
-  using extents_type = boost::numeric::ublas::shape;
+  using extents_type = boost::numeric::ublas::dynamic_extents<>;
   fixture()
       : extents{extents_type{}, // 0
 
@@ -49,7 +49,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_eval, value, test_types,
   using namespace boost::numeric;
   using value_type = typename value::first_type;
   using layout_type = typename value::second_type;
-  using tensor_type = ublas::tensor<value_type, layout_type>;
+  using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
   for (auto const &e : extents) {
 
@@ -62,24 +62,24 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_eval, value, test_types,
     }
 
     auto expr = t + t;
-    auto result = expr.template eval<value_type, layout_type>();
+    auto result = expr.template eval<value_type, ublas::dynamic_extents<>, layout_type>();
 
     BOOST_CHECK(result.extents() == e);
-    for (auto st = 0u; st < t.extents().product(); st++)
+    for (auto st = 0u; st < product(t.extents()); st++)
       BOOST_CHECK_EQUAL(result(st), t(st) + t(st));
 
     auto expr2 = 2.0f * t;
-    auto result2 = expr2.template eval<value_type, layout_type>();
+    auto result2 = expr2.template eval<value_type, ublas::dynamic_extents<>, layout_type>();
 
     BOOST_CHECK(result2.extents() == e);
-    for (auto st = 0u; st < t.extents().product(); st++)
+    for (auto st = 0u; st < product(t.extents()); st++)
       BOOST_CHECK_EQUAL(result2(st), 2.0f * t(st));
 
     auto expr3 = ((2.0f * t) / (t + 1.0f));
-    auto result3 = expr3.template eval<value_type, layout_type>();
+    auto result3 = expr3.template eval<value_type, ublas::dynamic_extents<>, layout_type>();
 
     BOOST_CHECK(result3.extents() == e);
-    for (auto st = 0u; st < t.extents().product(); st++)
+    for (auto st = 0u; st < product(t.extents()); st++)
       BOOST_CHECK_EQUAL(result3(st), static_cast<value_type>(
                                          ((2.0f * t(st)) / (t(st) + 1.0f))));
   }
@@ -90,7 +90,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_eval_to, value,
   using namespace boost::numeric;
   using value_type = typename value::first_type;
   using layout_type = typename value::second_type;
-  using tensor_type = ublas::tensor<value_type, layout_type>;
+  using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
   for (auto const &e : extents) {
 
@@ -106,7 +106,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_eval_to, value,
     expr.eval_to(result);
 
     BOOST_CHECK(result.extents() == e);
-    for (auto st = 0u; st < t.extents().product(); st++)
+    for (auto st = 0u; st < product(t.extents()); st++)
       BOOST_CHECK_EQUAL(result(st), t(st) + t(st));
 
     auto expr2 = 2.0f * t;
@@ -114,7 +114,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_eval_to, value,
     expr2.eval_to(result2);
 
     BOOST_CHECK(result2.extents() == e);
-    for (auto st = 0u; st < t.extents().product(); st++)
+    for (auto st = 0u; st < product(t.extents()); st++)
       BOOST_CHECK_EQUAL(result2(st), 2.0f * t(st));
 
     auto expr3 = ((2.0f * t) / (t + 1.0f));
@@ -122,7 +122,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_eval_to, value,
     expr3.eval_to(result3);
 
     BOOST_CHECK(result3.extents() == e);
-    for (int st = 0; st < t.extents().product(); st++)
+    for (int st = 0; st < product(t.extents()); st++)
       BOOST_CHECK_EQUAL(result3(st), static_cast<value_type>(
                                          ((2.0f * t(st)) / (t(st) + 1.0f))));
   }

@@ -6,3 +6,4 @@ CMakeLists.txt
 cmake-build-debug/
 build/
 .ccls-cache/
+.DS_Store

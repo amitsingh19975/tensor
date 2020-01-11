@@ -22,7 +22,7 @@ using test_types = zip<int, long, float, double, std::complex<float>>::with_t<
     boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
 
 struct fixture {
-  using extents_type = boost::numeric::ublas::shape;
+  using extents_type = boost::numeric::ublas::dynamic_extents<>;
   fixture()
       : extents{//extents_type{}, // 0
 
@@ -51,7 +51,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_call_operator, value,
   using namespace boost::numeric;
   using value_type = typename value::first_type;
   using layout_type = typename value::second_type;
-  using tensor_type = ublas::tensor<value_type, layout_type>;
+  using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
   for (auto const &e : extents) {
 
@@ -63,15 +63,15 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_call_operator, value,
     }
 
     auto expr = t + t;
-    for (auto st = 0u; st < t.extents().product(); st++)
+    for (auto st = 0u; st < product( t.extents() ); st++)
       BOOST_CHECK_EQUAL(expr(st), t(st) + t(st));
 
     auto expr2 = 2.0f * t;
-    for (auto st = 0u; st < t.extents().product(); st++)
+    for (auto st = 0u; st < product( t.extents() ); st++)
       BOOST_CHECK_EQUAL(expr2(st), 2.0f * t(st));
 
     auto expr3 = ((2.0f * t) / (t + 1.0f));
-    for (auto st = 0u; st < t.extents().product(); st++)
+    for (auto st = 0u; st < product( t.extents() ); st++)
       BOOST_CHECK_EQUAL(expr3(st), ((2.0f * t(st)) / (t(st) + 1.0f)));
   }
 }
@@ -81,7 +81,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_bool_operator, value,
   using namespace boost::numeric;
   using value_type = typename value::first_type;
   using layout_type = typename value::second_type;
-  using tensor_type = ublas::tensor<value_type, layout_type>;
+  using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
   for (auto const &e : extents) {
 
@@ -108,14 +108,14 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_bool_operator, value,
 
       auto expr5 = t + 1.0f == t;
       bool result5 = expr5;
-      if (e.product() > 0)
+      if (product( e ) > 0)
         BOOST_CHECK_EQUAL(result5, false);
 
       auto expr2 = 2.0f * t == t + t;
       bool result2 = expr2;
       BOOST_CHECK(result2);
 
-      BOOST_CHECK_THROW(static_cast<bool>(t - t), std::runtime_error);
+      BOOST_CHECK_THROW((void)static_cast<bool>(t - t), std::runtime_error);
     }
   }
 }

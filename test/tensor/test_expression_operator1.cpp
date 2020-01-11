@@ -54,7 +54,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_binary_arithmetic_operations, valu
 	using namespace boost::numeric;
 	using value_type  = typename value::first_type;
 	using layout_type = typename value::second_type;
-	using tensor_type = ublas::tensor<value_type, layout_type>;
+	using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
 
 	auto check = [](auto const& e)

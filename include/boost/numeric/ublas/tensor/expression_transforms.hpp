@@ -19,6 +19,7 @@
 #include "expression_transforms_traits.hpp"
 #include "extents.hpp"
 #include "ublas_type_traits.hpp"
+#include "fwd.hpp"
 
 namespace boost::numeric::ublas {
 
@@ -28,15 +29,6 @@ template <boost::yap::expr_kind Kind, typename Tuple>
 struct tensor_expression;
 
 }
-
-template <class T, class F, class A>
-class tensor;
-
-template <class T, class F, class A>
-class matrix;
-
-template <class T, class A>
-class vector;
 
 }  // namespace boost::numeric::ublas
 
@@ -53,10 +45,10 @@ namespace boost::numeric::ublas::detail::transforms {
  *
  */
 struct at_index {
-  template <class T, class F, class A>
+  template <class T, class E, class F, class A>
   BOOST_UBLAS_INLINE decltype(auto) operator()(
       ::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
-      ::boost::numeric::ublas::tensor<T, F, A> const &terminal) {
+      ::boost::numeric::ublas::tensor<T, E, F, A> const &terminal) {
     return ::boost::yap::make_terminal(terminal(index));
   }
   template <class T, class F, class A>
@@ -100,10 +92,10 @@ struct at_index {
  */
 
 struct get_extents {
-  template <class T, class F, class A>
+  template <class T, class E, class F, class A>
   constexpr decltype(auto) operator()(
       ::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
-      ::boost::numeric::ublas::tensor<T, F, A> &terminal) {
+      ::boost::numeric::ublas::tensor<T, E, F, A> &terminal) {
     return terminal.extents();
   }
   // This overload must be existing for const-refences
@@ -113,14 +105,14 @@ struct get_extents {
   // tensor-terminal. It is important to have this overload for it.
   // We can omit for other terminal types because we know only
   // contractions are defined for tensor terminals.
-  template <class T, class F, class A>
+  template <class T, class E, class F, class A>
   constexpr decltype(auto) operator()(
       ::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
-      ::boost::numeric::ublas::tensor<T, F, A> const &terminal) {
+      ::boost::numeric::ublas::tensor<T, E, F, A> const &terminal) {
     return terminal.extents();
   }
 
-  template <class T, class F, class A>
+  template <class T, class E, class F, class A>
   constexpr decltype(auto) operator()(
       ::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
       ::boost::numeric::ublas::matrix<T, F, A> &terminal) {
@@ -146,17 +138,17 @@ struct get_extents {
         ::boost::yap::as_expr<
             ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
         *this);
-    if (left.is_free_scalar() && right.is_free_scalar())
+    if (is_free_scalar(left) && is_free_scalar(right))
       return basic_extents<size_t>{1};
-    else if (left.is_free_scalar())
+    else if (is_free_scalar(left))
       return right;
-    else if (right.is_free_scalar())
+    else if (is_free_scalar(right))
       return left;
     else {
       if (left != right)
         throw std::runtime_error("Cannot Subtract Tensor of shapes " +
-                                 left.to_string() + " and " +
-                                 right.to_string());
+                                 to_string(left) + " and " +
+                                 to_string(right));
       return left;
     }
   }
@@ -173,17 +165,17 @@ struct get_extents {
         ::boost::yap::as_expr<
             ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
         *this);
-    if (left.is_free_scalar() && right.is_free_scalar())
+    if (is_free_scalar(left) && is_free_scalar(right))
       return basic_extents<size_t>{1};
-    else if (left.is_free_scalar())
+    else if (is_free_scalar(left))
       return right;
-    else if (right.is_free_scalar())
+    else if (is_free_scalar(right))
       return left;
     else {
       if (left != right)
         throw std::runtime_error("Cannot Multiply Tensor of shapes " +
-                                 left.to_string() + " and " +
-                                 right.to_string());
+                                 to_string(left) + " and " +
+                                 to_string(right));
       return left;
     }
   }
@@ -200,17 +192,17 @@ struct get_extents {
         ::boost::yap::as_expr<
             ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
         *this);
-    if (left.is_free_scalar() && right.is_free_scalar())
+    if (is_free_scalar(left) && is_free_scalar(right))
       return basic_extents<size_t>{1};
-    else if (left.is_free_scalar())
+    else if (is_free_scalar(left))
       return right;
-    else if (right.is_free_scalar())
+    else if (is_free_scalar(right))
       return left;
     else {
       if (left != right)
         throw std::runtime_error("Cannot Divide Tensor of shapes " +
-                                 left.to_string() + " and " +
-                                 right.to_string());
+                                 to_string(left) + " and " +
+                                 to_string(right));
       return left;
     }
   }
@@ -228,17 +220,17 @@ struct get_extents {
             ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
         *this);
 
-    if (left.is_free_scalar() && right.is_free_scalar())
+    if (is_free_scalar(left) && is_free_scalar(right))
       return basic_extents<size_t>{1};
-    else if (left.is_free_scalar())
+    else if (is_free_scalar(left))
       return right;
-    else if (right.is_free_scalar())
+    else if (is_free_scalar(right))
       return left;
     else {
       if (left != right)
         throw std::runtime_error("Cannot Add Tensor of shapes " +
-                                 left.to_string() + " and " +
-                                 right.to_string());
+                                 to_string(left) + " and " +
+                                 to_string(right));
       return left;
     }
   }
@@ -274,17 +266,17 @@ struct get_extents {
             ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
         *this);
 
-    if (left.is_free_scalar() && right.is_free_scalar())
+    if (is_free_scalar(left) && is_free_scalar(right))
       return basic_extents<size_t>{1};
-    else if (left.is_free_scalar())
+    else if (is_free_scalar(left))
       return right;
-    else if (right.is_free_scalar())
+    else if (is_free_scalar(right))
       return left;
     else {
       if (left != right)
         throw std::runtime_error("Cannot perform == on tensor of shapes " +
-                                 left.to_string() + " and " +
-                                 right.to_string());
+                                 to_string(left) + " and " +
+                                 to_string(right));
       return left;
     }
   }
@@ -302,17 +294,17 @@ struct get_extents {
             ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
         *this);
 
-    if (left.is_free_scalar() && right.is_free_scalar())
+    if (is_free_scalar(left) && is_free_scalar(right))
       return basic_extents<size_t>{1};
-    else if (left.is_free_scalar())
+    else if (is_free_scalar(left))
       return right;
-    else if (right.is_free_scalar())
+    else if (is_free_scalar(right))
       return left;
     else {
       if (left != right)
         throw std::runtime_error("Cannot perform != on tensor of shapes " +
-                                 left.to_string() + " and " +
-                                 right.to_string());
+                                 to_string(left) + " and " +
+                                 to_string(right));
       return left;
     }
   }
@@ -329,17 +321,17 @@ struct get_extents {
             ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
         *this);
 
-    if (left.is_free_scalar() && right.is_free_scalar())
+    if (is_free_scalar(left) && is_free_scalar(right))
       return basic_extents<size_t>{1};
-    else if (left.is_free_scalar())
+    else if (is_free_scalar(left))
       return right;
-    else if (right.is_free_scalar())
+    else if (is_free_scalar(right))
       return left;
     else {
       if (left != right)
         throw std::runtime_error("Cannot perform < on tensor of shapes " +
-                                 left.to_string() + " and " +
-                                 right.to_string());
+                                 to_string(left) + " and " +
+                                 to_string(right));
       return left;
     }
   }
@@ -356,17 +348,17 @@ struct get_extents {
             ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
         *this);
 
-    if (left.is_free_scalar() && right.is_free_scalar())
+    if (is_free_scalar(left) && is_free_scalar(right))
       return basic_extents<size_t>{1};
-    else if (left.is_free_scalar())
+    else if (is_free_scalar(left))
       return right;
-    else if (right.is_free_scalar())
+    else if (is_free_scalar(right))
       return left;
     else {
       if (left != right)
         throw std::runtime_error("Cannot perform > on tensor of shapes " +
-                                 left.to_string() + " and " +
-                                 right.to_string());
+                                 to_string(left) + " and " +
+                                 to_string(right));
       return left;
     }
   }
@@ -383,17 +375,17 @@ struct get_extents {
             ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
         *this);
 
-    if (left.is_free_scalar() && right.is_free_scalar())
+    if (is_free_scalar(left) && is_free_scalar(right))
       return basic_extents<size_t>{1};
-    else if (left.is_free_scalar())
+    else if (is_free_scalar(left))
       return right;
-    else if (right.is_free_scalar())
+    else if (is_free_scalar(right))
       return left;
     else {
       if (left != right)
         throw std::runtime_error("Cannot perform >= on tensor of shapes " +
-                                 left.to_string() + " and " +
-                                 right.to_string());
+                                 to_string(left) + " and " +
+                                 to_string(right));
       return left;
     }
   }
@@ -410,17 +402,17 @@ struct get_extents {
             ::boost::numeric::ublas::detail::tensor_expression>(rexpr),
         *this);
 
-    if (left.is_free_scalar() && right.is_free_scalar())
+    if (is_free_scalar(left) && is_free_scalar(right))
       return basic_extents<size_t>{1};
-    else if (left.is_free_scalar())
+    else if (is_free_scalar(left))
       return right;
-    else if (right.is_free_scalar())
+    else if (is_free_scalar(right))
       return left;
     else {
       if (left != right)
         throw std::runtime_error("Cannot perform <= on tensor of shapes " +
-                                 left.to_string() + " and " +
-                                 right.to_string());
+                                 to_string(left) + " and " +
+                                 to_string(right));
       return left;
     }
   }
@@ -444,9 +436,9 @@ struct get_extents {
   constexpr decltype(auto) operator()(
       ::boost::yap::expr_tag<::boost::yap::expr_kind::terminal>,
       Expr &terminal) {
-    if constexpr (::boost::numeric::ublas::is_vector_expression_v<Expr>) {
+    if constexpr (::boost::numeric::ublas::detail::is_vector_expression_v<Expr>) {
       return basic_extents<size_t>{terminal.size(), 1};
-    } else if constexpr (::boost::numeric::ublas::is_matrix_expression_v<
+    } else if constexpr (::boost::numeric::ublas::detail::is_matrix_expression_v<
                              Expr>) {
       return basic_extents<size_t>{terminal.size1(), terminal.size2()};
     } else
@@ -668,7 +660,7 @@ struct is_equality_or_non_equality_extent_same {
         ::boost::yap::transform(::boost::yap::as_expr(e1), get_extents{});
     auto right =
         ::boost::yap::transform(::boost::yap::as_expr(e2), get_extents{});
-    status = left.is_free_scalar() || right.is_free_scalar() || left == right;
+    status = is_free_scalar(left) || is_free_scalar(right) || left == right;
   }
 
   template <class Expr1, class Expr2>
@@ -679,7 +671,7 @@ struct is_equality_or_non_equality_extent_same {
         ::boost::yap::transform(::boost::yap::as_expr(e1), get_extents{});
     auto right =
         ::boost::yap::transform(::boost::yap::as_expr(e2), get_extents{});
-    status = left.is_free_scalar() || right.is_free_scalar() || left == right;
+    status = is_free_scalar(left) || is_free_scalar(right) || left == right;
   }
 
   bool status = false;

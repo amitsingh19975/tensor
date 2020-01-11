@@ -21,6 +21,7 @@
 #include "expression_utils.hpp"
 #include "extents.hpp"
 #include "strides.hpp"
+#include "fwd.hpp"
 
 namespace {
 struct deduced {};
@@ -65,16 +66,24 @@ struct tensor_expression {
    *
    * @return The tensor which contains the values of evaluated expresssion.
    */
-  template <class T = deduced, class F = ::boost::numeric::ublas::first_order,
+  template <class T = deduced, class E = ::boost::numeric::ublas::dynamic_extents<>, class F = ::boost::numeric::ublas::first_order,
             class A = std::vector<T, std::allocator<T>>>
   BOOST_UBLAS_INLINE auto eval() {
     using value_type = std::conditional_t<std::is_same_v<T, deduced>,
                                           decltype(this->operator()(0)), T>;
-    ::boost::numeric::ublas::tensor<value_type, F, A> result;
+    namespace ub = ::boost::numeric::ublas;
+    using tensor_type = ub::tensor<value_type, E, F, A>;
+    using array_type = typename tensor_type::array_type;
+    
+    tensor_type result;
     auto shape_expr = ::boost::yap::transform(*this, transforms::get_extents{});
-    result.extents_ = shape_expr;
-    result.strides_ = basic_strides<std::size_t, F>{shape_expr};
-    result.data_.resize(shape_expr.product());
+    if constexpr( !ub::detail::is_static<E>::value ){
+      result.extents_ = shape_expr;
+      result.strides_ = typename tensor_type::strides_type{shape_expr};
+      if constexpr ( !ub::detail::is_stl_array<array_type>::value){
+        result.data_.resize(product(shape_expr));
+      }
+    }
 
     // #ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
 
@@ -89,8 +98,8 @@ struct tensor_expression {
     //                                                       this->operator()(i);
     // #else
 
-#pragma omp parallel for
-    for (auto i = 0u; i < shape_expr.product(); i++)
+  #pragma omp parallel for
+    for (auto i = 0u; i < product(shape_expr); i++)
       result.data_[i] = this->operator()(i);
     // #endif
     return std::move(result);
@@ -107,14 +116,22 @@ struct tensor_expression {
    * @param[out] target the resulting tensor.
    */
 
-  template <class T, class F, class A>
+  template <class T, class E, class F, class A>
   BOOST_UBLAS_INLINE void eval_to(
-      ::boost::numeric::ublas::tensor<T, F, A> &target) {
+      ::boost::numeric::ublas::tensor<T, E, F, A> &target) {
+    
+    namespace ub = ::boost::numeric::ublas;
+    using tensor_type = ::boost::numeric::ublas::tensor<T, E, F, A>;
+    using array_type = typename tensor_type::array_type;
+
     auto shape_expr = ::boost::yap::transform(*this, transforms::get_extents{});
-    target.data_.resize(shape_expr.product());
-    target.extents_ = shape_expr;
-    target.strides_ =
-        ::boost::numeric::ublas::basic_strides<std::size_t, F>{shape_expr};
+    if constexpr( !ub::detail::is_static<E>::value ){
+      target.extents_ = shape_expr;
+      target.strides_ = typename tensor_type::strides_type{shape_expr};
+      if constexpr ( !ub::detail::is_stl_array<array_type>::value){
+        target.data_.resize(product(shape_expr));
+      }
+    }
 
     // #ifndef BOOST_UBLAS_NO_EXPRESSION_OPTIMIZATION
 
@@ -130,7 +147,7 @@ struct tensor_expression {
     //#else
 
 #pragma omp parallel for
-    for (auto i = 0u; i < shape_expr.product(); i++)
+    for (auto i = 0u; i < product(shape_expr); i++)
       target.data_[i] = this->operator()(i);
     //#endif
   }
@@ -163,7 +180,7 @@ struct tensor_expression {
     }
 
     auto shape_expr = ::boost::yap::transform(*this, transforms::get_extents{});
-    for (auto i = 0u; i < shape_expr.product(); i++)
+    for (auto i = 0u; i < product(shape_expr); i++)
       if (!(this->operator()(i))) return false;
     return true;
   }

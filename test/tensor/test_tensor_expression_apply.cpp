@@ -23,7 +23,7 @@ using test_types = zip<int, long, float, double, std::complex<float>>::with_t<
     boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
 
 struct fixture {
-  using extents_type = boost::numeric::ublas::shape;
+  using extents_type = boost::numeric::ublas::dynamic_extents<>;
   fixture()
       : extents{
 
@@ -50,7 +50,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_apply_tensor, value,
   using namespace boost::numeric;
   using value_type = typename value::first_type;
   using layout_type = typename value::second_type;
-  using tensor_type = ublas::tensor<value_type, layout_type>;
+  using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
   for (auto const &e : extents) {
 
@@ -65,7 +65,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_apply_tensor, value,
     tensor_type t_copy1 = t;
     tensor_type t_copy2 = t;
 
-    BOOST_TEST_MESSAGE("Extent on apply tensor : "+ e.to_string());
+    BOOST_TEST_MESSAGE("Extent on apply tensor : "+ to_string(e));
 
 
     if (!e.empty()) {
@@ -82,15 +82,15 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_apply_tensor, value,
           auto transformed_expr7 = ublas::apply(t_copy2, [](auto const& ep){return ep*ep;});
           auto transformed_expr8 = ublas::apply(t_copy2, [](auto const& ep){return sqrt(ep);});
 
-          static_assert(ublas::is_tensor_expression_v<decltype(terminal_tensor)>);
-          static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr1)>);
-          static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr2)>);
-          static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr3)>);
-          static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr4)>);
-          static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr5)>);
-          static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr6)>);
-          static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr7)>);
-          static_assert(ublas::is_tensor_expression_v<decltype(transformed_expr8)>);
+          static_assert(ublas::detail::is_tensor_expression_v<decltype(terminal_tensor)>);
+          static_assert(ublas::detail::is_tensor_expression_v<decltype(transformed_expr1)>);
+          static_assert(ublas::detail::is_tensor_expression_v<decltype(transformed_expr2)>);
+          static_assert(ublas::detail::is_tensor_expression_v<decltype(transformed_expr3)>);
+          static_assert(ublas::detail::is_tensor_expression_v<decltype(transformed_expr4)>);
+          static_assert(ublas::detail::is_tensor_expression_v<decltype(transformed_expr5)>);
+          static_assert(ublas::detail::is_tensor_expression_v<decltype(transformed_expr6)>);
+          static_assert(ublas::detail::is_tensor_expression_v<decltype(transformed_expr7)>);
+          static_assert(ublas::detail::is_tensor_expression_v<decltype(transformed_expr8)>);
 
           tensor_type x = transformed_expr1;
           tensor_type x2 = transformed_expr2;
@@ -124,7 +124,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_apply_expression,
   using namespace boost::numeric;
   using value_type = typename value::first_type;
   using layout_type = typename value::second_type;
-  using tensor_type = ublas::tensor<value_type, layout_type>;
+  using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
   for (auto const &e : extents) {
     auto t = tensor_type(e);
@@ -134,7 +134,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_expression_apply_expression,
       v += value_type{1};
     }
 
-    BOOST_TEST_MESSAGE("Extent on apply expr : "+ e.to_string());
+    BOOST_TEST_MESSAGE("Extent on apply expr : "+ to_string(e));
 
     if(!e.empty()) {
       auto reverse_t = t;

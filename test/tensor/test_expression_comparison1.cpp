@@ -25,7 +25,6 @@ struct fixture {
 	using extents_type = boost::numeric::ublas::basic_extents<std::size_t>;
 	fixture()
 	  : extents{
-				extents_type{},    // 3
 				extents_type{2,3}, // 4
 				extents_type{4,2,3}, // 8
 				extents_type{4,2,3,5}} // 9
@@ -42,11 +41,12 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison, value,  test_types, fi
 	using namespace boost::numeric;
 	using value_type  = typename value::first_type;
 	using layout_type = typename value::second_type;
-	using tensor_type = ublas::tensor<value_type, layout_type>;
+	using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
 
 	auto check = [](auto const& e)
-	{
+	{	
+		
 		auto t  = tensor_type (e);
 		auto t2 = tensor_type (e);
 		auto v  = value_type  {};

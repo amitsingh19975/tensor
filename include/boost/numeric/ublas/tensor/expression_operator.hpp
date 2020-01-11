@@ -19,14 +19,9 @@
 #include "functions.hpp"
 #include "multi_index_utility.hpp"
 #include "tensor_cast_macros.hpp"
+#include "fwd.hpp"
 
 namespace boost::numeric::ublas {
-
-namespace detail {
-template <::boost::yap::expr_kind K, typename A>
-struct tensor_expression;
-
-}
 
 BOOST_UBLAS_EAGER_TENSOR_CAST(static_tensor_cast, static_cast)
 BOOST_UBLAS_EAGER_TENSOR_CAST(dynamic_tensor_cast, dynamic_cast)
@@ -37,26 +32,26 @@ BOOST_UBLAS_EAGER_TENSOR_CAST(reinterpret_tensor_cast, reinterpret_cast)
 // Tensor to expr
 BOOST_YAP_USER_UDT_UNARY_OPERATOR(
     negate, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 BOOST_YAP_USER_UDT_UNARY_OPERATOR(
     unary_plus, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     plus, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     minus, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     multiplies, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     divides, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 
 // Expr to Expr
 BOOST_YAP_USER_BINARY_OPERATOR(plus,
@@ -115,70 +110,70 @@ BOOST_UBLAS_INLINE decltype(auto) operator*(
 }
 
 // Assign Operators
-template <class T, class F, class V, class Expr>
+template <class T, class E, class F, class V, class Expr>
 BOOST_UBLAS_INLINE decltype(auto) operator+=(
-    boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
+    boost::numeric::ublas::tensor<T, E, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
           std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
-  if (shape != lhs.extents() && !shape.is_free_scalar()) {
+  if (shape != lhs.extents() && !is_free_scalar(shape)) {
     throw std::runtime_error("Cannot apply operator += with extents " +
-                             lhs.extents().to_string() + " and " +
-                             shape.to_string());
+                             to_string(lhs.extents()) + " and " +
+                             to_string(shape));
   }
   auto new_expr = lhs + expr;
   new_expr.eval_to(lhs);
   return lhs;
 }
 
-template <class T, class F, class V, class Expr>
+template <class T, class E, class F, class V, class Expr>
 BOOST_UBLAS_INLINE decltype(auto) operator-=(
-    boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
+    boost::numeric::ublas::tensor<T, E, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
           std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
-  if (shape != lhs.extents() && !shape.is_free_scalar()) {
+  if (shape != lhs.extents() && !is_free_scalar(shape)) {
     throw std::runtime_error("Cannot apply operator -= with extents " +
-                             lhs.extents().to_string() + " and " +
-                             shape.to_string());
+                             to_string(lhs.extents()) + " and " +
+                             to_string(shape));
   }
   auto new_expr = lhs - expr;
   new_expr.eval_to(lhs);
   return lhs;
 }
-template <class T, class F, class V, class Expr>
+template <class T, class E, class F, class V, class Expr>
 BOOST_UBLAS_INLINE decltype(auto) operator*=(
-    boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
+    boost::numeric::ublas::tensor<T, E, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
           std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
-  if (shape != lhs.extents() && !shape.is_free_scalar()) {
+  if (shape != lhs.extents() && !is_free_scalar(shape)) {
     throw std::runtime_error("Cannot apply operator *= with extents " +
-                             lhs.extents().to_string() + " and " +
-                             shape.to_string());
+                             to_string(lhs.extents()) + " and " +
+                             to_string(shape));
   }
   auto new_expr = lhs * expr;
   new_expr.eval_to(lhs);
   return lhs;
 }
-template <class T, class F, class V, class Expr>
+template <class T, class E, class F, class V, class Expr>
 BOOST_UBLAS_INLINE decltype(auto) operator/=(
-    boost::numeric::ublas::tensor<T, V, F> &lhs, Expr &&e) {
+    boost::numeric::ublas::tensor<T, E, V, F> &lhs, Expr &&e) {
   decltype(auto) expr =
       boost::yap::as_expr<boost::numeric::ublas::detail::tensor_expression>(
           std::forward<Expr>(e));
   auto shape = boost::yap::transform(
       expr, boost::numeric::ublas::detail::transforms::get_extents{});
-  if (shape != lhs.extents() && !shape.is_free_scalar()) {
+  if (shape != lhs.extents() && !is_free_scalar(shape)) {
     throw std::runtime_error("Cannot apply operator /= with extents " +
-                             lhs.extents().to_string() + " and " +
-                             shape.to_string());
+                             to_string(lhs.extents()) + " and " +
+                             to_string(shape));
   }
   auto new_expr = lhs / expr;
   new_expr.eval_to(lhs);

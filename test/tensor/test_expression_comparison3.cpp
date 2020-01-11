@@ -22,10 +22,9 @@ using double_extended = boost::multiprecision::cpp_bin_float_double_extended;
 using test_types = zip<int,long,float,double,double_extended>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
 
 struct fixture {
-	using extents_type = boost::numeric::ublas::basic_extents<std::size_t>;
+	using extents_type = boost::numeric::ublas::dynamic_extents<>;
 	fixture()
 	  : extents{
-				extents_type{},    // 3
 				extents_type{2,3}, // 4
 				extents_type{4,2,3}, // 8
 				extents_type{4,2,3,5}} // 9
@@ -39,7 +38,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_scalar, value,  te
 	using namespace boost::numeric;
 	using value_type  = typename value::first_type;
 	using layout_type = typename value::second_type;
-	using tensor_type = ublas::tensor<value_type, layout_type>;
+	using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
 
 
 	auto check = [](auto const& e)
@@ -47,9 +46,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_comparison_with_scalar, value,  te
 
 		BOOST_CHECK( (bool) (tensor_type(e,value_type{2}) == tensor_type(e,value_type{2}))  );
 		BOOST_CHECK( (bool) (tensor_type(e,value_type{2}) != tensor_type(e,value_type{1}))  );
-
-		if(e.empty())
-			return;
 
 		BOOST_CHECK( ! (bool)(tensor_type(e,2) <  2) );
 		BOOST_CHECK( ! (bool)(tensor_type(e,2) >  2) );

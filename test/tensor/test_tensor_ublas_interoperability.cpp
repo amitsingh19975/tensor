@@ -24,7 +24,7 @@ using test_types =
                                           boost::numeric::ublas::last_order>;
 
 struct fixture {
-  using extents_type = boost::numeric::ublas::basic_extents<std::size_t>;
+  using extents_type = boost::numeric::ublas::dynamic_extents<>;
   fixture()
       : extents{extents_type{1, 1},   // 1
                 extents_type{1, 2},   // 2
@@ -44,7 +44,7 @@ struct fixture {
         using namespace boost::numeric;
         using value_type  = typename value::first_type;
         using layout_type = typename value::second_type;
-        using tensor_type = ublas::tensor<value_type, layout_type>;
+        using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
         using matrix_type = typename tensor_type::matrix_type;
 
         auto check = [](auto const& e)
@@ -60,21 +60,21 @@ struct fixture {
 
             BOOST_CHECK_EQUAL (  t.extents().at(0) , e.at(0) );
             BOOST_CHECK_EQUAL (  t.extents().at(1) , e.at(1) );
-            BOOST_CHECK_EQUAL (  t.size() , e.product() );
+            BOOST_CHECK_EQUAL (  t.size() , product(e) );
             BOOST_CHECK_EQUAL (  t.rank() , e.size() );
             BOOST_CHECK       ( !t.empty()    );
             BOOST_CHECK_NE    (  t.data() , nullptr);
 
             BOOST_CHECK_EQUAL (  s.extents().at(0) , e.at(0) );
             BOOST_CHECK_EQUAL (  s.extents().at(1) , e.at(1) );
-            BOOST_CHECK_EQUAL (  s.size() , e.product() );
+            BOOST_CHECK_EQUAL (  s.size() , product(e) );
             BOOST_CHECK_EQUAL (  s.rank() , e.size() );
             BOOST_CHECK       ( !s.empty()    );
             BOOST_CHECK_NE    (  s.data() , nullptr);
 
             BOOST_CHECK_EQUAL (  q.extents().at(0) , e.at(0) );
             BOOST_CHECK_EQUAL (  q.extents().at(1) , e.at(1) );
-            BOOST_CHECK_EQUAL (  q.size() , e.product() );
+            BOOST_CHECK_EQUAL (  q.size() , product(e) );
             BOOST_CHECK_EQUAL (  q.rank() , e.size() );
             BOOST_CHECK       ( !q.empty()    );
             BOOST_CHECK_NE    (  q.data() , nullptr);
@@ -103,7 +103,7 @@ struct fixture {
         using namespace boost::numeric;
         using value_type  = typename value::first_type;
         using layout_type = typename value::second_type;
-        using tensor_type = ublas::tensor<value_type, layout_type>;
+        using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
         using vector_type = typename tensor_type::vector_type;
 
         auto check = [](auto const& e)
@@ -119,21 +119,21 @@ struct fixture {
 
             BOOST_CHECK_EQUAL (  t.extents().at(0) , e.at(0)*e.at(1) );
             BOOST_CHECK_EQUAL (  t.extents().at(1) , 1);
-            BOOST_CHECK_EQUAL (  t.size() , e.product() );
+            BOOST_CHECK_EQUAL (  t.size() , product(e) );
             BOOST_CHECK_EQUAL (  t.rank() , e.size() );
             BOOST_CHECK       ( !t.empty()    );
             BOOST_CHECK_NE    (  t.data() , nullptr);
 
             BOOST_CHECK_EQUAL (  s.extents().at(0) , e.at(0)*e.at(1) );
             BOOST_CHECK_EQUAL (  s.extents().at(1) , 1);
-            BOOST_CHECK_EQUAL (  s.size() , e.product() );
+            BOOST_CHECK_EQUAL (  s.size() , product(e) );
             BOOST_CHECK_EQUAL (  s.rank() , e.size() );
             BOOST_CHECK       ( !s.empty()    );
             BOOST_CHECK_NE    (  s.data() , nullptr);
 
             BOOST_CHECK_EQUAL (  q.extents().at(0) , e.at(0)*e.at(1) );
             BOOST_CHECK_EQUAL (  q.extents().at(1) , 1);
-            BOOST_CHECK_EQUAL (  q.size() , e.product() );
+            BOOST_CHECK_EQUAL (  q.size() , product(e) );
             BOOST_CHECK_EQUAL (  q.rank() , e.size() );
             BOOST_CHECK       ( !q.empty()    );
             BOOST_CHECK_NE    (  q.data() , nullptr);
@@ -158,13 +158,13 @@ struct fixture {
         using namespace boost::numeric;
         using value_type  = typename value::first_type;
         using layout_type = typename value::second_type;
-        using tensor_type = ublas::tensor<value_type, layout_type>;
+        using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>, layout_type>;
         using matrix_type = typename tensor_type::matrix_type;
         using vector_type = typename tensor_type::vector_type;
 
         auto check = [](auto const& e)
         {
-            if(e.product() <= 2)
+            if(product(e) <= 2)
                 return;
             assert(e.size() == 2);
             auto Q = tensor_type{e[0],1};

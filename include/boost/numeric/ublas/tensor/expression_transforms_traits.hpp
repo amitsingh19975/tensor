@@ -18,6 +18,7 @@
 #include <boost/yap/yap.hpp>
 #include <type_traits>
 #include <utility>
+#include "fwd.hpp"
 
 /**
  * All these traits are used to check the state of the expression for
@@ -25,10 +26,6 @@
  * in future we extent it to other ublas containers like vector, matrix that are
  * embedded in the tensor expression.
  */
-
-namespace boost::numeric::ublas::detail {
-template <::boost::yap::expr_kind, typename> struct tensor_expression;
-}
 
 namespace boost::numeric::ublas::detail::transforms {
 
@@ -56,8 +53,8 @@ struct is_multiply<::boost::numeric::ublas::detail::tensor_expression<
             ::boost::yap::expr_kind::terminal,
             ::boost::hana::tuple<operandB>>>>> {
   static constexpr bool value =
-      ::boost::numeric::ublas::is_tensor_v<std::remove_reference_t<operandA>> &&
-      ::boost::numeric::ublas::is_tensor_v<std::remove_reference_t<operandB>>;
+      ::boost::numeric::ublas::detail::is_tensor_v<std::remove_reference_t<operandA>> &&
+      ::boost::numeric::ublas::detail::is_tensor_v<std::remove_reference_t<operandB>>;
 };
 
 /**
@@ -84,8 +81,8 @@ struct is_addition<::boost::numeric::ublas::detail::tensor_expression<
             ::boost::yap::expr_kind::terminal,
             ::boost::hana::tuple<operandB>>>>> {
   static constexpr bool value =
-      ::boost::numeric::ublas::is_tensor_v<std::remove_reference_t<operandA>> &&
-      ::boost::numeric::ublas::is_tensor_v<std::remove_reference_t<operandB>>;
+      ::boost::numeric::ublas::detail::is_tensor_v<std::remove_reference_t<operandA>> &&
+      ::boost::numeric::ublas::detail::is_tensor_v<std::remove_reference_t<operandB>>;
 };
 
 /**
@@ -106,7 +103,7 @@ template <class operand>
 struct is_terminal<::boost::numeric::ublas::detail::tensor_expression<
     ::boost::yap::expr_kind::terminal, ::boost::hana::tuple<operand>>> {
   static constexpr bool value =
-      ::boost::numeric::ublas::is_tensor_v<std::remove_reference_t<operand>>;
+      ::boost::numeric::ublas::detail::is_tensor_v<std::remove_reference_t<operand>>;
 };
 
 /**
@@ -135,10 +132,10 @@ struct is_scalar_multiply<::boost::numeric::ublas::detail::tensor_expression<
             ::boost::yap::expr_kind::terminal, ::boost::hana::tuple<B>>>>> {
   static constexpr bool first_scalar =
       std::is_arithmetic_v<std::remove_reference_t<A>> &&
-      ::boost::numeric::ublas::is_tensor_v<std::remove_reference_t<B>>;
+      ::boost::numeric::ublas::detail::is_tensor_v<std::remove_reference_t<B>>;
   static constexpr bool second_scalar =
       std::is_arithmetic_v<std::remove_reference_t<B>> &&
-      ::boost::numeric::ublas::is_tensor_v<std::remove_reference_t<A>>;
+      ::boost::numeric::ublas::detail::is_tensor_v<std::remove_reference_t<A>>;
   static constexpr bool value = first_scalar || second_scalar;
 };
 

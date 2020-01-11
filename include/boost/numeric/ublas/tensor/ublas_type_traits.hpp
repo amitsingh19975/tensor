@@ -17,13 +17,11 @@
 
 #include <boost/yap/yap.hpp>
 #include <type_traits>
+#include "fwd.hpp"
 
-namespace boost::numeric::ublas {
+namespace boost::numeric::ublas::detail {
 
 // Forward declare classes
-template <class T, class F, class A> class tensor;
-template <class T, class F, class A> class matrix;
-template <class T, class A> class vector;
 template <class derived_type> class matrix_expression;
 template <class derived_type> class vector_expression;
 namespace detail {
@@ -37,7 +35,7 @@ template <boost::yap::expr_kind K, typename Tuple> struct tensor_expression;
  * @tparam T the type to check for if its tensor or not.
  */
 template <class T> struct is_tensor { static constexpr bool value = false; };
-template <class T, class F, class A> struct is_tensor<tensor<T, F, A>> {
+template <class T, class E, class F, class A> struct is_tensor< tensor<T, E, F, A> > {
   static constexpr bool value = true;
 };
 
@@ -73,7 +71,7 @@ template <class T> struct is_tensor_expression {
   static constexpr bool value = false;
 };
 template <boost::yap::expr_kind K, typename Tuple>
-struct is_tensor_expression<detail::tensor_expression<K, Tuple>> {
+struct is_tensor_expression<tensor_expression<K, Tuple>> {
   static constexpr bool value = true;
 };
 

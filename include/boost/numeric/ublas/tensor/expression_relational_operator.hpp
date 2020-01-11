@@ -25,27 +25,27 @@ template <::boost::yap::expr_kind K, typename A> struct tensor_expression;
 
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     less, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     less_equal, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     equal_to, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     not_equal_to, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     greater, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 
 BOOST_YAP_USER_UDT_ANY_BINARY_OPERATOR(
     greater_equal, boost::numeric::ublas::detail::tensor_expression,
-    boost::numeric::ublas::is_tensor)
+    boost::numeric::ublas::detail::is_tensor)
 
 BOOST_YAP_USER_BINARY_OPERATOR(equal_to,
                                boost::numeric::ublas::detail::tensor_expression,

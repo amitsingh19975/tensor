@@ -22,8 +22,8 @@
 #include <boost/test/unit_test.hpp>
 #include "utility.hpp"
 
-// BOOST_AUTO_TEST_SUITE ( test_tensor, * boost::unit_test::depends_on("test_extents") ) ;
-BOOST_AUTO_TEST_SUITE ( test_tensor )
+BOOST_AUTO_TEST_SUITE ( test_tensor, * boost::unit_test::depends_on("test_extents") ) ;
+// BOOST_AUTO_TEST_SUITE ( test_tensor )
 
 using test_types = zip<int,long,float,double,std::complex<float>>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
 
@@ -291,7 +291,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_read_write_multi_index_access_at, 
 	using value_type  = typename value::first_type;
 	using layout_type = typename value::second_type;
 	using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>,layout_type>;
-
 	auto check1 = [](const tensor_type& t)
 	{
 		auto v = value_type{};
@@ -380,7 +379,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_reshape, value,  test_types, fixtu
 	using layout_type = typename value::second_type;
 	using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>,layout_type>;
 
-
 	for(auto const& efrom : extents){
 		for(auto const& eto : extents){
 
@@ -415,7 +413,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_swap, value,  test_types, fixture)
 	using value_type  = typename value::first_type;
 	using layout_type = typename value::second_type;
 	using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>,layout_type>;
-
 	for(auto const& e_t : extents){
 		for(auto const& e_r : extents) {
 
@@ -429,48 +426,48 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_swap, value,  test_types, fixture)
 			for(auto i = 0ul; i < t.size(); ++i)
 				BOOST_CHECK_EQUAL( t[i], w );
 
-// 			BOOST_CHECK_EQUAL (  t.size() , product(e_r) );
-// 			BOOST_CHECK_EQUAL (  t.rank() , e_r.size() );
-// 			BOOST_CHECK ( t.extents() == e_r );
+			BOOST_CHECK_EQUAL (  t.size() , product(e_r) );
+			BOOST_CHECK_EQUAL (  t.rank() , e_r.size() );
+			BOOST_CHECK ( t.extents() == e_r );
 
-// 			for(auto i = 0ul; i < r.size(); ++i)
-// 				BOOST_CHECK_EQUAL( r[i], v );
+			for(auto i = 0ul; i < r.size(); ++i)
+				BOOST_CHECK_EQUAL( r[i], v );
 
-// 			BOOST_CHECK_EQUAL (  r.size() , product(e_t) );
-// 			BOOST_CHECK_EQUAL (  r.rank() , e_t.size() );
-// 			BOOST_CHECK ( r.extents() == e_t );
-
-
-// 		}
-// 	}
-// }
+			BOOST_CHECK_EQUAL (  r.size() , product(e_t) );
+			BOOST_CHECK_EQUAL (  r.rank() , e_t.size() );
+			BOOST_CHECK ( r.extents() == e_t );
 
 
+		}
+	}
+}
 
-// BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_standard_iterator, value,  test_types, fixture)
-// {
-// 	using namespace boost::numeric;
-// 	using value_type  = typename value::first_type;
-// 	using layout_type = typename value::second_type;
-// 	using tensor_type = ublas::tensor<value_type, ublas::shape<ublas::dynamic_rank>,layout_type>;
 
-// 	for(auto const& e : extents)
-// 	{
-// 		auto v = value_type {} + value_type{1};
-// 		auto t = tensor_type{e, v};
 
-// 		BOOST_CHECK_EQUAL( std::distance(t.begin(),  t.end ()), t.size()  );
-// 		BOOST_CHECK_EQUAL( std::distance(t.rbegin(), t.rend()), t.size()  );
+BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_standard_iterator, value,  test_types, fixture)
+{
+	using namespace boost::numeric;
+	using value_type  = typename value::first_type;
+	using layout_type = typename value::second_type;
+	using tensor_type = ublas::tensor<value_type, ublas::shape<ublas::dynamic_rank>,layout_type>;
 
-// 		BOOST_CHECK_EQUAL( std::distance(t.cbegin(),  t.cend ()), t.size() );
-// 		BOOST_CHECK_EQUAL( std::distance(t.crbegin(), t.crend()), t.size() );
+	for(auto const& e : extents)
+	{
+		auto v = value_type {} + value_type{1};
+		auto t = tensor_type{e, v};
 
-// 		if(t.size() > 0) {
-// 			BOOST_CHECK(  t.data() ==  std::addressof( *t.begin () )  ) ;
-// 			BOOST_CHECK(  t.data() ==  std::addressof( *t.cbegin() )  ) ;
-// 		}
-// 	}
-// }
+		BOOST_CHECK_EQUAL( std::distance(t.begin(),  t.end ()), t.size()  );
+		BOOST_CHECK_EQUAL( std::distance(t.rbegin(), t.rend()), t.size()  );
+
+		BOOST_CHECK_EQUAL( std::distance(t.cbegin(),  t.cend ()), t.size() );
+		BOOST_CHECK_EQUAL( std::distance(t.crbegin(), t.crend()), t.size() );
+
+		if(t.size() > 0) {
+			BOOST_CHECK(  t.data() ==  std::addressof( *t.begin () )  ) ;
+			BOOST_CHECK(  t.data() ==  std::addressof( *t.cbegin() )  ) ;
+		}
+	}
+}
 
 BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_throw, value, test_types, fixture)
 {

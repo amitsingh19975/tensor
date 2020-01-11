@@ -449,7 +449,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_standard_iterator, value,  test_ty
 	using namespace boost::numeric;
 	using value_type  = typename value::first_type;
 	using layout_type = typename value::second_type;
-	using tensor_type = ublas::tensor<value_type, ublas::shape<ublas::dynamic_rank>,layout_type>;
+	using tensor_type = ublas::tensor<value_type, ublas::dynamic_extents<>,layout_type>;
 
 	for(auto const& e : extents)
 	{

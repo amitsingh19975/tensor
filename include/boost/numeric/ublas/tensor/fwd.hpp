@@ -13,11 +13,17 @@
 #define BOOST_NUMERIC_UBLAS_TENSOR_FWD_HPP
 
 #include <boost/yap/yap.hpp>
+
 namespace boost::numeric::ublas {
 
-template <class T, ptrdiff_t... E> struct basic_static_extents;
+#define TENSOR_STATIC_AUTO_CONSTEXPR_RETURN [[nodiscard]] static constexpr auto
+#define TENSOR_AUTO_CONSTEXPR_RETURN [[nodiscard]] constexpr auto
+#define TENSOR_CONSTEXPR_RETURN(T) [[nodiscard]] constexpr T
+#define TENSOR_AUTO_RETURN [[nodiscard]] constexpr auto
+#define TENSOR_RETURN(T) [[nodiscard]] T
 
-template <class T> class basic_extents;
+template <class T, ptrdiff_t... E>
+struct basic_static_extents;
 
 template <class int_type, ptrdiff_t... E> struct basic_static_extents;
 
@@ -25,23 +31,37 @@ template <class __int_type, class __layout> class basic_strides;
 
 template<class T, class L> class basic_strides;
 
-template <class E, typename> constexpr bool valid(E const &e);
+template <class T> class basic_extents;
 
-template <class E, typename> constexpr bool is_scalar(E const &e);
+template <class T, class L> class basic_strides;
+
+template <class E, typename>
+constexpr bool valid(E const &e);
 
 template <class E, typename> constexpr bool is_free_scalar(E const &e);
 
 template <class E, typename> constexpr bool is_vector(E const &e);
 
-template <class E, typename> constexpr bool is_matrix(E const &e);
+template <class E, typename> constexpr bool is_scalar(E const &e);
 
-template <class E, typename> constexpr bool is_tensor(E const &e);
+template <class E, typename>
+constexpr bool is_vector(E const &e);
 
-template <class E, typename> auto squeeze(E const &e);
+template <class E, typename>
+constexpr bool is_matrix(E const &e);
+
+template <class E, typename>
+constexpr bool is_tensor(E const &e);
 
 template <class E, typename> constexpr auto product(E const &e);
 
+template <class E, typename> auto squeeze(E const &e);
+
 template <class E, typename> std::string to_string(E const &e);
+
+template <class int_type, ptrdiff_t... E> struct basic_static_extents;
+
+template <class __int_type, class __layout> class basic_strides;
 
 /** @brief Forward declaration of static_strides for specialization
  *
@@ -52,7 +72,8 @@ template <class E, typename> std::string to_string(E const &e);
  * @tparam Layout either first_order or last_order
  *
  */
-template <class ExtentType, class Layout> struct static_strides;
+template <class ExtentType, class Layout>
+struct static_strides;
 
 /** @brief Type trait for selecting static_strides or basic_stride based on the
  * type of extents
@@ -63,23 +84,47 @@ template <class ExtentType, class Layout> struct static_strides;
  *
  */
 
-template <class E, class Layout> struct stride_type;
+template <class E, class Layout>
+struct stride_type;
 
-template <class T, class E, class F, class A> class tensor;
+template <class T, class E, class F, class A>
+class tensor;
 
-template <class T, class F, class A> class matrix;
+template <class T, class F, class A>
+class matrix;
 
-template <class T, class A> class vector;
+template <class T, class A>
+class vector;
 
-template <class A> struct storage_traits;
+template <class A>
+struct storage_traits;
 
-template<class index_type, class tuple_type> struct has_index;
+template <class index_type, class tuple_type>
+struct has_index;
 
-template<class tupe_type> struct valid_multi_index;
+template <class tupe_type>
+struct valid_multi_index;
+
+namespace span
+{
+template <typename T, ptrdiff_t...>
+struct slice_helper;
+
+template <typename T, ptrdiff_t...>
+struct slice_helper;
+
+template <typename T, ptrdiff_t...>
+struct basic_slice;
+
+} // namespace span
+
+template <typename T, typename... S>
+struct subtensor;
 
 } // namespace boost::numeric::ublas
 
-namespace boost::numeric::ublas::detail {
+namespace boost::numeric::ublas::detail
+{
 
 /** @brief stores the extents
  *
@@ -87,29 +132,39 @@ namespace boost::numeric::ublas::detail {
  * tparam S of type basic_shape
  *
  */
-template <ptrdiff_t R, class S> struct basic_extents_impl;
+template <ptrdiff_t R, class S>
+struct basic_extents_impl;
 
-template <class E> struct is_extents_impl;
+template <class E>
+struct is_extents_impl;
 
-template <class E> struct is_static_extents_impl;
+template <class E>
+struct is_static_extents_impl;
 
-template <class E> struct is_static_extents;
+template <class E>
+struct is_static_extents;
 
-template <class E> struct is_basic_extents_impl_impl;
+template <class E>
+struct is_basic_extents_impl_impl;
 
-template <class E> struct is_basic_extents_impl;
+template <class E>
+struct is_basic_extents_impl;
 
-template <class E> struct is_dynamic;
+template <class E>
+struct is_dynamic;
 
-template <class E> struct is_static;
+template <class E>
+struct is_static;
 
-template <class T> struct remove_cvref;
+template <class T>
+struct remove_cvref;
 
 struct iterator_tag;
 
 struct invalid_iterator_tag;
 
-template <class T, class> struct is_iterator;
+template <class T, class>
+struct is_iterator;
 
 /**
  * @tparam depth type of size_t for keeping track of recursive depth
@@ -123,13 +178,17 @@ template <class T, class> struct is_iterator;
 template <size_t depth = 0, class E, class IndexType, class... Args>
 constexpr bool in_bounds(E const &e, IndexType const &idx, Args... args);
 
-template <class E> constexpr bool in_bounds(E const &e);
+template <class E>
+constexpr bool in_bounds(E const &e);
 
-template <ptrdiff_t... E> struct dynamic_extents_impl;
+template <ptrdiff_t... E>
+struct dynamic_extents_impl;
 
-template <ptrdiff_t... E> struct shape_in_bounds;
+template <ptrdiff_t... E>
+struct shape_in_bounds;
 
-template <ptrdiff_t... Extents> struct basic_shape;
+template <ptrdiff_t... Extents>
+struct basic_shape;
 
 /** @brief struct declaration which makes the range of dynamic_extents for a
  *given range
@@ -138,7 +197,8 @@ template <ptrdiff_t... Extents> struct basic_shape;
  * @tparam end which is a end of range
  *
  **/
-template <ptrdiff_t start, ptrdiff_t end> struct make_dynamic_basic_shape_impl;
+template <ptrdiff_t start, ptrdiff_t end>
+struct make_dynamic_basic_shape_impl;
 
 /** @brief struct declaration which concat two basic_shapes
  *
@@ -146,9 +206,11 @@ template <ptrdiff_t start, ptrdiff_t end> struct make_dynamic_basic_shape_impl;
  * @tparam S2 type of basic_shape
  *
  **/
-template <class S1, class S2> struct concat_basic_shape;
+template <class S1, class S2>
+struct concat_basic_shape;
 
-template <ptrdiff_t start, ptrdiff_t end> struct make_dynamic_basic_shape_impl;
+template <ptrdiff_t start, ptrdiff_t end>
+struct make_dynamic_basic_shape_impl;
 
 /** @brief struct declaration which makes the basic_shape with given rank and
  *extents
@@ -158,70 +220,93 @@ template <ptrdiff_t start, ptrdiff_t end> struct make_dynamic_basic_shape_impl;
  *extents
  *
  **/
-template <ptrdiff_t rank, ptrdiff_t... Extents> struct make_basic_shape;
+template <ptrdiff_t rank, ptrdiff_t... Extents>
+struct make_basic_shape;
 
-template <class S> struct is_basic_shape;
+template <class S>
+struct is_basic_shape;
 
-template <class S> struct is_dynamic_basic_shape;
+template <class S>
+struct is_dynamic_basic_shape;
 
-template <typename T> struct is_stl_array;
+template <typename T>
+struct is_stl_array;
 
-template <ptrdiff_t... D> struct product_helper_impl;
+template <ptrdiff_t... D>
+struct product_helper_impl;
 
-template <typename E> struct product_helper;
-
-template <typename V, typename F, typename A> struct tensor_mode_result;
+template <typename E>
+struct product_helper;
 
 template <::boost::yap::expr_kind, typename> struct tensor_expression;
 
 template<boost::yap::expr_kind Kind, class D> struct tensor_expression;
 
-template<class T, class EL, class ER, class OP> struct binary_tensor_expression;
+template <typename V, typename F, typename A> struct tensor_mode_result;
 
-template<class T, class E, class OP> struct unary_tensor_expression;
+template <boost::yap::expr_kind Kind, class D> struct tensor_expression;
 
-template<class ... index_types> struct has_index_impl;
+template <class T, class EL, class ER, class OP>
+struct binary_tensor_expression;
+
+template <class T, class E, class OP>
+struct unary_tensor_expression;
+
+template <class... index_types> struct has_index_impl;
 
 template<class ... index_types> struct valid_multi_index_impl;
 
+template <class... index_types> struct valid_multi_index_impl;
 // TODO: Future
 // template <typename V, typename E1, typename E2, typename F, typename A>
 // struct tensor_result;
 
+template <bool, typename E, typename... S>
+struct default_span_array_impl;
+
 } // namespace boost::numeric::ublas::detail
 
-namespace boost::numeric::ublas::storage {
+namespace boost::numeric::ublas::storage
+{
 
 struct tensor_storage;
 struct sparse_storage;
 struct band_storage;
 struct dense_storage;
 
-namespace sparse_tensor {
+namespace sparse_tensor
+{
 
-template <typename T, typename A> struct compressed_map;
+template <typename T, typename A>
+struct compressed_map;
 }
 
-namespace dense_tensor {
+namespace dense_tensor
+{
 
 template <typename T, typename E, typename A, typename = void>
 struct default_storage;
 }
 
-namespace detail {
-template <typename T> struct is_tensor_storage;
-template <typename T> struct is_sparse_storage;
-template <typename T> struct is_band_storage;
-template <typename T> struct is_dense_storage;
+namespace detail
+{
+template <typename T>
+struct is_tensor_storage;
+template <typename T>
+struct is_sparse_storage;
+template <typename T>
+struct is_band_storage;
+template <typename T>
+struct is_dense_storage;
 } // namespace detail
 
 } // namespace boost::numeric::ublas::storage
 
-namespace boost::numeric::ublas::index{
-    
-    template<std::size_t I> struct index_type;
+namespace boost::numeric::ublas::index
+{
 
-
+template <std::size_t I>
+struct index_type;
 }
 
 #endif

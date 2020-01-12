@@ -63,8 +63,16 @@ struct basic_static_extents<int_type,R,E...>
     if( k >= this->size() ) {
       throw std::out_of_range("boost::numeric::ublas::basic_static_extents: Out Of Bound");
     }else{
-      return impl::at(k); 
+      return static_cast<value_type>(impl::at(k)); 
     }
+  }
+
+  /**
+   * @param k pos of extent
+   * @returns the element at given pos
+   */
+  TENSOR_AUTO_CONSTEXPR_RETURN operator[](size_type k) const { 
+    return this->at(k);
   }
 
   // default constructor

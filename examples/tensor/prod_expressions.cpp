@@ -240,27 +240,27 @@ int main()
 		{
 
 			auto n = static_extents<3,4,2>{};
-			auto A = tensor<value_t,decltype(n),format_t>(n,2);
-			auto m = 5u;
+			auto A = tensor<value_t,decltype(n),format_t>(n,2.f);
+			auto m = 5ul;
 			auto q = 0u; // contraction mode
 
 			// C1(l,j,k) = T2(l,j,k) + A(i,j,k)*T1(l,i);
-			q = 1u;
-			tensor_t C1 = tensor_t(dynamic_extents<>{m,n[1],n[2]},value_t(2)) + prod(A,matrix_t(m,n[q-1],1),q);
+			q = value_t(1);
+			tensor_t C1 = tensor_t(dynamic_extents<>{m,n[1],n[2]},2.f) + prod(A,matrix_t(m,n[q-1],1),q);
 
 			// C2(i,l,k) = A(i,j,k)*T1(l,j) + 4;
-			q = 2u;
+			q = value_t(2);
 			tensor_t C2 = prod(A,matrix_t(m,n[q-1],1),q) + 4;
 
 			// C3(i,l1,l2) = A(i,j,k)*T1(l1,j)*T2(l2,k);
-			q = 3u;
-			tensor_t C3 = prod(prod(A,matrix_t(m+1,n[q-2],value_t(1)),q-1),matrix_t(m+2,n[q-1],1),q);
+			q = value_t(3);
+			tensor_t C3 = prod(prod(A,matrix_t(m+1,n[q-2],1.f),q-1),matrix_t(m+2,n[q-1],1),q);
 
 			// C4(i,l1,l2) = A(i,j,k)*T2(l2,k)*T1(l1,j);
-			tensor_t C4 = prod(prod(A,matrix_t(m+2,n[q-1],value_t(1)),q),matrix_t(m+1,n[q-2],1),q-1);
+			tensor_t C4 = prod(prod(A,matrix_t(m+2,n[q-1],1.f),q),matrix_t(m+1,n[q-2],1),q-1);
 
 			// C5(i,k,l) = A(i,k,j)*T1(l,j) + 4;
-			q = 3u;
+			q = value_t(4);
 			tensor_t C5 = prod(trans(A,{1,3,2}),matrix_t(m,n[1],1),q) + 4;
 
 			// formatted output

@@ -52,6 +52,7 @@ before_install:
   - ${CXX} --version;
 
 install:
+  - travis_wait 30
   - cd ..
   - git clone -b master --depth 1 https://github.com/boostorg/boost.git boost-root
   - cd boost-root

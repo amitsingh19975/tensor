@@ -189,7 +189,7 @@ template <ptrdiff_t... D> struct product_helper_impl;
 
 template <typename E> struct product_helper;
 
-template <::boost::yap::expr_kind, typename> struct tensor_expression;
+template <::boost::yap::expr_kind K, typename T> struct tensor_expression;
 
 template <typename V, typename F, typename A> struct tensor_mode_result;
 
@@ -264,12 +264,12 @@ template <typename T, ptrdiff_t f_, ptrdiff_t l_, ptrdiff_t s_, ptrdiff_t sz> st
 
 template <typename T, ptrdiff_t f_, ptrdiff_t l_, ptrdiff_t s_> struct normalized_slice_helper;
 
-template <typename T, ptrdiff_t...> struct slice_helper;
+template <typename T, ptrdiff_t... Ts> struct slice_helper;
 
 } // namespace detail
 
 
-template <typename T, ptrdiff_t...> struct basic_slice;
+template <typename T, ptrdiff_t... Ts> struct basic_slice;
 
 } // namespace boost::numeric::ublas::span
 

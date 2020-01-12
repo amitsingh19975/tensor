@@ -47,7 +47,7 @@ struct basic_static_extents<int_type,R,E...>
 	using size_type = std::size_t;
 
   //@returns the rank of basic_static_extents
-  TENSOR_STATIC_AUTO_CONSTEXPR_RETURN size() noexcept { return impl::Rank; }
+  TENSOR_STATIC_AUTO_CONSTEXPR_RETURN size() noexcept { return static_cast<size_type>(impl::Rank); }
   
   //@returns the rank of basic_static_extents
   TENSOR_STATIC_AUTO_CONSTEXPR_RETURN rank() noexcept { return impl::Rank; }

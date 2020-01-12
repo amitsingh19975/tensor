@@ -24,7 +24,7 @@ bool operator==(basic_strides<__int_type, __layout> const &lhs,
   if (lhs.size() != rhs.size()) {
     return false;
   }
-  for (auto i = 0u; i < lhs.size(); i++) {
+  for (auto i = typename E::size_type(0); i < lhs.size(); i++) {
     if (lhs.at(i) != rhs.at(i)) {
       return false;
     }

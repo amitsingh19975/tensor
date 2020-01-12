@@ -71,7 +71,7 @@ struct compressed_map : sparse_storage {
 
   template<typename A2>
   compressed_map( std::vector<T,A2> const& v) : size_(v.size()){
-    for(auto i = 0u; i < v.size(); i++){
+    for(auto i = size_type(0); i < v.size(); i++){
       if(v[i] != value_type{0}){
         data_.insert({i,v[i]});
       }
@@ -80,7 +80,7 @@ struct compressed_map : sparse_storage {
 
   template<typename A2>
   compressed_map( std::vector<T,A2> && v) : size_(v.size()){
-    for(auto i = 0u; i < v.size(); i++){
+    for(auto i = size_type(0); i < v.size(); i++){
       if(v[i] != value_type{0}){
         data_.insert({i,std::move(v[i])});
       }

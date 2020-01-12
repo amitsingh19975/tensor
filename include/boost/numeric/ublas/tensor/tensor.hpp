@@ -260,7 +260,7 @@ public:
 		auto const sz = v.size1() * v.size2();
 		if(sz){
 			if constexpr(detail::is_static<extents_type>::value){
-				if ( extents_.size() != 2 && ( extents_[0] != v.size1() || extents_[1] != v.size2() ) ){
+				if ( extents_.size() != size_type(2) && ( extents_[0] != v.size1() || extents_[1] != v.size2() ) ){
 					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : extents not correct, please check!");
 				}
@@ -270,7 +270,7 @@ public:
 				}
 			}else {
 				if ( detail::is_static_extents<extents_type>::value 
-					&& extents_.size() != 2 ){
+					&& extents_.size() != size_type(2) ){
 					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : rank of extents not correct, please check!");
 				}
@@ -297,7 +297,7 @@ public:
 		auto const sz = v.size1() * v.size2();
 		if(sz){
 			if constexpr (detail::is_static<extents_type>::value){
-				if ( extents_.size() != 2 && ( extents_[0] != v.size1() || extents_[1] != v.size2() ) ){
+				if ( extents_.size() != size_type(2) && ( extents_[0] != v.size1() || extents_[1] != v.size2() ) ){
 					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : extents not correct, please check!");
 				}
@@ -308,7 +308,7 @@ public:
 				}
 			}else {
 				if ( detail::is_static_extents<extents_type>::value 
-					&& extents_.size() != 2 ){
+					&& extents_.size() != size_type(2) ){
 					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : rank of extents not correct, please check!");
 				}
@@ -334,7 +334,7 @@ public:
 		auto const sz = v.size();
 		if(sz){
 			if constexpr(detail::is_static<extents_type>::value){
-				if ( extents_.size() != 2 && ( extents_[0] != v.size() || extents_[1] != 1 ) ){
+				if ( extents_.size() != size_type(2) && ( extents_[0] != typename extents_type::value_type( v.size() ) || extents_[1] != typename extents_type::value_type(1) ) ){
 					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : extents not correct, please check!");
 				}
@@ -344,11 +344,11 @@ public:
 				}
 			}else{
 				if ( detail::is_static_extents<extents_type>::value 
-					&& extents_.size() != 2 ){
+					&& extents_.size() != typename extents_type::size_type(2) ){
 					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : rank of extents not correct, please check!");
 				}
-				extents_ = extents_type{v.size(),1};
+				extents_ = extents_type{v.size(), typename extents_type::value_type(1)};
 				strides_ = strides_type(extents_);
 				data_ = array_type(v.data());
 			}
@@ -369,7 +369,7 @@ public:
 		auto const sz = v.size();
 		if(sz){
 			if constexpr(detail::is_static<extents_type>::value){
-				if ( extents_.size() != 2 && ( extents_[0] != v.size() || extents_[1] != 1 ) ){
+				if ( extents_.size() != typename extents_type::size_type(2) && ( extents_[0] != v.size() || extents_[1] != 1 ) ){
 					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : extents not correct, please check!");
 				}

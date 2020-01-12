@@ -246,7 +246,7 @@ int main()
 
 			// C1(l,j,k) = T2(l,j,k) + A(i,j,k)*T1(l,i);
 			q = 1u;
-			tensor_t C1 = tensor_t(dynamic_extents<>{m,n[1],n[2]},2) + prod(A,matrix_t(m,n[q-1],1),q);
+			tensor_t C1 = tensor_t(dynamic_extents<>{m,n[1],n[2]},value_t(2)) + prod(A,matrix_t(m,n[q-1],1),q);
 
 			// C2(i,l,k) = A(i,j,k)*T1(l,j) + 4;
 			q = 2u;
@@ -254,10 +254,10 @@ int main()
 
 			// C3(i,l1,l2) = A(i,j,k)*T1(l1,j)*T2(l2,k);
 			q = 3u;
-			tensor_t C3 = prod(prod(A,matrix_t(m+1,n[q-2],1),q-1),matrix_t(m+2,n[q-1],1),q);
+			tensor_t C3 = prod(prod(A,matrix_t(m+1,n[q-2],value_t(1)),q-1),matrix_t(m+2,n[q-1],1),q);
 
 			// C4(i,l1,l2) = A(i,j,k)*T2(l2,k)*T1(l1,j);
-			tensor_t C4 = prod(prod(A,matrix_t(m+2,n[q-1],1),q),matrix_t(m+1,n[q-2],1),q-1);
+			tensor_t C4 = prod(prod(A,matrix_t(m+2,n[q-1],value_t(1)),q),matrix_t(m+1,n[q-2],1),q-1);
 
 			// C5(i,k,l) = A(i,k,j)*T1(l,j) + 4;
 			q = 3u;

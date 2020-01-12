@@ -154,8 +154,8 @@ struct subtensor<tensor<T, E, F, A>, S...>
 
 	/** @brief returns the size of subtensor */
 	TENSOR_CONSTEXPR_RETURN(size_type) size() const noexcept{
-		size_type s = 1;
-		for(auto i = 0ul; i < extents_.size(); i++){
+		size_type s(1);
+		for(auto i = size_type(0); i < extents_.size(); i++){
 			s *= this->extents_[i];
 		}
 		return s;

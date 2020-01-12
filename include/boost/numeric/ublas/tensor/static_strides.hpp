@@ -76,7 +76,7 @@ struct static_strides<basic_static_extents<T, R, Extents...>, first_order>
   TENSOR_AUTO_CONSTEXPR_RETURN rank() const noexcept { return impl::Rank; }
 
   //@returns the rank of basic_static_extents
-  TENSOR_AUTO_CONSTEXPR_RETURN size() const noexcept { return impl::Rank; }
+  TENSOR_AUTO_CONSTEXPR_RETURN size() const noexcept { return static_cast<size_type>(impl::Rank); }
 
   /**
    * @param k pos of extent
@@ -211,7 +211,7 @@ public:
     if (is_vector(static_cast<extents_type const &>(*this)) || is_scalar(static_cast<extents_type const &>(*this)))
       return value_type{1};
 
-    if (this->size() < 2)
+    if (this->size() < size_type(2))
       throw std::runtime_error(
           "Error in boost::numeric::ublas::static_strides() : size of strides "
           "must be greater or equal 2.");
@@ -239,7 +239,7 @@ public:
   auto base() const
   {
     std::vector<value_type> temp(rank());
-    for (auto i = 0u; i < temp.size(); i++)
+    for (auto i = size_type(0); i < temp.size(); i++)
     {
       temp[i] = this->at(i);
     }
@@ -355,7 +355,7 @@ struct static_strides<basic_static_extents<T, R, Extents...>, last_order>
     if (is_vector(static_cast<extents_type const &>(*this)) || is_scalar(static_cast<extents_type const &>(*this)))
       return value_type{1};
 
-    if (this->size() < 2)
+    if (this->size() < size_type(2))
       throw std::runtime_error(
           "Error in boost::numeric::ublas::static_strides() : size of strides "
           "must be greater or equal 2.");
@@ -367,7 +367,7 @@ struct static_strides<basic_static_extents<T, R, Extents...>, last_order>
   auto base() const
   {
     std::vector<value_type> temp(rank());
-    for (auto i = 0u; i < temp.size(); i++)
+    for (auto i = size_type(0); i < temp.size(); i++)
     {
       temp[i] = this->at(i);
     }
@@ -485,7 +485,7 @@ bool operator==(static_strides<E, __layout> const &lhs, static_strides<E, __layo
   {
     return false;
   }
-  for (auto i = 0u; i < lhs.size(); i++)
+  for (auto i = typename E::size_type(0); i < lhs.size(); i++)
   {
     if (lhs.at(i) != rhs.at(i))
     {

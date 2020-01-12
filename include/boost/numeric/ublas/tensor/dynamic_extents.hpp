@@ -20,7 +20,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <vector>
-
+#include <iostream>
 #include <cassert>
 #include <boost/numeric/ublas/tensor/extents_functions.hpp>
 

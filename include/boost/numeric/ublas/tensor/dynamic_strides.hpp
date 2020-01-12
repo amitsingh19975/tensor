@@ -258,7 +258,7 @@ auto access(std::size_t sum, basic_strides<std::size_t, layout_type> const& w, s
 	if constexpr (sizeof...(is) == 0)
 		return sum;
 	else
-		return detail::access<r+1>(sum,w,std::forward<size_types>(is)...);
+		return access<r+1>(sum,w,std::forward<size_types>(is)...);
 }
 
 /** @brief Returns relative memory index with respect to a multi-index
@@ -278,7 +278,7 @@ auto access(std::size_t sum, static_strides<E, layout_type> const& w, std::size_
 	if constexpr (sizeof...(is) == 0)
 		return sum;
 	else
-		return detail::access<r+1>(sum,w,std::forward<size_types>(is)...);
+		return access<r+1>(sum,w,std::forward<size_types>(is)...);
 }
 
 }

@@ -74,6 +74,6 @@ test_script:
   #- PATH=%ADDPATH%%PATH%
   - if not "%CXXSTD%" == "" set CXXSTD=cxxstd=%CXXSTD%
   - set ADDRMD=address-model=64
-  - b2 -j3 libs/numeric/ublas/test toolset=%TOOLSET% %CXXSTD% %ADDRMD%
+  - b2 libs/numeric/ublas/test/tensor toolset=%TOOLSET% %CXXSTD% %ADDRMD%
   - b2 -j3 libs/numeric/ublas/benchmarks toolset=%TOOLSET% %CXXSTD% %ADDRMD%
   - b2 -j3 libs/numeric/ublas/examples/tensor toolset=%TOOLSET% %CXXSTD% %ADDRMD%

@@ -1,3 +1,4 @@
+
 //  Copyright (c) 2018-2019 Cem Bassoy
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
@@ -20,7 +21,7 @@
 
 // BOOST_AUTO_TEST_SUITE ( test_tensor_matrix_interoperability, * boost::unit_test::depends_on("test_tensor") ) ;
 
-BOOST_AUTO_TEST_SUITE ( test_tensor_matrix_interoperability )
+BOOST_AUTO_TEST_SUITE ( test_tensor_matrix_vector )
 
 using test_types = zip<int,long,float,double>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
 
@@ -301,10 +302,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_vector_move_assignment, value,  te
 	for(auto const& e : extents)
 		check(e);
 }
-
-
-
-
 
 BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_matrix_expressions, value,  test_types, fixture )
 {

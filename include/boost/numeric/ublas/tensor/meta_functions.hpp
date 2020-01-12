@@ -228,16 +228,15 @@ struct is_stl_array<std::array<T, N>> : std::true_type
 {
 };
 
+template <typename T, ptrdiff_t S, ptrdiff_t... E>
+struct product_helper<basic_static_extents<T,S,E...>> {
+  static constexpr T value = product_helper_impl<E...>::value;
+};
+
 } // namespace boost::numeric::ublas::detail
 
 namespace boost::numeric::ublas
 {
-
-template <typename T, ptrdiff_t S, ptrdiff_t... E>
-struct detail::product_helper<basic_static_extents<T, S, E...>>
-{
-  static constexpr T value = detail::product_helper_impl<E...>::value;
-};
 template <typename V, typename F, typename A>
 struct tensor_mode_result
 {

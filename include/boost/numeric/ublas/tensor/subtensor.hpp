@@ -20,9 +20,7 @@ namespace boost::numeric::ublas
 
 /** @brief contains a view to the tensor */
 template <typename T, typename E, typename F, typename A, typename... S>
-struct subtensor<tensor<T, E, F, A>, S...> : public detail::tensor_expression<
-												 subtensor<tensor<T, E, F, A>, S...>,
-												 subtensor<tensor<T, E, F, A>, S...>>
+struct subtensor<tensor<T, E, F, A>, S...>
 {
 
 	using tensor_type = tensor<T, E, F, A>;
@@ -32,15 +30,10 @@ struct subtensor<tensor<T, E, F, A>, S...> : public detail::tensor_expression<
 	using span_arr = detail::default_span_arary_t<E, S...>;
 
 	template <class derived_type>
-	using tensor_expression_type = detail::tensor_expression<self_type, derived_type>;
-
-	template <class derived_type>
 	using matrix_expression_type = matrix_expression<derived_type>;
 
 	template <class derived_type>
 	using vector_expression_type = vector_expression<derived_type>;
-
-	using super_type = tensor_expression_type<self_type>;
 
 	using array_type = typename tensor_type::array_type;
 	using layout_type = typename tensor_type::layout_type;
@@ -72,7 +65,7 @@ struct subtensor<tensor<T, E, F, A>, S...> : public detail::tensor_expression<
 	 * 
 	*/
 	subtensor(tensor_type &t)
-		: super_type(), spans_(), data_(t.data())
+		: spans_(), data_(t.data())
 	{
 		if constexpr (detail::is_dynamic<extents_type>::value)
 		{	
@@ -102,8 +95,7 @@ struct subtensor<tensor<T, E, F, A>, S...> : public detail::tensor_expression<
 	*/
 	template <typename U, ptrdiff_t... Args, typename... span_types>
 	subtensor(tensor_type &t, span::basic_slice<U,Args...> const &span, span_types &&... spans)
-		:   super_type()
-		  , spans_(detail::generate_span_array(t.extents(), span, std::forward<span_types>(spans)...))
+		:   spans_(detail::generate_span_array(t.extents(), span, std::forward<span_types>(spans)...))
 		  , extents_(detail::extents(spans_))
 		  , strides_(extents_)
 		  , span_strides_(detail::span_strides(t.strides(), spans_))

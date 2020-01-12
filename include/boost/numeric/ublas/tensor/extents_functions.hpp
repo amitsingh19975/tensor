@@ -20,19 +20,21 @@
 
 namespace boost::numeric::ublas {
 
-/** @brief Returns true if size > 1 and all elements > 0 */
-template <class E, typename std::enable_if<detail::is_extents<E>::value>::type
-                       * = nullptr>
+/** @brief Returns true if size > 1 and all elements > 0 or size == 1 && e[0] == 1 */
+template <class E, typename ::std::enable_if<detail::is_extents<E>::value, int>::type = 0>
 constexpr bool valid(E const &e) {
 
+  if (e.size() == 1 && e[0] == 1)
+      return true;
+
   if constexpr (!detail::is_static_extents<E>::value) {
-    return e.size() > typename E::value_type(1) &&
+    return e.size() > typename E::size_type(1) &&
            std::none_of(e.begin(), e.end(), [](auto const &a) {
              return a == typename E::value_type(0);
            });
   } else {
     auto arr = e.to_array();
-    return arr.size() > typename E::value_type(1) &&
+    return arr.size() > typename E::size_type(1) &&
            std::none_of(arr.begin(), arr.end(), [](auto const &a) {
              return a == typename E::value_type(0);
            });
@@ -46,19 +48,18 @@ constexpr bool valid(E const &e) {
  * @returns the string of extents
  */
 
-template <class E, typename std::enable_if<detail::is_extents<E>::value>::type
-                       * = nullptr>
-std::string to_string(E const &e) {
+template <class E, typename ::std::enable_if<detail::is_extents<E>::value, int>::type = 0>
+auto to_string(E const &e) {
   if (e.empty()) {
-    return "{}";
+    return ::std::string("{}");
   };
-  std::string s = "{ ";
+  ::std::string s = "{ ";
   for (auto i = 0; i < e.size(); i++) {
     if (i != e.size() - 1) {
-      s += std::to_string(e.at(i)) + ", ";
+      s += ::std::to_string(e.at(i)) + ", ";
     }
   }
-  s += std::to_string(e.at(e.size() - 1)) + " }";
+  s += ::std::to_string(e.at(e.size() - 1)) + " }";
   return s;
 }
 
@@ -66,8 +67,7 @@ std::string to_string(E const &e) {
  *
  * @returns true if (1,1,[1,...,1])
  */
-template <class E, typename std::enable_if<detail::is_extents<E>::value>::type
-                       * = nullptr>
+template <class E, typename ::std::enable_if<detail::is_extents<E>::value, int>::type = 0>
 constexpr bool is_scalar(E const &e) {
   if (e.size() == typename E::size_type(0)) {
     return false;
@@ -84,12 +84,27 @@ constexpr bool is_scalar(E const &e) {
   }
 }
 
+/**
+ * @brief Returns true if this is a pure scalar. i.e rank=1 and product=1
+ *
+ * @note free scalars are used by expression templates to determine that an
+ * operand is not bounded by shapes. In the following expression `5` has an
+ * extent of free_scalar in the AST
+ *
+ * @code auto expr = 5 * tensor<int>{shape{3,3}}; @endcode
+ *
+ * @returns true if (1)
+ */
+template <class E, typename ::std::enable_if<detail::is_extents<E>::value, int>::type = 0>
+constexpr bool is_free_scalar(E const &e) {
+  return e.size() == 1 && e[0] == 1;
+}
+
 /** @brief Returns true if this has a vector shape
  *
  * @returns true if (1,n,[1,...,1]) or (n,1,[1,...,1]) with n > 1
  */
-template <class E, typename std::enable_if<detail::is_extents<E>::value>::type
-                       * = nullptr>
+template <class E, typename ::std::enable_if<detail::is_extents<E>::value, int>::type = 0>
 constexpr bool is_vector(E const &e) {
   if (e.size() == typename E::size_type(0)) {
     return false;
@@ -103,14 +118,14 @@ constexpr bool is_vector(E const &e) {
   auto equal_one = [](auto const &a) { return a == typename E::value_type(1); };
 
   if constexpr (!detail::is_static_extents<E>::value) {
-    return std::any_of(e.begin(), e.begin() + 2, greater_one) &&
-           std::any_of(e.begin(), e.begin() + 2, equal_one) &&
-           std::all_of(e.begin() + 2, e.end(), equal_one);
+    return ::std::any_of(e.begin(), e.begin() + 2, greater_one) &&
+           ::std::any_of(e.begin(), e.begin() + 2, equal_one) &&
+           ::std::all_of(e.begin() + 2, e.end(), equal_one);
   } else {
     auto arr = e.to_array();
-    return std::any_of(arr.begin(), arr.begin() + 2, greater_one) &&
-           std::any_of(arr.begin(), arr.begin() + 2, equal_one) &&
-           std::all_of(arr.begin() + 2, arr.end(), equal_one);
+    return ::std::any_of(arr.begin(), arr.begin() + 2, greater_one) &&
+           ::std::any_of(arr.begin(), arr.begin() + 2, equal_one) &&
+           ::std::all_of(arr.begin() + 2, arr.end(), equal_one);
   }
 }
 
@@ -118,8 +133,7 @@ constexpr bool is_vector(E const &e) {
  *
  * @returns true if (m,n,[1,...,1]) with m > 1 and n > 1
  */
-template <class E, typename std::enable_if<detail::is_extents<E>::value>::type
-                       * = nullptr>
+template <class E, typename ::std::enable_if<detail::is_extents<E>::value, int>::type = 0>
 constexpr bool is_matrix(E const &e) {
   if (e.size() < typename E::size_type(2)) {
     return false;
@@ -131,12 +145,12 @@ constexpr bool is_matrix(E const &e) {
   auto equal_one = [](auto const &a) { return a == typename E::value_type(1); };
 
   if constexpr (!detail::is_static_extents<E>::value) {
-    return std::all_of(e.begin(), e.begin() + 2, greater_one) &&
-           std::all_of(e.begin() + 2, e.end(), equal_one);
+    return ::std::all_of(e.begin(), e.begin() + 2, greater_one) &&
+           ::std::all_of(e.begin() + 2, e.end(), equal_one);
   } else {
     auto arr = e.to_array();
-    return std::all_of(arr.begin(), arr.begin() + 2, greater_one) &&
-           std::all_of(arr.begin() + 2, arr.end(), equal_one);
+    return ::std::all_of(arr.begin(), arr.begin() + 2, greater_one) &&
+           ::std::all_of(arr.begin() + 2, arr.end(), equal_one);
   }
 }
 
@@ -144,8 +158,7 @@ constexpr bool is_matrix(E const &e) {
  *
  * @returns true if !empty() && !is_scalar() && !is_vector() && !is_matrix()
  */
-template <class E, typename std::enable_if<detail::is_extents<E>::value>::type
-                       * = nullptr>
+template <class E, typename ::std::enable_if<detail::is_extents<E>::value, int>::type = 0>
 constexpr bool is_tensor(E const &e) {
   if (e.size() < typename E::size_type(3)) {
     return false;
@@ -156,10 +169,10 @@ constexpr bool is_tensor(E const &e) {
   };
 
   if constexpr (!detail::is_static_extents<E>::value) {
-    return std::any_of(e.begin() + 2, e.end(), greater_one);
+    return ::std::any_of(e.begin() + 2, e.end(), greater_one);
   } else {
     auto arr = e.to_array();
-    return std::any_of(arr.begin() + 2, arr.end(), greater_one);
+    return ::std::any_of(arr.begin() + 2, arr.end(), greater_one);
   }
 }
 
@@ -175,8 +188,7 @@ constexpr bool is_tensor(E const &e) {
  *
  * @returns basic_extents<int_type> with squeezed extents
  */
-template <class E, typename std::enable_if<detail::is_extents<E>::value>::type
-                       * = nullptr>
+template <class E, typename ::std::enable_if<detail::is_extents<E>::value, int>::type = 0>
 auto squeeze(E const &e) {
   if (e.size() <= 2) {
     if constexpr (detail::is_static_extents<E>::value) {
@@ -190,9 +202,9 @@ auto squeeze(E const &e) {
   auto old_extent = e.base();
 
   auto insert_iter =
-      std::back_insert_iterator<typename E::base_type>(new_extent);
+      ::std::back_insert_iterator<typename E::base_type>(new_extent);
 
-  auto c = std::count_if(old_extent.begin(), old_extent.end(), [](auto &n) {
+  auto c = ::std::count_if(old_extent.begin(), old_extent.end(), [](auto &n) {
     return n == typename E::value_type(1);
   });
 
@@ -203,7 +215,7 @@ auto squeeze(E const &e) {
     new_extent.push_back(typename E::value_type(1));
     new_extent.push_back(old_extent[1]);
   } else {
-    std::remove_copy(old_extent.begin(), old_extent.end(), insert_iter,
+    ::std::remove_copy(old_extent.begin(), old_extent.end(), insert_iter,
                      typename E::value_type(1));
   }
 
@@ -214,8 +226,7 @@ auto squeeze(E const &e) {
 }
 
 /** @brief Returns the number of elements a tensor holds with this */
-template <class E, typename std::enable_if<detail::is_extents<E>::value>::type
-                       * = nullptr>
+template <class E, typename ::std::enable_if<detail::is_extents<E>::value, int>::type = 0>
 constexpr auto product(E const &e) {
 
   if (e.empty()) {
@@ -231,7 +242,7 @@ constexpr auto product(E const &e) {
   }else {
     if constexpr (!detail::is_static_extents<E>::value) {
       return typename E::value_type(
-          std::accumulate(e.begin(), e.end(), 1ul, std::multiplies<>()));
+          ::std::accumulate(e.begin(), e.end(), 1ul, std::multiplies<>()));
     } else {
       auto p = typename E::value_type(1);
       for (auto i = 0; i < e.size(); i++) {

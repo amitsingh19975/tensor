@@ -16,14 +16,10 @@
 #include <type_traits>
 #include "fwd.hpp"
 
-namespace boost::numeric::ublas {
-
-constexpr ptrdiff_t dynamic_extent{-1};
-constexpr ptrdiff_t dynamic_rank{-2};
-
-} // namespace boost::numeric::ublas
-
 namespace boost::numeric::ublas::detail {
+    
+static constexpr ptrdiff_t dynamic_extent = -1;
+static constexpr ptrdiff_t dynamic_rank = -2;
 
 template <> struct shape_in_bounds<> : std::integral_constant<bool,true>{};
 

@@ -22,6 +22,7 @@
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
+#include "extents_functions.hpp"
 
 namespace boost::numeric::ublas::storage {
 
@@ -32,7 +33,7 @@ struct dense_storage : tensor_storage {};
 
 namespace sparse_tensor {
 
-template <typename T, typename A = std::allocator<std::pair<const ptrdiff_t, T>>>
+template <typename T, typename A = ::std::allocator<::std::pair<const ptrdiff_t, T>>>
 struct compressed_map : sparse_storage {
   using base_type = std::unordered_map<std::ptrdiff_t, T, std::hash<ptrdiff_t>,
                                        std::equal_to<ptrdiff_t>, A>;
@@ -87,7 +88,6 @@ struct compressed_map : sparse_storage {
   }
 
   compressed_map( std::initializer_list<std::pair<key_type, value_type>> l) : size_(l.size()){
-    auto i = 0u;
     for(auto const& v : l){
       if(v.second != value_type{0}){
         data_.insert(v);
@@ -254,12 +254,12 @@ inline static constexpr bool is_dynamic_v =
 
 template <typename T, typename E, typename A>
 struct default_storage<T, E, A,
-                       typename std::enable_if<is_dynamic_v<E>>::type> {
+                       typename ::std::enable_if<is_dynamic_v<E>>::type> {
   using type = std::vector<T, A>;
 };
 
 template <typename T, typename E, typename A>
-struct default_storage<T, E, A, typename std::enable_if<is_static_v<E>>::type> {
+struct default_storage<T, E, A, typename ::std::enable_if<is_static_v<E>>::type> {
   using type = std::array<T, product(E{})>;
 };
 

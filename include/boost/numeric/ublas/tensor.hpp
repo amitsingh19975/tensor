@@ -15,13 +15,15 @@
 #ifndef BOOST_NUMERIC_UBLAS_TENSOR_HPP
 #define BOOST_NUMERIC_UBLAS_TENSOR_HPP
 
-#include "tensor/functions.hpp"
-#include "tensor/operators_arithmetic.hpp"
-#include "tensor/operators_comparison.hpp"
-#include "tensor/extents.hpp"
-#include "tensor/strides.hpp"
-#include "tensor/ostream.hpp"
-#include "tensor/tensor.hpp"
-#include "tensor/subtensor.hpp"
+#include <boost/numeric/ublas/tensor/functions.hpp>
+#include <boost/numeric/ublas/tensor/extents.hpp>
+#include <boost/numeric/ublas/tensor/strides.hpp>
+#include <boost/numeric/ublas/tensor/ostream.hpp>
+#include <boost/numeric/ublas/tensor/tensor.hpp>
+#include <boost/numeric/ublas/tensor/expression_operator.hpp>
+#include <boost/numeric/ublas/tensor/ublas_type_traits.hpp>
+#include <boost/numeric/ublas/tensor/operators_arithmetic.hpp>
+#include <boost/numeric/ublas/tensor/operators_comparison.hpp>
+#include <boost/numeric/ublas/tensor/subtensor.hpp>
 
 #endif // BOOST_NUMERIC_UBLAS_TENSOR_HPP

@@ -15,6 +15,7 @@
 
 #include <tuple>
 #include <type_traits>
+#include <vector>
 #include "fwd.hpp"
 
 namespace boost   {

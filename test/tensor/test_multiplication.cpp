@@ -32,7 +32,7 @@ using test_types = zip<int,long,float,double,std::complex<float>>::with_t<boost:
 
 struct fixture
 {
-	using extents_type = boost::numeric::ublas::shape<boost::numeric::ublas::dynamic_rank>;
+	using extents_type = boost::numeric::ublas::dynamic_extents<>;
 	fixture()
 	  : extents {
 	      extents_type{1,1}, // 1
@@ -59,7 +59,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_mtv, value,  test_types, fixture )
 	using layout_type  = typename value::second_type;
 	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
-	using extents_type = ublas::shape<ublas::dynamic_rank>;
+	using extents_type = ublas::dynamic_extents<>;
 	using extents_type_base = typename extents_type::base_type;
 	using size_type = typename extents_type_base::value_type;
 
@@ -108,7 +108,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_mtm, value,  test_types, fixture )
 	using layout_type  = typename value::second_type;
 	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
-	using extents_type = ublas::shape<ublas::dynamic_rank>;
+	using extents_type = ublas::dynamic_extents<>;
 	//	using extents_type_base = typename extents_type::base_type;
 
 
@@ -150,7 +150,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttv, value,  test_types, fixture )
 	using layout_type  = typename value::second_type;
 	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
-	using extents_type = ublas::shape<ublas::dynamic_rank>;
+	using extents_type = ublas::dynamic_extents<>;
 	using extents_type_base = typename extents_type::base_type;
 	using size_type = typename extents_type_base::value_type;
 
@@ -195,7 +195,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttm, value,  test_types, fixture )
 	using layout_type  = typename value::second_type;
 	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
-	using extents_type = ublas::shape<ublas::dynamic_rank>;
+	using extents_type = ublas::dynamic_extents<>;
 	using size_type = typename extents_type::value_type;
 
 
@@ -234,7 +234,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttt_permutation, value,  test_type
 	using layout_type  = typename value::second_type;
 	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
-	using extents_type = ublas::shape<ublas::dynamic_rank>;
+	using extents_type = ublas::dynamic_extents<>;
 	using size_type    = typename strides_type::value_type;
 
 
@@ -342,7 +342,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttt, value,  test_types, fixture )
 	using layout_type  = typename value::second_type;
 	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
-	using extents_type = ublas::shape<ublas::dynamic_rank>;
+	using extents_type = ublas::dynamic_extents<>;
 	using size_type    = typename strides_type::value_type;
 
 	// left-hand and right-hand side have the
@@ -449,7 +449,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_outer, value,  test_types, fixture
 	using namespace boost::numeric;
 	using value_type   = typename value::first_type;
 	using layout_type  = typename value::second_type;
-	using extents_type = ublas::shape<ublas::dynamic_rank>;
+	using extents_type = ublas::dynamic_extents<>;
 	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
 

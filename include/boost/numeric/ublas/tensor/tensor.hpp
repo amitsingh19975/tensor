@@ -10,68 +10,40 @@
 //  which started as a Google Summer of Code project.
 //
 
-
 /// \file tensor.hpp Definition for the tensor template class
 
 #ifndef BOOST_UBLAS_TENSOR_IMPL_HPP
 #define BOOST_UBLAS_TENSOR_IMPL_HPP
 
 #include <boost/config.hpp>
+#include <boost/yap/yap.hpp>
 
 #include <initializer_list>
-
+#include <type_traits>
+#include <iostream>
 #include "algorithms.hpp"
 #include "storage.hpp"
-#include "expression.hpp"
-#include "expression_evaluation.hpp"
 #include "extents.hpp"
-#include "strides.hpp"
 #include "index.hpp"
+#include "strides.hpp"
+#include "tensor_expression.hpp"
 #include "meta_functions.hpp"
+#include "fwd.hpp"
 #include "subtensor.hpp"
 
-namespace boost { namespace numeric { namespace ublas {
+namespace boost::numeric::ublas {
 
-///** \brief Base class for Tensor container models
-// *
-// * it does not model the Tensor concept but all derived types should.
-// * The class defines a common base type and some common interface for all
-// * statically derived Tensor classes
-// * We implement the casts to the statically derived type.
-// */
-//template<class C>
-//class tensor_container:
-//		public detail::tensor_expression<C>
-//{
-//public:
-//	static const unsigned complexity = 0;
-//	typedef C container_type;
-//	typedef tensor_tag type_category;
-
-//	BOOST_UBLAS_INLINE
-//	const container_type &operator () () const {
-//			return *static_cast<const container_type *> (this);
-//	}
-//	BOOST_UBLAS_INLINE
-//	container_type &operator () () {
-//			return *static_cast<container_type *> (this);
-//	}
-//};
-
-
-
-	/** @brief A dense tensor of values of type \c T.
-	*
-	* For a \f$n\f$-dimensional tensor \f$v\f$ and \f$0\leq i < n\f$ every element \f$v_i\f$ is mapped
-	* to the \f$i\f$-th element of the container. A storage type \c A can be specified which defaults to \c unbounded_array.
-	* Elements are constructed by \c A, which need not initialise their value.
-	*
-	* @tparam T type of the objects stored in the tensor (like int, double, complex,...)
-	* @tparam A The type of the storage array of the tensor. Default is \c unbounded_array<T>. \c <bounded_array<T> and \c std::vector<T> can also be used
-	*/
+/** @brief A dense tensor of values of type \c T.
+*
+* For a \f$n\f$-dimensional tensor \f$v\f$ and \f$0\leq i < n\f$ every element \f$v_i\f$ is mapped
+* to the \f$i\f$-th element of the container. A storage type \c A can be specified which defaults to \c unbounded_array.
+* Elements are constructed by \c A, which need not initialise their value.
+*
+* @tparam T type of the objects stored in the tensor (like int, double, complex,...)
+* @tparam A The type of the storage array of the tensor. Default is \c unbounded_array<T>. \c <bounded_array<T> and \c std::vector<T> can also be used
+*/
 template<class T = float, class E = dynamic_extents<>, class F = first_order, class A = storage::dense_tensor::default_storage_t< T, E ,std::allocator<T>> >
-class tensor:
-		public detail::tensor_expression<tensor<T, E, F, A>,tensor<T, E, F, A>>
+class tensor
 {
 
 	static_assert( std::is_same<F,first_order>::value || 
@@ -80,21 +52,11 @@ class tensor:
 
 	using self_type  = tensor<T, E, F, A>;
 public:
-
-
-
-	template<class derived_type>
-	using tensor_expression_type = detail::tensor_expression<self_type,derived_type>;
-
 	template<class derived_type>
 	using matrix_expression_type = matrix_expression<derived_type>;
 
 	template<class derived_type>
 	using vector_expression_type = vector_expression<derived_type>;
-
-	using super_type = tensor_expression_type<self_type>;
-
-//	static_assert(std::is_same_v<tensor_expression_type<self_type>, detail::tensor_expression<tensor<T,E,F,A>,tensor<T,E,F,A>>>, "tensor_expression_type<self_type>");
 
 	using array_type  = A;
 	using layout_type = F;
@@ -134,8 +96,7 @@ public:
 	 */
 	BOOST_UBLAS_INLINE
 	constexpr tensor ()
-		: tensor_expression_type<self_type>() // container_type
-		, extents_()
+		: extents_()
 		, strides_()
 	{
 		if constexpr(!detail::is_stl_array<array_type>::value){
@@ -156,8 +117,7 @@ public:
 	typename std::enable_if< !detail::is_static_extents<U>::value >::type* = nullptr>
 	explicit BOOST_UBLAS_INLINE
 	tensor (std::initializer_list<size_type> l)
-		: tensor_expression_type<self_type>()
-		, extents_ (std::move(l))
+		: extents_ (std::move(l))
 		, strides_ (extents_)
 	{
 		if constexpr(!detail::is_stl_array<array_type>::value){
@@ -177,8 +137,7 @@ public:
 	typename std::enable_if< detail::is_static_extents<U>::value >::type* = nullptr>
 	explicit BOOST_UBLAS_INLINE
 	tensor (std::initializer_list<size_type> l)
-		: tensor_expression_type<self_type>()
-		, extents_ (l.begin(),l.end())
+		: extents_ (l.begin(),l.end())
 		, strides_ (extents_)
 	{
 		if constexpr(!detail::is_stl_array<array_type>::value){
@@ -196,8 +155,7 @@ public:
 	 */
 	explicit BOOST_UBLAS_INLINE
 	tensor (extents_type const& s)
-		: tensor_expression_type<self_type>() //tensor_container<self_type>()
-		, extents_ (s)
+		: extents_ (s)
 		, strides_ (extents_)
 	{
 		if constexpr(!detail::is_stl_array<array_type>::value){
@@ -216,8 +174,7 @@ public:
 	 */
 	BOOST_UBLAS_INLINE
 	tensor (extents_type const& s, const array_type &a)
-		: tensor_expression_type<self_type>() //tensor_container<self_type>()
-		, extents_ (s)
+		: extents_ (s)
 		, strides_ (extents_)
 		, data_    (a)
 	{
@@ -236,8 +193,7 @@ public:
 	 */
 	BOOST_UBLAS_INLINE
 	tensor (extents_type const& e, const value_type &i)
-		: tensor_expression_type<self_type>() //tensor_container<self_type> ()
-		, extents_ (e)
+		: extents_ (e)
 		, strides_ (extents_)
 	{
 		if constexpr(!detail::is_stl_array<array_type>::value){
@@ -271,8 +227,7 @@ public:
 	 */
 	BOOST_UBLAS_INLINE
 	tensor (const tensor &v)
-		: tensor_expression_type<self_type>()
-		, extents_ (v.extents_)
+		: extents_ (v.extents_)
 		, strides_ (v.strides_)
 		, data_    (v.data_   )
 	{}
@@ -285,8 +240,7 @@ public:
 	 */
 	BOOST_UBLAS_INLINE
 	tensor (tensor &&v)
-		: tensor_expression_type<self_type>() //tensor_container<self_type> ()
-		, extents_ (std::move(v.extents_))
+		: extents_ (std::move(v.extents_))
 		, strides_ (std::move(v.strides_))
 		, data_    (std::move(v.data_   ))
 	{}
@@ -300,8 +254,7 @@ public:
 	 */
 	BOOST_UBLAS_INLINE
 	tensor (const matrix_type &v)
-		: tensor_expression_type<self_type>()
-		, extents_ ()
+		: extents_ ()
 		, strides_ ()
 	{
 		auto const sz = v.size1() * v.size2();
@@ -336,8 +289,7 @@ public:
 	 */
 	BOOST_UBLAS_INLINE
 	tensor (matrix_type &&v)
-		: tensor_expression_type<self_type>()
-		, extents_ {}
+		: extents_ {}
 		, strides_ {}
 		, data_    {}
 	{
@@ -376,8 +328,7 @@ public:
 	 */
 	BOOST_UBLAS_INLINE
 	tensor (const vector_type &v)
-		: tensor_expression_type<self_type>()
-		, extents_ ()
+		: extents_ ()
 		, strides_ ()
 	{
 		auto const sz = v.size();
@@ -411,8 +362,7 @@ public:
 	 */
 	BOOST_UBLAS_INLINE
 	tensor (vector_type &&v)
-		: tensor_expression_type<self_type>()
-		, extents_ {}
+		: extents_ {}
 		, strides_ {}
 		, data_    {}
 	{
@@ -448,8 +398,7 @@ public:
 	BOOST_UBLAS_INLINE
 	template<class other_layout>
 	tensor (const tensor<value_type, extents_type, other_layout> &other)
-		: tensor_expression_type<self_type> ()
-		, extents_ (other.extents())
+		: extents_ (other.extents())
 		, strides_ (other.extents())
 	{	
 		if constexpr(!detail::is_stl_array<array_type>::value){
@@ -468,31 +417,6 @@ public:
 				 this->data(), this->strides().data(),
 				 other.data(), other.strides().data());
 		}
-		
-	}
-
-	/** @brief Constructs a tensor with an tensor expression
-	 *
-	 * @code tensor<float> A = B + 3 * C; @endcode
-	 *
-	 * @note type must be specified of tensor must be specified.
-	 * @note dimension extents are extracted from tensors within the expression.
-	 *
-	 * @param expr tensor expression
-	 */
-	BOOST_UBLAS_INLINE
-	template<class derived_type>
-	tensor (const tensor_expression_type<derived_type> &expr)
-		: tensor_expression_type<self_type> ()
-		, extents_ ( detail::retrieve_extents(expr) )
-		, strides_ ( extents_ )
-	{
-		static_assert( detail::has_tensor_types<self_type, tensor_expression_type<derived_type>>::value,
-									 "Error in boost::numeric::ublas::tensor: expression does not contain a tensor. cannot retrieve shape.");
-		if constexpr(!detail::is_stl_array<array_type>::value){
-			data_ =  array_type(product(extents_));
-		}
-		detail::eval( *this, expr );
 	}
 
 	/** @brief Constructs a tensor with a matrix expression
@@ -523,23 +447,35 @@ public:
 	BOOST_UBLAS_INLINE
 	template<class derived_type>
 	tensor (const vector_expression_type<derived_type> &expr)
-		: tensor(  vector_type ( expr )  )
-	{
+		: tensor(  vector_type ( expr )  ){
 	}
 
-	/** @brief Evaluates the tensor_expression and assigns the results to the tensor
+	BOOST_UBLAS_INLINE
+	template <boost::yap::expr_kind Kind, typename Tuple>
+	tensor(detail::tensor_expression<Kind, Tuple> &expr) {
+		expr.eval_to(*this);
+	}
+
+	BOOST_UBLAS_INLINE
+	template <boost::yap::expr_kind Kind, typename Tuple>
+	tensor(detail::tensor_expression<Kind, Tuple> &&expr) {
+		expr.eval_to(*this);
+	}
+
+	/** @brief Evaluates the tensor_expression and assigns the results to the
+	 * tensor
 	 *
 	 * @code A = B + C * 2;  @endcode
 	 *
-	 * @note rank and dimension extents of the tensors in the expressions must conform with this tensor.
+	 * @note rank and dimension extents of the tensors in the expressions must
+	 * conform with this tensor.
 	 *
 	 * @param expr expression that is evaluated.
 	 */
 	BOOST_UBLAS_INLINE
-	template<class derived_type>
-	tensor &operator = (const tensor_expression_type<derived_type> &expr)
-	{
-		detail::eval(*this, expr);
+	template <boost::yap::expr_kind Kind, typename Tuple>
+	tensor &operator=(detail::tensor_expression<Kind, Tuple> &&expr) {
+		expr.eval_to(*this);
 		return *this;
 	}
 
@@ -677,9 +613,6 @@ public:
 			}
 	}
 
-
-
-
 	/** @brief Element access using a single index.
 	 *
 	 *
@@ -704,9 +637,6 @@ public:
 		return this->data_[i];
 	}
 
-
-
-
 	/** @brief Generates a tensor index for tensor contraction
 	 *
 	 *
@@ -725,10 +655,6 @@ public:
 
 		return std::make_pair( std::cref(*this),  std::make_tuple( p, std::forward<index_types>(ps)... ) );
 	}
-
-
-
-
 
 	/** @brief Reshapes the tensor
 	 *
@@ -892,28 +818,43 @@ public:
 		return data_.rend();
 	}
 
+private:
+  extents_type extents_;
+  strides_type strides_;
+  array_type data_;
 
-#if 0
-	// -------------
-	// Serialization
-	// -------------
+  template <boost::yap::expr_kind, typename>
+  friend struct boost::numeric::ublas::detail::tensor_expression;
 
-	/// Serialize a tensor into and archive as defined in Boost
-	/// \param ar Archive object. Can be a flat file, an XML file or any other stream
-	/// \param file_version Optional file version (not yet used)
-	template<class Archive>
-	void serialize(Archive & ar, const unsigned int /* file_version */){
-		ar & serialization::make_nvp("data",data_);
-	}
-#endif
+  template <typename new_type, class Tensor>
+  friend decltype(auto) static_tensor_cast(Tensor &e);
+  template <typename new_type, class Tensor>
+  friend decltype(auto) dynamic_tensor_cast(Tensor &e);
+  template <typename new_type, class Tensor>
+  friend decltype(auto) reinterpret_tensor_cast(Tensor &e);
 
-
-
+  template <typename new_type, class Tensor>
+  friend decltype(auto) static_tensor_cast(Tensor &&e);
+  template <typename new_type, class Tensor>
+  friend decltype(auto) dynamic_tensor_cast(Tensor &&e);
+  template <typename new_type, class Tensor>
+  friend decltype(auto) reinterpret_tensor_cast(Tensor &&e);
 // private:
 
-	extents_type extents_;
-	strides_type strides_;
-	array_type data_;
+#if 0
+                // -------------
+                // Serialization
+                // -------------
+
+                /// Serialize a tensor into and archive as defined in Boost
+                /// \param ar Archive object. Can be a flat file, an XML file or any other stream
+                /// \param file_version Optional file version (not yet used)
+                template<class Archive>
+                void serialize ( Archive & ar, const unsigned int /* file_version */ )
+                {
+                    ar & serialization::make_nvp ( "data",data_ );
+                }
+#endif
 };
 
 #if __cpp_deduction_guides
@@ -932,10 +873,6 @@ tensor(E const&) ->tensor<float,E>;
 template<class T = float, class E = dynamic_extents<>, class F = first_order, class A = storage::sparse_tensor::compressed_map<T> >
 using sparse_tensor = tensor<T,E,F,A>;
 
-}}} // namespaces
-
-
-
-
+} // namespaces
 
 #endif

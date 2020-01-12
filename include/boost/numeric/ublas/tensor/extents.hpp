@@ -9,7 +9,6 @@
 //  Fraunhofer IOSB, Ettlingen, Germany
 //
 
-
 #ifndef BOOST_NUMERIC_UBLAS_TENSOR_EXTENTS_HPP
 #define BOOST_NUMERIC_UBLAS_TENSOR_EXTENTS_HPP
 

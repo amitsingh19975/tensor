@@ -15,7 +15,13 @@
 #include <boost/config.hpp>
 #include <cassert>
 
-#if defined(__GNUC__) || ( defined( __has_attribute ) && __has_attribute(always_inline) )
+#if defined( __has_attribute )
+    #define has_attribute(ATTR) __has_attribute(ATTR)
+#else
+    #define has_attribute(ATTR) 0
+#endif
+
+#if defined(__GNUC__) || has_attribute(always_inline)
     #define BOOST_UBLAS_TENSOR_ALWAYS_INLINE inline __attribute__((always_inline))
 #elif defined(_MSC_VER) && !__INTEL_COMPILER && _MSC_VER >= 1310
     #define BOOST_UBLAS_TENSOR_ALWAYS_INLINE inline __forceinline
@@ -30,7 +36,8 @@
     #define TENSOR_ASSERT(e,comment) if (!e) { throw std::runtime_error( comment ); }
     inline static constexpr bool TENSOR_ASSERT_NOEXCEPT = false;
 #endif
-#if defined(__GNUC__) || defined(__INTEL_COMPILER) ||  ( defined( __has_attribute ) && __has_attribute(__builtin_expect) )
+
+#if defined(__GNUC__) || defined(__INTEL_COMPILER) ||  has_attribute(__builtin_expect)
     #define BOOST_UBLAS_TENSOR_LIKLY(x) __builtin_expect(!!(x),1)
     #define BOOST_UBLAS_TENSOR_UNLIKLY(x) __builtin_expect(!!(x),0)
 #else

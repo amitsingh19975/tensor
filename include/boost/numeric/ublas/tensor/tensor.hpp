@@ -16,27 +16,19 @@
 #ifndef BOOST_UBLAS_TENSOR_IMPL_HPP
 #define BOOST_UBLAS_TENSOR_IMPL_HPP
 
-#include <boost/config.hpp>
-
 #include <initializer_list>
 
-#include "algorithms.hpp"
-#include "expression.hpp"
-#include "expression_evaluation.hpp"
-#include "extents.hpp"
-#include "strides.hpp"
-#include "index.hpp"
+#include <boost/numeric/ublas/tensor/detail/config.hpp>
+#include <boost/numeric/ublas/tensor/algorithms.hpp>
+#include <boost/numeric/ublas/tensor/storage.hpp>
+#include <boost/numeric/ublas/tensor/expression.hpp>
+#include <boost/numeric/ublas/tensor/expression_evaluation.hpp>
+#include <boost/numeric/ublas/tensor/extents.hpp>
+#include <boost/numeric/ublas/tensor/strides.hpp>
+#include <boost/numeric/ublas/tensor/index.hpp>
+#include <boost/numeric/ublas/tensor/detail/meta_functions.hpp>
 
 namespace boost { namespace numeric { namespace ublas {
-
-template<class T, class F, class A>
-class tensor;
-
-template<class T, class F, class A>
-class matrix;
-
-template<class T, class A>
-class vector;
 
 ///** \brief Base class for Tensor container models
 // *
@@ -54,11 +46,11 @@ class vector;
 //	typedef C container_type;
 //	typedef tensor_tag type_category;
 
-//	BOOST_UBLAS_INLINE
+//	BOOST_UBLAS_TENSOR_INLINE
 //	const container_type &operator () () const {
 //			return *static_cast<const container_type *> (this);
 //	}
-//	BOOST_UBLAS_INLINE
+//	BOOST_UBLAS_TENSOR_INLINE
 //	container_type &operator () () {
 //			return *static_cast<container_type *> (this);
 //	}
@@ -75,16 +67,16 @@ class vector;
 	* @tparam T type of the objects stored in the tensor (like int, double, complex,...)
 	* @tparam A The type of the storage array of the tensor. Default is \c unbounded_array<T>. \c <bounded_array<T> and \c std::vector<T> can also be used
 	*/
-template<class T, class F = first_order, class A = std::vector<T,std::allocator<T>> >
+template<class T = float, class E = dynamic_extents<>, class F = first_order, class A = storage::dense_tensor::default_storage_t< T, E ,std::allocator<T>> >
 class tensor:
-		public detail::tensor_expression<tensor<T, F, A>,tensor<T, F, A>>
+		public detail::tensor_expression<tensor<T, E, F, A>,tensor<T, E, F, A>>
 {
 
 	static_assert( std::is_same<F,first_order>::value || 
 				   std::is_same<F,last_order >::value, 
 				   "boost::numeric::tensor template class only supports first- or last-order storage formats.");
 
-	using self_type  = tensor<T, F, A>;
+	using self_type  = tensor<T, E, F, A>;
 public:
 
 
@@ -100,7 +92,7 @@ public:
 
 	using super_type = tensor_expression_type<self_type>;
 
-//	static_assert(std::is_same_v<tensor_expression_type<self_type>, detail::tensor_expression<tensor<T,F,A>,tensor<T,F,A>>>, "tensor_expression_type<self_type>");
+//	static_assert(std::is_same_v<tensor_expression_type<self_type>, detail::tensor_expression<tensor<T,E,F,A>,tensor<T,E,F,A>>>, "tensor_expression_type<self_type>");
 
 	using array_type  = A;
 	using layout_type = F;
@@ -125,11 +117,11 @@ public:
 	using tensor_temporary_type = self_type;
 	using storage_category = dense_tag;
 
-	using strides_type = basic_strides<std::size_t,layout_type>;
-	using extents_type = shape;
+	using strides_type = strides_t<E,layout_type>;
+	using extents_type = E;
 
-	using matrix_type     = matrix<value_type,layout_type,array_type>;
-	using vector_type     = vector<value_type,array_type>;
+	using matrix_type     = matrix<value_type,layout_type,std::vector<T>>;
+	using vector_type     = vector<value_type,std::vector<T>>;
 
 
 	/** @brief Constructs a tensor.
@@ -138,17 +130,19 @@ public:
 	 * @note the tensor needs to reshaped for further use.
 	 *
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	constexpr tensor ()
 		: tensor_expression_type<self_type>() // container_type
 		, extents_()
 		, strides_()
-		, data_()
 	{
+		if constexpr(!detail::is_stl_array<array_type>::value){
+			data_ =  array_type(product(extents_));
+		}
 	}
 
 
-	/** @brief Constructs a tensor with an initializer list
+	/** @brief Constructs a tensor with an initializer list for dynamic_extents
 	 *
 	 * By default, its elements are initialized to 0.
 	 *
@@ -156,15 +150,39 @@ public:
 	 *
 	 * @param l initializer list for setting the dimension extents of the tensor
 	 */
-	explicit BOOST_UBLAS_INLINE
+	template<class U = E, 
+	typename std::enable_if< !detail::is_static_extents<U>::value >::type* = nullptr>
+	explicit BOOST_UBLAS_TENSOR_INLINE
 	tensor (std::initializer_list<size_type> l)
 		: tensor_expression_type<self_type>()
 		, extents_ (std::move(l))
 		, strides_ (extents_)
-		, data_    (extents_.product())
 	{
+		if constexpr(!detail::is_stl_array<array_type>::value){
+			data_ =  array_type(product(extents_));
+		}
 	}
 
+	/** @brief Constructs a tensor with an initializer list for static_extents and dynamic_extents</rank/>
+	 *
+	 * By default, its elements are initialized to 0.
+	 *
+	 * @code tensor<float> A{4,2,3}; @endcode
+	 *
+	 * @param l initializer list for setting the dimension extents of the tensor
+	 */
+	template<class U = E, 
+	typename std::enable_if< detail::is_static_extents<U>::value >::type* = nullptr>
+	explicit BOOST_UBLAS_TENSOR_INLINE
+	tensor (std::initializer_list<size_type> l)
+		: tensor_expression_type<self_type>()
+		, extents_ (l.begin(),l.end())
+		, strides_ (extents_)
+	{
+		if constexpr(!detail::is_stl_array<array_type>::value){
+			data_ =  array_type(product(extents_));
+		}
+	}
 
 	/** @brief Constructs a tensor with a \c shape
 	 *
@@ -174,13 +192,16 @@ public:
 	 *
 	 * @param s initial tensor dimension extents
 	 */
-	explicit BOOST_UBLAS_INLINE
+	explicit BOOST_UBLAS_TENSOR_INLINE
 	tensor (extents_type const& s)
 		: tensor_expression_type<self_type>() //tensor_container<self_type>()
 		, extents_ (s)
 		, strides_ (extents_)
-		, data_    (extents_.product())
-	{}
+	{
+		if constexpr(!detail::is_stl_array<array_type>::value){
+			data_ =  array_type(product(extents_));
+		}
+	}
 
 
 	/** @brief Constructs a tensor with a \c shape and initiates it with one-dimensional data
@@ -191,14 +212,14 @@ public:
 	 *  @param s initial tensor dimension extents
 	 *  @param a container of \c array_type that is copied according to the storage layout
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	tensor (extents_type const& s, const array_type &a)
 		: tensor_expression_type<self_type>() //tensor_container<self_type>()
 		, extents_ (s)
 		, strides_ (extents_)
 		, data_    (a)
 	{
-		if(this->extents_.product() != this->data_.size())
+		if(product(extents_) != this->data_.size())
 			throw std::runtime_error("Error in boost::numeric::ublas::tensor: size of provided data and specified extents do not match.");
 	}
 
@@ -211,13 +232,34 @@ public:
 	 *  @param e initial tensor dimension extents
 	 *  @param i initial value of all elements of type \c value_type
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	tensor (extents_type const& e, const value_type &i)
 		: tensor_expression_type<self_type>() //tensor_container<self_type> ()
 		, extents_ (e)
 		, strides_ (extents_)
-		, data_    (extents_.product(), i)
-	{}
+	{
+		if constexpr(!detail::is_stl_array<array_type>::value){
+			data_ =  array_type(product(extents_),i);
+		}else{
+			std::fill(begin(),end(),i);
+		}
+	}
+
+	// /** @brief Constructs a tensor using a shape tuple and initiates it with a value.
+	//  *
+	//  *  @code tensor<float> A{extents{4,2,3}, 1 }; @endcode
+	//  *
+	//  *  @param e initial tensor dimension extents
+	//  *  @param i initial value of all elements of type \c value_type
+	//  */
+	// template<class U = E>
+	// BOOST_UBLAS_TENSOR_INLINE
+	// tensor (shape_t<typename extents_type::value_type, dynamic_rank> const& e, const value_type &i, typename std::enable_if<detail::is_static_extents<U>::value>::type* = nullptr)
+	// 	: tensor_expression_type<self_type>() //tensor_container<self_type> ()
+	// 	, extents_ (e.begin(),e.end())
+	// 	, strides_ (extents_)
+	// 	, data_    (product(extents_), i)
+	// {}
 
 
 
@@ -225,7 +267,7 @@ public:
 	 *
 	 *  @param v tensor to be copied.
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	tensor (const tensor &v)
 		: tensor_expression_type<self_type>()
 		, extents_ (v.extents_)
@@ -239,7 +281,7 @@ public:
 	 *
 	 *  @param v tensor to be moved.
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	tensor (tensor &&v)
 		: tensor_expression_type<self_type>() //tensor_container<self_type> ()
 		, extents_ (std::move(v.extents_))
@@ -254,16 +296,33 @@ public:
 	 *
 	 *  @param v matrix to be copied.
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	tensor (const matrix_type &v)
 		: tensor_expression_type<self_type>()
 		, extents_ ()
 		, strides_ ()
-		, data_    (v.data())
 	{
-		if(!data_.empty()){
-			extents_ = extents_type{v.size1(),v.size2()};
-			strides_ = strides_type(extents_);
+		auto const sz = v.size1() * v.size2();
+		if(sz){
+			if constexpr(detail::is_static<extents_type>::value){
+				if ( extents_.size() != 2 && ( extents_[0] != v.size1() || extents_[1] != v.size2() ) ){
+					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : extents not correct, please check!");
+				}
+				auto& ublas_m = v.data(); 
+				for(auto i = 0; i < sz; i++){
+					data_[i] = ublas_m[i];
+				}
+			}else {
+				if ( detail::is_static_extents<extents_type>::value 
+					&& extents_.size() != 2 ){
+					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : rank of extents not correct, please check!");
+				}
+				extents_ = extents_type{v.size1(),v.size2()};
+				strides_ = strides_type(extents_);
+				data_    = array_type(v.data());
+			}
 		}
 	}
 
@@ -273,17 +332,36 @@ public:
 	 *
 	 *  @param v matrix to be moved.
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	tensor (matrix_type &&v)
 		: tensor_expression_type<self_type>()
 		, extents_ {}
 		, strides_ {}
 		, data_    {}
 	{
-		if(v.size1()*v.size2() != 0){
-			extents_ = extents_type{v.size1(),v.size2()};
-			strides_ = strides_type(extents_);
-			data_    = std::move(v.data());
+
+		auto const sz = v.size1() * v.size2();
+		if(sz){
+			if constexpr (detail::is_static<extents_type>::value){
+				if ( extents_.size() != 2 && ( extents_[0] != v.size1() || extents_[1] != v.size2() ) ){
+					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : extents not correct, please check!");
+				}
+				auto& ublas_m = v.data();
+				auto const sz = v.size1() * v.size2(); 
+				for(auto i = 0; i < sz; i++){
+					data_[i] = std::move(ublas_m[i]);
+				}
+			}else {
+				if ( detail::is_static_extents<extents_type>::value 
+					&& extents_.size() != 2 ){
+					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : rank of extents not correct, please check!");
+				}
+				extents_ = extents_type{v.size1(),v.size2()};
+				data_    = std::move(v.data());
+				strides_ = strides_type(extents_);
+			}
 		}
 	}
 
@@ -294,34 +372,69 @@ public:
 	 *
 	 *  @param v vector to be copied.
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	tensor (const vector_type &v)
 		: tensor_expression_type<self_type>()
 		, extents_ ()
 		, strides_ ()
-		, data_    (v.data())
 	{
-		if(!data_.empty()){
-			extents_ = extents_type{data_.size(),1};
-			strides_ = strides_type(extents_);
+		auto const sz = v.size();
+		if(sz){
+			if (detail::is_static<extents_type>::value){
+				if ( extents_.size() != 2 && ( extents_[0] != v.size() || extents_[1] != 1 ) ){
+					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : extents not correct, please check!");
+				}
+				auto& ublas_v = v.data(); 
+				for(auto i = 0; i < sz; i++){
+					data_[i] = ublas_v[i];
+				}
+			}else{
+				if ( detail::is_static_extents<extents_type>::value 
+					&& extents_.size() != 2 ){
+					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : rank of extents not correct, please check!");
+				}
+				extents_ = extents_type{v.size(),1};
+				strides_ = strides_type(extents_);
+				data_ = array_type(v.data());
+			}
 		}
+		
 	}
 
 	/** @brief Constructs a tensor using a \c vector
 	 *
 	 *  @param v vector to be moved.
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	tensor (vector_type &&v)
 		: tensor_expression_type<self_type>()
 		, extents_ {}
 		, strides_ {}
 		, data_    {}
 	{
-		if(v.size() != 0){
-			extents_ = extents_type{v.size(),1};
-			strides_ = strides_type(extents_);
-			data_    = std::move(v.data());
+		auto const sz = v.size();
+		if(sz){
+			if (detail::is_static<extents_type>::value){
+				if ( extents_.size() != 2 && ( extents_[0] != v.size() || extents_[1] != 1 ) ){
+					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : extents not correct, please check!");
+				}
+				auto& ublas_v = v.data(); 
+				for(auto i = 0; i < sz; i++){
+					data_[i] = ublas_v[i];
+				}
+			}else{
+				if ( detail::is_static_extents<extents_type>::value 
+					&& extents_.size() != 2 ){
+					throw std::out_of_range("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : rank of extents not correct, please check!");
+				}
+				extents_ = extents_type{v.size(),1};
+				strides_ = strides_type(extents_);
+				data_    = std::move(v.data());
+			}
 		}
 	}
 
@@ -330,17 +443,29 @@ public:
 	 *
 	 * @param other tensor with a different layout to be copied.
 	 */
-	BOOST_UBLAS_INLINE
 	template<class other_layout>
-	tensor (const tensor<value_type, other_layout> &other)
+	tensor (const tensor<value_type, extents_type, other_layout> &other)
 		: tensor_expression_type<self_type> ()
 		, extents_ (other.extents())
 		, strides_ (other.extents())
-		, data_    (other.extents().product())
-	{
-		copy(this->rank(), this->extents().data(),
+	{	
+		if constexpr(!detail::is_stl_array<array_type>::value){
+			data_ =  array_type(product(extents_));
+		}
+
+		if constexpr (detail::is_static_extents<extents_type>::value){
+			auto e = this->extents().base(); 
+			auto s = this->strides().base(); 
+			auto o_s = other.strides().base(); 
+			copy(this->rank(), e.data(),
+				 this->data(), s.data(),
+				 other.data(), o_s.data());
+		}else{
+			copy(this->rank(), this->extents().data(),
 				 this->data(), this->strides().data(),
 				 other.data(), other.strides().data());
+		}
+		
 	}
 
 	/** @brief Constructs a tensor with an tensor expression
@@ -352,16 +477,17 @@ public:
 	 *
 	 * @param expr tensor expression
 	 */
-	BOOST_UBLAS_INLINE
 	template<class derived_type>
 	tensor (const tensor_expression_type<derived_type> &expr)
 		: tensor_expression_type<self_type> ()
 		, extents_ ( detail::retrieve_extents(expr) )
 		, strides_ ( extents_ )
-		, data_    ( extents_.product() )
 	{
 		static_assert( detail::has_tensor_types<self_type, tensor_expression_type<derived_type>>::value,
 									 "Error in boost::numeric::ublas::tensor: expression does not contain a tensor. cannot retrieve shape.");
+		if constexpr(!detail::is_stl_array<array_type>::value){
+			data_ =  array_type(product(extents_));
+		}
 		detail::eval( *this, expr );
 	}
 
@@ -374,7 +500,6 @@ public:
 	 *
 	 * @param expr matrix expression
 	 */
-	BOOST_UBLAS_INLINE
 	template<class derived_type>
 	tensor (const matrix_expression_type<derived_type> &expr)
 		: tensor(  matrix_type ( expr )  )
@@ -390,7 +515,6 @@ public:
 	 *
 	 * @param expr vector expression
 	 */
-	BOOST_UBLAS_INLINE
 	template<class derived_type>
 	tensor (const vector_expression_type<derived_type> &expr)
 		: tensor(  vector_type ( expr )  )
@@ -405,7 +529,6 @@ public:
 	 *
 	 * @param expr expression that is evaluated.
 	 */
-	BOOST_UBLAS_INLINE
 	template<class derived_type>
 	tensor &operator = (const tensor_expression_type<derived_type> &expr)
 	{
@@ -426,57 +549,57 @@ public:
 	}
 
 	/** @brief Returns true if the tensor is empty (\c size==0) */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	bool empty () const {
 		return this->data_.empty();
 	}
 
 
 	/** @brief Returns the size of the tensor */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	size_type size () const {
 		return this->data_.size ();
 	}
 
 	/** @brief Returns the size of the tensor */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	size_type size (size_type r) const {
 		return this->extents_.at(r);
 	}
 
 	/** @brief Returns the number of dimensions/modes of the tensor */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	size_type rank () const {
 		return this->extents_.size();
 	}
 
 	/** @brief Returns the number of dimensions/modes of the tensor */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	size_type order () const {
 		return this->extents_.size();
 	}
 
 	/** @brief Returns the strides of the tensor */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	strides_type const& strides () const {
 		return this->strides_;
 	}
 
 	/** @brief Returns the extents of the tensor */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	extents_type const& extents () const {
 		return this->extents_;
 	}
 
 
 	/** @brief Returns a \c const reference to the container. */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_pointer data () const {
 		return this->data_.data();
 	}
 
 	/** @brief Returns a \c const reference to the container. */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	pointer data () {
 		return this->data_.data();
 	}
@@ -487,24 +610,21 @@ public:
 	 *
 	 *  @param i zero-based index where 0 <= i < this->size()
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_reference operator [] (size_type i) const {
 		return this->data_[i];
 	}
 
 	/** @brief Element access using a single index.
 	 *
-	 *
-	 *  @code A[i] = a; @endcode
+	 *  @code auto a = A[i]; @endcode
 	 *
 	 *  @param i zero-based index where 0 <= i < this->size()
 	 */
-	BOOST_UBLAS_INLINE
-	reference operator [] (size_type i)
-	{
+	BOOST_UBLAS_TENSOR_INLINE
+	reference operator [] (size_type i) {
 		return this->data_[i];
 	}
-
 
 	/** @brief Element access using a multi-index or single-index.
 	 *
@@ -516,7 +636,7 @@ public:
 	 *  @param is zero-based indices where 0 <= is[r] < this->size(r) where  0 < r < this->rank()
 	 */
 	template<class ... size_types>
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_reference at (size_type i, size_types ... is) const {
 		if constexpr (sizeof...(is) == 0)
 			return this->data_[i];
@@ -533,17 +653,16 @@ public:
 	 *  @param i zero-based index where 0 <= i < this->size() if sizeof...(is) == 0, else 0<= i < this->size(0)
 	 *  @param is zero-based indices where 0 <= is[r] < this->size(r) where  0 < r < this->rank()
 	 */
-	BOOST_UBLAS_INLINE
 	template<class ... size_types>
+	BOOST_UBLAS_TENSOR_INLINE
 	reference at (size_type i, size_types ... is) {
 		if constexpr (sizeof...(is) == 0)
 			return this->data_[i];
-		else
-			return this->data_[detail::access<0ul>(size_type(0),this->strides_,i,std::forward<size_types>(is)...)];
+		else{
+			auto temp = detail::access<0ul>(size_type(0),this->strides_,i,std::forward<size_types>(is)...);
+			return this->data_[temp];
+			}
 	}
-
-
-
 
 	/** @brief Element access using a single index.
 	 *
@@ -552,7 +671,7 @@ public:
 	 *
 	 *  @param i zero-based index where 0 <= i < this->size()
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_reference operator()(size_type i) const {
 		return this->data_[i];
 	}
@@ -564,13 +683,10 @@ public:
 	 *
 	 *  @param i zero-based index where 0 <= i < this->size()
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	reference operator()(size_type i){
 		return this->data_[i];
 	}
-
-
-
 
 	/** @brief Generates a tensor index for tensor contraction
 	 *
@@ -580,8 +696,8 @@ public:
 	 *  @param i placeholder
 	 *  @param is zero-based indices where 0 <= is[r] < this->size(r) where  0 < r < this->rank()
 	 */
-	BOOST_UBLAS_INLINE
 	template<std::size_t I, class ... index_types>
+	BOOST_UBLAS_TENSOR_INLINE
 	decltype(auto) operator() (index::index_type<I> p, index_types ... ps) const
 	{
 		constexpr auto N = sizeof...(ps)+1;
@@ -609,14 +725,16 @@ public:
 	 * @param e extents with which the tensor is reshaped.
 	 * @param v value which is appended if the tensor is enlarged.
 	 */
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	void reshape (extents_type const& e, value_type v = value_type{})
 	{
+		static_assert(detail::is_static_extents<extents_type>::value == false,
+			"Error in boost::numeric::ublas::tensor: static extents cannot be reshaped");
 		this->extents_ = e;
 		this->strides_ = strides_type(this->extents_);
 
-		if(e.product() != this->size())
-			this->data_.resize (this->extents_.product(), v);
+		if(product(e) != this->size())
+			this->data_.resize (product(extents_), v);
 	}
 
 
@@ -631,73 +749,73 @@ public:
 
 
 	/// \brief return an iterator on the first element of the tensor
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_iterator begin () const {
 		return data_.begin ();
 	}
 
 	/// \brief return an iterator on the first element of the tensor
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_iterator cbegin () const {
 		return data_.cbegin ();
 	}
 
 	/// \brief return an iterator after the last element of the tensor
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_iterator end () const {
 		return data_.end();
 	}
 
 	/// \brief return an iterator after the last element of the tensor
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_iterator cend () const {
 		return data_.cend ();
 	}
 
 	/// \brief Return an iterator on the first element of the tensor
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	iterator begin () {
 		return data_.begin();
 	}
 
 	/// \brief Return an iterator at the end of the tensor
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	iterator end () {
 		return data_.end();
 	}
 
 	/// \brief Return a const reverse iterator before the first element of the reversed tensor (i.e. end() of normal tensor)
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_reverse_iterator rbegin () const {
 		return data_.rbegin();
 	}
 
 	/// \brief Return a const reverse iterator before the first element of the reversed tensor (i.e. end() of normal tensor)
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_reverse_iterator crbegin () const {
 		return data_.crbegin();
 	}
 
 	/// \brief Return a const reverse iterator on the end of the reverse tensor (i.e. first element of the normal tensor)
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_reverse_iterator rend () const {
 		return data_.rend();
 	}
 
 	/// \brief Return a const reverse iterator on the end of the reverse tensor (i.e. first element of the normal tensor)
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	const_reverse_iterator crend () const {
 		return data_.crend();
 	}
 
 	/// \brief Return a const reverse iterator before the first element of the reversed tensor (i.e. end() of normal tensor)
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	reverse_iterator rbegin () {
 		return data_.rbegin();
 	}
 
 	/// \brief Return a const reverse iterator on the end of the reverse tensor (i.e. first element of the normal tensor)
-	BOOST_UBLAS_INLINE
+	BOOST_UBLAS_TENSOR_INLINE
 	reverse_iterator rend () {
 		return data_.rend();
 	}
@@ -719,12 +837,26 @@ public:
 
 
 
-private:
+// private:
 
 	extents_type extents_;
 	strides_type strides_;
 	array_type data_;
 };
+
+#if __cpp_deduction_guides
+
+tensor() -> tensor<float,dynamic_extents<>>;
+
+template<class T, class E,
+	typename std::enable_if< detail::is_extents<E>::value >::type* = nullptr>
+tensor(E const&, T const& ) ->tensor<T,E>;
+
+template<class E,
+	typename std::enable_if< detail::is_extents<E>::value >::type* = nullptr>
+tensor(E const&) ->tensor<float,E>;
+#endif
+
 
 }}} // namespaces
 

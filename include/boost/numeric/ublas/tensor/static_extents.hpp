@@ -86,8 +86,9 @@ struct basic_static_extents<int_type,R,E...>
    * @note number of extents should be equal to dynamic rank
    */
   template <class... IndexType>
-  constexpr basic_static_extents(IndexType... DynamicExtents)
-      : impl(DynamicExtents...) {
+  constexpr basic_static_extents(IndexType... DynamicExtents) noexcept(TENSOR_ASSERT_NOEXCEPT)
+      : impl(DynamicExtents...) 
+  {
     static_assert(sizeof...(DynamicExtents) == impl::DynamicRank,"boost::numeric::ublas::basic_static_extents: number of extents should be equal to rank of extents");
   }
 
@@ -101,7 +102,7 @@ struct basic_static_extents<int_type,R,E...>
    *
    * @note number of extents should be equal to dynamic rank
    */
-  constexpr basic_static_extents(base_type const& b)
+  constexpr basic_static_extents(base_type const& b) noexcept(TENSOR_ASSERT_NOEXCEPT)
       : basic_static_extents(b.begin(), b.end()) {
   }
 
@@ -119,8 +120,9 @@ struct basic_static_extents<int_type,R,E...>
    *
    */
   template <class I, std::enable_if_t<detail::is_iterator<I>::value, int> = 0>
-  constexpr basic_static_extents(I begin, I end)
-      : impl(begin, end, detail::iterator_tag_t<I>{}) {
+  constexpr basic_static_extents(I begin, I end) noexcept(TENSOR_ASSERT_NOEXCEPT)
+      : impl(begin, end, detail::iterator_tag_t<I>{}) 
+  {
     if constexpr (std::is_same<detail::iterator_tag_t<I>,detail::iterator_tag>::value) {
       TENSOR_ASSERT( BOOST_UBLAS_TENSOR_LIKLY ( std::distance(begin,end) == impl::DynamicRank), 
         "boost::numeric::ublas::basic_static_extents: number of extents should be equal to rank of extents");

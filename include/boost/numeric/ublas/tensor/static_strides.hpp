@@ -370,7 +370,7 @@ struct static_strides<basic_static_extents<T, R, Extents...>, last_order>
   }
 
   /** @brief Returns the std::vector containing strides */
-  auto base() const
+  auto base() const noexcept(TENSOR_ASSERT_NOEXCEPT)
   {
     std::vector<value_type> temp(rank());
     for (auto i = 0u; i < temp.size(); i++)
@@ -394,7 +394,7 @@ private:
    */
   template <class E>
   [[nodiscard]] BOOST_UBLAS_TENSOR_INLINE 
-  static constexpr auto access(E const &, value_type sum) noexcept
+  static constexpr auto access(E const &, value_type sum) noexcept(TENSOR_ASSERT_NOEXCEPT)
   {
     return sum;
   }
@@ -419,7 +419,7 @@ private:
   template <class E, class... IndexType>
   [[nodiscard]] BOOST_UBLAS_TENSOR_INLINE 
   static constexpr auto access(E const &e, value_type sum, value_type i_el,
-                                             IndexType const &... idxs) noexcept
+                                             IndexType const &... idxs) noexcept(TENSOR_ASSERT_NOEXCEPT)
   {
     return static_strides::access((typename E::next const &)e, sum * e.N + i_el,
                                   idxs...);
@@ -521,7 +521,7 @@ namespace detail{
   */
   BOOST_UBLAS_INLINE
   template<class E, class layout_type, class size_type>
-  auto access(std::vector<size_type> const& i, static_strides<E,layout_type> const& w)
+  auto access(std::vector<size_type> const& i, static_strides<E,layout_type> const& w) noexcept(TENSOR_ASSERT_NOEXCEPT)
   {
     const auto p = i.size();
     size_type sum = 0u;
@@ -541,7 +541,7 @@ namespace detail{
   */
   BOOST_UBLAS_INLINE
   template<std::size_t r, class layout_type, class E, class ... size_types>
-  auto access(std::size_t sum, static_strides<E, layout_type> const& w, std::size_t i, size_types ... is)
+  auto access(std::size_t sum, static_strides<E, layout_type> const& w, std::size_t i, size_types ... is) noexcept(TENSOR_ASSERT_NOEXCEPT)
   {
     sum+=i*w[r];
     if constexpr (sizeof...(is) == 0)

@@ -11,7 +11,6 @@
 
 
 
-
 #include <boost/test/unit_test.hpp>
 #include <boost/numeric/ublas/tensor/strides.hpp>
 #include <boost/numeric/ublas/tensor/extents.hpp>

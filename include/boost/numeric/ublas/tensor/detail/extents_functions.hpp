@@ -23,7 +23,8 @@ namespace boost::numeric::ublas {
 
 /** @brief Returns true if size > 1 and all elements > 0 or size == 1 && e[0] == 1 */
 template <class ExtentsType, typename std::enable_if<detail::is_extents<ExtentsType>::value, int>::type = 0>
-BOOST_UBLAS_TENSOR_INLINE constexpr bool valid(ExtentsType const &e) {
+BOOST_UBLAS_TENSOR_INLINE 
+constexpr bool valid(ExtentsType const &e) {
 
   if (e.size() == 1 && e[0] == 1)
       return true;
@@ -49,16 +50,21 @@ BOOST_UBLAS_TENSOR_INLINE constexpr bool valid(ExtentsType const &e) {
  * @returns the string of extents
  */
 
-template <class ExtentsType, typename std::enable_if<detail::is_extents<ExtentsType>::value, int>::type = 0>
-std::string to_string(ExtentsType const &e) {
+template <class T
+  , typename std::enable_if<
+      detail::is_extents<T>::value || 
+      detail::is_strides<T>::value
+      , int
+    >::type = 0
+>
+BOOST_UBLAS_TENSOR_INLINE
+std::string to_string(T const &e) {
   if (e.empty()) {
     return "{}";
   };
   std::string s = "{ ";
-  for (auto i = 0; i < e.size(); i++) {
-    if (i != e.size() - 1) {
+  for (auto i = 0; i < e.size() - 1; i++) {
       s += std::to_string(e.at(i)) + ", ";
-    }
   }
   s += std::to_string(e.at(e.size() - 1)) + " }";
   return s;
@@ -69,7 +75,8 @@ std::string to_string(ExtentsType const &e) {
  * @returns true if (1,1,[1,...,1])
  */
 template <class ExtentsType, typename std::enable_if<detail::is_extents<ExtentsType>::value, int>::type = 0>
-BOOST_UBLAS_TENSOR_INLINE constexpr bool is_scalar(ExtentsType const &e) {
+BOOST_UBLAS_TENSOR_INLINE 
+constexpr bool is_scalar(ExtentsType const &e) {
   if (e.size() == typename ExtentsType::size_type(0)) {
     return false;
   }
@@ -97,7 +104,8 @@ BOOST_UBLAS_TENSOR_INLINE constexpr bool is_scalar(ExtentsType const &e) {
  * @returns true if (1)
  */
 template <class ExtentsType, typename std::enable_if<detail::is_extents<ExtentsType>::value, int>::type = 0>
-BOOST_UBLAS_TENSOR_INLINE constexpr bool is_free_scalar(ExtentsType const &e) {
+BOOST_UBLAS_TENSOR_INLINE 
+constexpr bool is_free_scalar(ExtentsType const &e) {
   return e.size() == 1 && e[0] == 1;
 }
 
@@ -106,7 +114,8 @@ BOOST_UBLAS_TENSOR_INLINE constexpr bool is_free_scalar(ExtentsType const &e) {
  * @returns true if (1,n,[1,...,1]) or (n,1,[1,...,1]) with n > 1
  */
 template <class ExtentsType, typename std::enable_if<detail::is_extents<ExtentsType>::value, int>::type = 0>
-BOOST_UBLAS_TENSOR_INLINE constexpr bool is_vector(ExtentsType const &e) {
+BOOST_UBLAS_TENSOR_INLINE 
+constexpr bool is_vector(ExtentsType const &e) {
   if (e.size() == typename ExtentsType::size_type(0)) {
     return false;
   } else if (e.size() == typename ExtentsType::size_type(1)) {
@@ -135,7 +144,8 @@ BOOST_UBLAS_TENSOR_INLINE constexpr bool is_vector(ExtentsType const &e) {
  * @returns true if (m,n,[1,...,1]) with m > 1 and n > 1
  */
 template <class ExtentsType, typename std::enable_if<detail::is_extents<ExtentsType>::value, int>::type = 0>
-BOOST_UBLAS_TENSOR_INLINE constexpr bool is_matrix(ExtentsType const &e) {
+BOOST_UBLAS_TENSOR_INLINE 
+constexpr bool is_matrix(ExtentsType const &e) {
   if (e.size() < typename ExtentsType::size_type(2)) {
     return false;
   }
@@ -160,7 +170,8 @@ BOOST_UBLAS_TENSOR_INLINE constexpr bool is_matrix(ExtentsType const &e) {
  * @returns true if !empty() && !is_scalar() && !is_vector() && !is_matrix()
  */
 template <class ExtentsType, typename std::enable_if<detail::is_extents<ExtentsType>::value, int>::type = 0>
-BOOST_UBLAS_TENSOR_INLINE constexpr bool is_tensor(ExtentsType const &e) {
+BOOST_UBLAS_TENSOR_INLINE 
+constexpr bool is_tensor(ExtentsType const &e) {
   if (e.size() < typename ExtentsType::size_type(3)) {
     return false;
   }
@@ -229,7 +240,8 @@ auto squeeze(ExtentsType const &e) {
 
 /** @brief Returns the number of elements a tensor holds with this */
 template <class ExtentsType, typename std::enable_if<detail::is_extents<ExtentsType>::value, int>::type = 0>
-BOOST_UBLAS_TENSOR_INLINE constexpr auto product(ExtentsType const &e) {
+BOOST_UBLAS_TENSOR_INLINE 
+constexpr auto product(ExtentsType const &e) {
 
   if (e.empty()) {
     return typename ExtentsType::value_type(0);
@@ -254,8 +266,6 @@ BOOST_UBLAS_TENSOR_INLINE constexpr auto product(ExtentsType const &e) {
     }
   }
 }
-
-
 
 } // namespace boost::numeric::ublas
 #endif

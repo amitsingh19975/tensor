@@ -82,8 +82,7 @@ struct basic_extents_impl<R, basic_shape<>>
   // default constructor
   constexpr basic_extents_impl() noexcept = default;
   // copy constructor
-  constexpr basic_extents_impl(basic_extents_impl const &other) noexcept =
-      default;
+  constexpr basic_extents_impl(basic_extents_impl const &other) noexcept = default;
   // copy assignment operator
   constexpr basic_extents_impl &
   operator=(basic_extents_impl const &other) noexcept = default;
@@ -95,7 +94,7 @@ struct basic_extents_impl<R, basic_shape<>>
    *
    **/
   template <typename IndexType>
-  explicit constexpr basic_extents_impl(std::initializer_list<IndexType> li) {}
+  explicit constexpr basic_extents_impl(std::initializer_list<IndexType> li) noexcept(TENSOR_ASSERT_NOEXCEPT) {}
 
   /** @brief assigns the value of dynamic extent
    *
@@ -107,7 +106,7 @@ struct basic_extents_impl<R, basic_shape<>>
    **/
   template <typename Iterator>
   constexpr basic_extents_impl(Iterator, Iterator,
-                               iterator_tag) noexcept {}
+                               iterator_tag) noexcept(TENSOR_ASSERT_NOEXCEPT) {}
 
   template <typename Iterator>
   constexpr basic_extents_impl(Iterator, Iterator, invalid_iterator_tag) noexcept(TENSOR_ASSERT_NOEXCEPT)
@@ -187,10 +186,12 @@ struct basic_extents_impl<R, basic_shape<dynamic_extent, E...>>
   constexpr auto empty() const noexcept { return false; }
 
   // default constructor
-  constexpr basic_extents_impl() noexcept : next(), N(0) {}
+  constexpr basic_extents_impl() noexcept
+    : next()
+    , N(0) 
+  {}
   // copy constructor
-  constexpr basic_extents_impl(basic_extents_impl const &other) noexcept =
-      default;
+  constexpr basic_extents_impl(basic_extents_impl const &other) noexcept = default;
   // copy assignment operator
   constexpr basic_extents_impl &
   operator=(basic_extents_impl const &other) noexcept = default;
@@ -219,7 +220,7 @@ struct basic_extents_impl<R, basic_shape<dynamic_extent, E...>>
    *
    **/
   template <typename IndexType>
-  explicit constexpr basic_extents_impl(std::initializer_list<IndexType> li)
+  explicit constexpr basic_extents_impl(std::initializer_list<IndexType> li) noexcept(TENSOR_ASSERT_NOEXCEPT)
       : basic_extents_impl(li.begin(), li.end(), iterator_tag{}) {}
 
   /** @brief assigns the value of dynamic extent
@@ -319,8 +320,7 @@ struct basic_extents_impl<R, basic_shape<SE, E...>>
   // default constructor
   constexpr basic_extents_impl() noexcept : next() {}
   // copy constructor
-  constexpr basic_extents_impl(basic_extents_impl const &other) noexcept =
-      default;
+  constexpr basic_extents_impl(basic_extents_impl const &other) noexcept = default;
   // copy assignment operator
   constexpr basic_extents_impl &
   operator=(basic_extents_impl const &other) noexcept = default;
@@ -332,7 +332,7 @@ struct basic_extents_impl<R, basic_shape<SE, E...>>
    *
    **/
   template <typename... IndexType>
-  explicit constexpr basic_extents_impl(IndexType... DynamicExtents) noexcept(TENSOR_ASSERT_NOEXCEPT)
+  explicit constexpr basic_extents_impl(IndexType... DynamicExtents)
       : next(DynamicExtents...)
   {
     static_assert(sizeof...(DynamicExtents) == DynamicRank,
@@ -346,7 +346,7 @@ struct basic_extents_impl<R, basic_shape<SE, E...>>
    *
    **/
   template <typename IndexType>
-  explicit constexpr basic_extents_impl(std::initializer_list<IndexType> li)
+  explicit constexpr basic_extents_impl(std::initializer_list<IndexType> li) noexcept(TENSOR_ASSERT_NOEXCEPT)
       : basic_extents_impl(li.begin(), li.end(), iterator_tag{}) {}
 
   /** @brief assigns the value of dynamic extent
@@ -359,7 +359,7 @@ struct basic_extents_impl<R, basic_shape<SE, E...>>
    **/
   template <typename Iterator>
   constexpr basic_extents_impl(Iterator begin, Iterator end,
-                               iterator_tag) noexcept
+                               iterator_tag) noexcept(TENSOR_ASSERT_NOEXCEPT)
       : next(begin, end, iterator_tag{}) {}
 
   template <typename Iterator>

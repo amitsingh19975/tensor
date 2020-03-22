@@ -642,7 +642,7 @@ BOOST_AUTO_TEST_CASE(test_basic_extents_impl_initialize_dynamic_extents,
 BOOST_AUTO_TEST_CASE(test_basic_extents_impl_exception)
 {
   using namespace boost::numeric::ublas::detail;
-  
+
   std::vector<size_t> v = {1,0,3};
   BOOST_REQUIRE_THROW( ( basic_extents_impl<0,make_basic_shape_t<3>>(v.begin(),v.end(),iterator_tag{}) ), std::runtime_error );
   

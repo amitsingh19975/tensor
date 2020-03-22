@@ -62,8 +62,13 @@ struct basic_static_extents<int_type,R,E...>
    */
   [[nodiscard]] BOOST_UBLAS_TENSOR_INLINE
   constexpr auto at(size_type k) const noexcept(TENSOR_ASSERT_NOEXCEPT){ 
-    TENSOR_ASSERT( BOOST_UBLAS_TENSOR_LIKLY( k < this->size() ), "boost::numeric::ublas::basic_static_extents: Out Of Bound");
+    TENSOR_ASSERT( BOOST_UBLAS_TENSOR_LIKLY( k < this->size() ), "boost::numeric::ublas::basic_static_extents::at: out of bound");
     return impl::at(k); 
+  }
+
+  [[nodiscard]] BOOST_UBLAS_TENSOR_INLINE
+  constexpr auto operator[](size_type k) const noexcept(TENSOR_ASSERT_NOEXCEPT){ 
+    return at(k); 
   }
 
   // default constructor
@@ -222,4 +227,5 @@ template<ptrdiff_t... E>
 using static_extents = basic_static_extents<std::size_t,sizeof...(E),E...>;
 
 } // namespace boost::numeric::ublas
+
 #endif

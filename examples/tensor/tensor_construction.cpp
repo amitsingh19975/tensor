@@ -14,138 +14,157 @@
 #include <iostream>
 #include <type_traits>
 
+namespace ub = boost::numeric::ublas;
+
 int main() {
     
-    using namespace boost::numeric::ublas;
+    using value_type = float;
 
-    auto t1 = tensor<float>{1,2,3,4};
-    auto t2 = tensor<float,dynamic_extents<4>>{dynamic_extents<4>{1,2,3,4}};
-    auto t3 = tensor<float,dynamic_extents<>>{dynamic_extents<>{1,2,3,4}};
-    auto t5 = tensor<float,dynamic_extents<>>{dynamic_extents<>{1,2,3,4},0.1}; 
-    auto t4 = tensor<float,static_extents<1,2,3,4>>();
+    /** tensor initialization using type deduction 
+     * Storage Type: std::vector
+     * Layout: first_order
+     * Initial Value: 0
+    **/
+    auto tensor_dynamic_extents_and_dynamic_rank_0  = ub::tensor<value_type>{1,2,3,4};
+    
+    /** Dynamic extents but static rank
+     * Storage Type: std::array of static rank
+     * Layout: first_order
+     * Initial Value: 0
+    **/
+    auto tensor_dynamic_extents_and_static_rank_1   = ub::tensor<value_type,ub::dynamic_extents<4>>{ub::dynamic_extents<4>{1,2,3,4}};
 
-    auto t6 = tensor<float,static_extents<1,2,3,4>,first_order>();
-    auto t7 = tensor<float,dynamic_extents<>,first_order>{1,2,3,4};
+    /** Dynamic extents but dynamic rank
+     * Storage Type: std::vector
+     * Layout: first_order
+     * Initial Value: 0
+    **/
+    auto tensor_dynamic_extents_and_dynamic_rank_2  = ub::tensor<value_type,ub::dynamic_extents<>>{ub::dynamic_extents<>{1,2,3,4}};
 
-    auto t8 = tensor<float,dynamic_extents<>,first_order,std::vector<float>>{1,2,3,4};
-    auto t9 = tensor<float,static_extents<1,2,3,4>,first_order,std::array<float,24>>();
+    /** Dynamic extents but dynamic rank
+     * Storage Type: std::vector
+     * Layout: first_order
+     * Initial Value: 0.1f
+    **/
+    auto tensor_dynamic_extents_and_dynamic_rank_3  = ub::tensor<value_type,ub::dynamic_extents<>>{ub::dynamic_extents<>{1,2,3,4},0.1};
 
-    auto t1_e = t1.extents();
-    auto t2_e = t2.extents();
-    auto t3_e = t3.extents();
-    auto t4_e = t4.extents();
-    auto t5_e = t5.extents();
-    auto t6_e = t6.extents();
-    auto t7_e = t7.extents();
-    auto t8_e = t8.extents();
-    auto t9_e = t9.extents();
+    /** Static extents but static rank
+     * Storage Type: std::array
+     * Layout: first_order
+     * Initial Value: 0
+    **/
+    auto tensor_static_extents_and_static_rank_4    = ub::tensor<value_type,ub::static_extents<1,2,3,4>>();
 
-    auto t1_s = t1.strides();
-    auto t2_s = t2.strides();
-    auto t3_s = t3.strides();
-    auto t4_s = t4.strides();
-    auto t5_s = t5.strides();
-    auto t6_s = t6.strides();
-    auto t7_s = t7.strides();
-    auto t8_s = t8.strides();
-    auto t9_s = t9.strides();
+    /** Static extents but static rank
+     * Storage Type: std::array
+     * Layout: first_order
+     * Initial Value: 0
+    **/
+    auto tensor_static_extents_and_static_rank_5    = ub::tensor<value_type,ub::static_extents<1,2,3,4>,ub::first_order>();
 
-    puts("\nt1: ");
-    for(auto i = 0u; i < t1_e.size(); i++){
-        std::cout<<t1_e[i]<<' ';
-    }
-    std::cout<<'\n';
-    for(auto i = 0u; i < t1_s.size(); i++){
-        std::cout<<t1_s[i]<<' ';
-    }
-    std::cout<<'\n';
+    /** Dynamic extents but dynamic rank
+     * Storage Type: std::array
+     * Layout: first_order
+     * Initial Value: 0
+    **/
+    auto tensor_dynamic_extents_and_dynamic_rank_6  = ub::tensor<value_type,ub::dynamic_extents<>,ub::first_order>{1,2,3,4};
 
-    puts("\nt2: ");
-    for(auto i = 0u; i < t2_e.size(); i++){
-        std::cout<<t2_e[i]<<' ';
-    }
-    std::cout<<'\n';
-    for(auto i = 0u; i < t2_s.size(); i++){
-        std::cout<<t2_s.extent(i)<<' ';
-    }
-    std::cout<<'\n';
+    /** Dynamic extents but dynamic rank
+     * Storage Type: std::vector
+     * Layout: first_order
+     * Initial Value: 0
+    **/
+    auto tensor_dynamic_extents_and_dynamic_rank_7  = ub::tensor<value_type,ub::dynamic_extents<>,ub::first_order,std::vector<value_type>>{1,2,3,4};
+
+    /** Static extents but static rank
+     * Storage Type: std::array of size 24
+     * Layout: first_order
+     * Initial Value: 0
+    **/
+    auto tensor_static_extents_and_static_rank_8    = ub::tensor<value_type,ub::static_extents<1,2,3,4>,ub::first_order,std::array<value_type,24>>();
+
+    auto t1_e = tensor_dynamic_extents_and_dynamic_rank_0.extents();
+    auto t2_e = tensor_dynamic_extents_and_static_rank_1.extents();
+    auto t3_e = tensor_dynamic_extents_and_dynamic_rank_2.extents();
+    auto t4_e = tensor_static_extents_and_static_rank_4.extents();
+    auto t5_e = tensor_dynamic_extents_and_dynamic_rank_3.extents();
+    auto t6_e = tensor_static_extents_and_static_rank_5.extents();
+    auto t7_e = tensor_dynamic_extents_and_dynamic_rank_6.extents();
+    auto t8_e = tensor_dynamic_extents_and_dynamic_rank_7.extents();
+    auto t9_e = tensor_static_extents_and_static_rank_8.extents();
+
+    auto t1_s = tensor_dynamic_extents_and_dynamic_rank_0.strides();
+    auto t2_s = tensor_dynamic_extents_and_static_rank_1.strides();
+    auto t3_s = tensor_dynamic_extents_and_dynamic_rank_2.strides();
+    auto t4_s = tensor_static_extents_and_static_rank_4.strides();
+    auto t5_s = tensor_dynamic_extents_and_dynamic_rank_3.strides();
+    auto t6_s = tensor_static_extents_and_static_rank_5.strides();
+    auto t7_s = tensor_dynamic_extents_and_dynamic_rank_6.strides();
+    auto t8_s = tensor_dynamic_extents_and_dynamic_rank_7.strides();
+    auto t9_s = tensor_static_extents_and_static_rank_8.strides();
+
+    std::cout<<"\nExtents: "<<ub::to_string(t1_e)<<'\n';
+    std::cout<<"Strides: "<<ub::to_string(t1_s)<<'\n';
     
-    puts("\nt3: ");
-    for(auto i = 0u; i < t3_e.size(); i++){
-        std::cout<<t3_e[i]<<' ';
-    }
-    std::cout<<'\n';
-    for(auto i = 0u; i < t3_s.size(); i++){
-        std::cout<<t3_s[i]<<' ';
-    }
-    std::cout<<'\n';
+    std::cout<<"\nExtents: "<<ub::to_string(t2_e)<<'\n';
+    std::cout<<"Strides: "<<ub::to_string(t2_s)<<'\n';
+
+    std::cout<<"\nExtents: "<<ub::to_string(t3_e)<<'\n';
+    std::cout<<"Strides: "<<ub::to_string(t3_s)<<'\n';
+
+    std::cout<<"\nExtents: "<<ub::to_string(t4_e)<<'\n';
+    std::cout<<"Strides: "<<ub::to_string(t4_s)<<'\n';
+
+    std::cout<<"\nExtents: "<<ub::to_string(t5_e)<<'\n';
+    std::cout<<"Strides: "<<ub::to_string(t5_s)<<'\n';
+
+    std::cout<<"\nExtents: "<<ub::to_string(t6_e)<<'\n';
+    std::cout<<"Strides: "<<ub::to_string(t6_s)<<'\n';
+
+    std::cout<<"\nExtents: "<<ub::to_string(t7_e)<<'\n';
+    std::cout<<"Strides: "<<ub::to_string(t7_s)<<'\n';
+
+    std::cout<<"\nExtents: "<<ub::to_string(t8_e)<<'\n';
+    std::cout<<"Strides: "<<ub::to_string(t8_s)<<'\n';
+
+    std::cout<<"\nExtents: "<<ub::to_string(t9_e)<<'\n';
+    std::cout<<"Strides: "<<ub::to_string(t9_s)<<'\n';
+
+    /**
+     *  Checking if layout is first order or not
+     *  Output: True
+     **/
+    std::cout<<std::is_same<typename decltype(tensor_dynamic_extents_and_dynamic_rank_7)::layout_type, ub::first_order>::value<<'\n';
     
-    puts("\nt4: ");
-    for(auto i = 0u; i < t4_e.size(); i++){
-        std::cout<<t4_e[i]<<' ';
-    }
-    std::cout<<'\n';
-    for(auto i = 0u; i < t4_s.size(); i++){
-        std::cout<<t4_s[i]<<' ';
-    }
-    std::cout<<'\n';
+    /**
+     *  Checking if layout is first order or not
+     *  Output: True
+     **/
+    std::cout<<std::is_same<typename decltype(tensor_static_extents_and_static_rank_8)::layout_type, ub::first_order>::value<<'\n';
     
-    puts("\nt5: ");
-    for(auto i = 0u; i < t5_e.size(); i++){
-        std::cout<<t5_e[i]<<' ';
-    }
-    std::cout<<'\n';
-    for(auto i = 0u; i < t5_s.size(); i++){
-        std::cout<<t5_s[i]<<' ';
-    }
-    std::cout<<'\n';
+    /**
+     *  Checking if container is std::vector
+     *  Output: True
+     **/
+    std::cout<<std::is_same<typename decltype(tensor_dynamic_extents_and_dynamic_rank_7)::array_type, std::vector<float> >::value<<'\n';
     
-    puts("\nt6: ");
-    for(auto i = 0u; i < t6_e.size(); i++){
-        std::cout<<t6_e[i]<<' ';
-    }
-    std::cout<<'\n';
-    for(auto i = 0u; i < t6_s.size(); i++){
-        std::cout<<t6_s[i]<<' ';
-    }
-    std::cout<<'\n';
+    /**
+     *  Checking if container is std::array
+     *  Output: True
+     **/
+    std::cout<<std::is_same<typename decltype(tensor_static_extents_and_static_rank_8)::array_type, std::array<float,24> >::value<<'\n';
     
-    puts("\nt7: ");
-    for(auto i = 0u; i < t7_e.size(); i++){
-        std::cout<<t7_e[i]<<' ';
-    }
-    std::cout<<'\n';
-    for(auto i = 0u; i < t7_s.size(); i++){
-        std::cout<<t7_s[i]<<' ';
-    }
-    std::cout<<'\n';
+    /**
+     *  Checking if extents is static
+     *  Output: True
+     **/
+    std::cout<<ub::detail::is_static<typename decltype(tensor_static_extents_and_static_rank_8)::extents_type >::value<<'\n';
     
-    puts("\nt8: ");
-    for(auto i = 0u; i < t8_e.size(); i++){
-        std::cout<<t8_e[i]<<' ';
-    }
-    std::cout<<'\n';
-    for(auto i = 0u; i < t8_s.size(); i++){
-        std::cout<<t8_s[i]<<' ';
-    }
-    std::cout<<'\n';
-    
-    puts("\nt9: ");
-    for(auto i = 0u; i < t9_e.size(); i++){
-        std::cout<<t9_e[i]<<' ';
-    }
-    std::cout<<'\n';
-    for(auto i = 0u; i < t9_s.size(); i++){
-        std::cout<<t9_s[i]<<' ';
-    }
-    std::cout<<'\n';
-    
-    static_assert(std::is_same<typename decltype(t8)::layout_type, first_order>::value,"");
-    static_assert(std::is_same<typename decltype(t9)::layout_type, first_order>::value,"");
-    static_assert(std::is_same<typename decltype(t8)::array_type, std::vector<float> >::value,"");
-    static_assert(std::is_same<typename decltype(t9)::array_type, std::array<float,24> >::value,"");
-    static_assert(detail::is_static_extents<typename decltype(t9)::extents_type >::value,"");
-    static_assert(detail::is_dynamic<typename decltype(t8)::extents_type >::value,"");
+    /**
+     *  Checking if extents is dynamic
+     *  Output: True
+     **/
+    std::cout<<ub::detail::is_dynamic<typename decltype(tensor_dynamic_extents_and_dynamic_rank_7)::extents_type >::value<<'\n';
 
     return 0;
 }

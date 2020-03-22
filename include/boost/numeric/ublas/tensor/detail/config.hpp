@@ -21,15 +21,7 @@
     #define has_attribute(ATTR) 0
 #endif
 
-#if defined(__GNUC__) || has_attribute(always_inline)
-    #define BOOST_UBLAS_TENSOR_ALWAYS_INLINE inline __attribute__((always_inline))
-#elif defined(_MSC_VER) && !__INTEL_COMPILER && _MSC_VER >= 1310
-    #define BOOST_UBLAS_TENSOR_ALWAYS_INLINE inline __forceinline
-#else
-    #define BOOST_UBLAS_TENSOR_ALWAYS_INLINE inline
-#endif
-
-#ifdef BOOST_UBLAS_TENSOR_TESTING
+#ifndef BOOST_UBLAS_TENSOR_TEST_ENABLE
     #define TENSOR_ASSERT(e,comment) assert( (e) && comment )
     inline static constexpr bool TENSOR_ASSERT_NOEXCEPT = true;
 #else
@@ -38,15 +30,15 @@
 #endif
 
 #if defined(__GNUC__) || defined(__INTEL_COMPILER) ||  has_attribute(__builtin_expect)
-    #define BOOST_UBLAS_TENSOR_LIKLY(x) __builtin_expect(!!(x),1)
-    #define BOOST_UBLAS_TENSOR_UNLIKLY(x) __builtin_expect(!!(x),0)
+    #define BOOST_UBLAS_TENSOR_LIKLY(x) static_cast<bool>(__builtin_expect(!!(x),1))
+    #define BOOST_UBLAS_TENSOR_UNLIKLY(x) static_cast<bool>(__builtin_expect(!!(x),0))
 #else
-    #define BOOST_UBLAS_TENSOR_LIKLY(x) x
+    #define BOOST_UBLAS_TENSOR_LIKLY(x) static_cast<bool>(x)
     #define BOOST_UBLAS_TENSOR_UNLIKLY(x) BOOST_UBLAS_TENSOR_LIKLY(x)
 #endif
 
 #ifndef BOOST_UBLAS_INLINE
-    #define BOOST_UBLAS_TENSOR_INLINE BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+    #define BOOST_UBLAS_TENSOR_INLINE inline
 #else
     #define BOOST_UBLAS_TENSOR_INLINE BOOST_UBLAS_INLINE
 #endif

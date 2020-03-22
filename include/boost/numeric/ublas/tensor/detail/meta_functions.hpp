@@ -33,6 +33,20 @@ template <class E> struct is_extents {
 };
 
 template <class E>
+struct is_stride_impl : std::integral_constant<bool, false> {};
+
+template <class ExtentsType, class Layout>
+struct is_stride_impl< static_strides<ExtentsType,Layout> > : std::true_type {};
+
+template <class T, class Layout> 
+struct is_stride_impl< basic_strides<T,Layout> > : std::true_type {};
+
+template <class E> struct is_strides {
+  static constexpr bool value =
+      is_stride_impl<typename std::decay<E>::type>::value;
+};
+
+template <class E>
 struct is_static_extents_impl : std::integral_constant<bool, false> {};
 
 template <class T, ptrdiff_t R, ptrdiff_t... E>

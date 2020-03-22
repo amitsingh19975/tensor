@@ -12,7 +12,8 @@
 #ifndef _BOOST_NUMERIC_UBLAS_TENSOR_FWD_HPP_
 #define _BOOST_NUMERIC_UBLAS_TENSOR_FWD_HPP_
 
-#include <iostream>
+#include <cstddef>
+#include <string>
 
 namespace boost::numeric::ublas {
 

@@ -83,12 +83,12 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_copy, value,  test_type
 
 		using size_type = typename ublas::strides<ublas::first_order>::value_type;
 		size_type const*const p0 = nullptr;
-		BOOST_CHECK_THROW( ublas::copy( n.size(), p0, c.data(), wc.data(), b.data(), wb.data() ), std::length_error );
-		BOOST_CHECK_THROW( ublas::copy( n.size(), n.data(), c.data(), p0, b.data(), wb.data() ), std::length_error );
-		BOOST_CHECK_THROW( ublas::copy( n.size(), n.data(), c.data(), wc.data(), b.data(), p0 ), std::length_error );
+		BOOST_CHECK_THROW( ublas::copy( n.size(), p0, c.data(), wc.data(), b.data(), wb.data() ), std::runtime_error );
+		BOOST_CHECK_THROW( ublas::copy( n.size(), n.data(), c.data(), p0, b.data(), wb.data() ), std::runtime_error );
+		BOOST_CHECK_THROW( ublas::copy( n.size(), n.data(), c.data(), wc.data(), b.data(), p0 ), std::runtime_error );
 
 		value_type* c0 = nullptr;
-		BOOST_CHECK_THROW( ublas::copy( n.size(), n.data(), c0, wc.data(), b.data(), wb.data() ), std::length_error );
+		BOOST_CHECK_THROW( ublas::copy( n.size(), n.data(), c0, wc.data(), b.data(), wb.data() ), std::runtime_error );
 	}
 
 	// special case rank == 0
@@ -134,7 +134,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_copy_exceptions, value,
 		auto wa = ublas::strides<ublas::first_order>(n);
 		auto wc = ublas::strides<ublas::first_order>(n);
 
-		BOOST_REQUIRE_THROW( ublas::copy( n.size(), n.data(), c.data(), wc.data(), a, wa.data() ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::copy( n.size(), n.data(), c.data(), wc.data(), a, wa.data() ), std::runtime_error );
 		
 	}
 
@@ -146,7 +146,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_copy_exceptions, value,
 		auto wa = ublas::strides<ublas::first_order>(n);
 		auto wc = ublas::strides<ublas::first_order>(n);
 
-		BOOST_REQUIRE_THROW( ublas::copy( n.size(), n.data(), c, wc.data(), a, wa.data() ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::copy( n.size(), n.data(), c, wc.data(), a, wa.data() ), std::runtime_error );
 
 	}
 
@@ -158,7 +158,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_copy_exceptions, value,
 			auto wa = ublas::strides<ublas::first_order>(n);
 			auto wc = ublas::strides<ublas::first_order>(n);
 
-			BOOST_REQUIRE_THROW( ublas::copy( n.size(), n.data(), c, wc.data(), a.data(), wa.data() ), std::length_error );
+			BOOST_REQUIRE_THROW( ublas::copy( n.size(), n.data(), c, wc.data(), a.data(), wa.data() ), std::runtime_error );
 			
 	}
 
@@ -170,7 +170,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_copy_exceptions, value,
 			size_t* wa = nullptr;
 			auto wc = ublas::strides<ublas::first_order>(n);
 
-			BOOST_REQUIRE_THROW( ublas::copy( n.size(), n.data(), c.data(), wc.data(), a.data(), wa ), std::length_error );
+			BOOST_REQUIRE_THROW( ublas::copy( n.size(), n.data(), c.data(), wc.data(), a.data(), wa ), std::runtime_error );
 			
 	}
 
@@ -182,7 +182,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_copy_exceptions, value,
 			size_t* wc = nullptr;
 			auto wa = ublas::strides<ublas::first_order>(n);
 
-			BOOST_REQUIRE_THROW( ublas::copy( n.size(), n.data(), c.data(), wc, a.data(), wa.data() ), std::length_error );
+			BOOST_REQUIRE_THROW( ublas::copy( n.size(), n.data(), c.data(), wc, a.data(), wa.data() ), std::runtime_error );
 			
 	}
 
@@ -195,7 +195,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_copy_exceptions, value,
 			auto wc = ublas::strides<ublas::first_order>(n);
 			auto wa = ublas::strides<ublas::first_order>(n);
 
-			BOOST_REQUIRE_THROW( ublas::copy( n.size(), m, c.data(), wc.data(), a.data(), wa.data() ), std::length_error );
+			BOOST_REQUIRE_THROW( ublas::copy( n.size(), m, c.data(), wc.data(), a.data(), wa.data() ), std::runtime_error );
 			
 	}
 }
@@ -236,9 +236,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_transform, value,  test
         const size_type* s0 = nullptr;
         size_type const*const p0 = nullptr;
 
-        BOOST_CHECK_THROW(ublas::transform( n.size(), n.data(), c0, wb.data(), a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::length_error);
-        BOOST_CHECK_THROW(ublas::transform( n.size(), n.data(), b.data(), s0, a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::length_error);
-        BOOST_CHECK_THROW(ublas::transform( n.size(), p0, b.data(), wb.data(), a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::length_error);
+        BOOST_CHECK_THROW(ublas::transform( n.size(), n.data(), c0, wb.data(), a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::runtime_error);
+        BOOST_CHECK_THROW(ublas::transform( n.size(), n.data(), b.data(), s0, a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::runtime_error);
+        BOOST_CHECK_THROW(ublas::transform( n.size(), p0, b.data(), wb.data(), a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::runtime_error);
 
 
         for(auto i = 1ul; i < c.size(); ++i)
@@ -262,7 +262,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_transform_exceptions, v
 		auto wa = ublas::strides<ublas::first_order>(n);
 		auto wc = ublas::strides<ublas::first_order>(n);
 
-		BOOST_REQUIRE_THROW( ublas::transform( n.size(), n.data(), c.data(), wc.data(), a, wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::transform( n.size(), n.data(), c.data(), wc.data(), a, wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::runtime_error );
 		
 	}
 
@@ -274,7 +274,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_transform_exceptions, v
 		auto wa = ublas::strides<ublas::first_order>(n);
 		auto wc = ublas::strides<ublas::first_order>(n);
 
-		BOOST_REQUIRE_THROW( ublas::transform( n.size(), n.data(), c, wc.data(), a, wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::transform( n.size(), n.data(), c, wc.data(), a, wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::runtime_error );
 
 	}
 
@@ -286,7 +286,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_transform_exceptions, v
 			auto wa = ublas::strides<ublas::first_order>(n);
 			auto wc = ublas::strides<ublas::first_order>(n);
 
-			BOOST_REQUIRE_THROW( ublas::transform( n.size(), n.data(), c, wc.data(), a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::length_error );
+			BOOST_REQUIRE_THROW( ublas::transform( n.size(), n.data(), c, wc.data(), a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::runtime_error );
 			
 	}
 
@@ -298,7 +298,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_transform_exceptions, v
 			size_t* wa = nullptr;
 			auto wc = ublas::strides<ublas::first_order>(n);
 
-			BOOST_REQUIRE_THROW( ublas::transform( n.size(), n.data(), c.data(), wc.data(), a.data(), wa, [](value_type const& a){ return a + value_type(1);} ), std::length_error );
+			BOOST_REQUIRE_THROW( ublas::transform( n.size(), n.data(), c.data(), wc.data(), a.data(), wa, [](value_type const& a){ return a + value_type(1);} ), std::runtime_error );
 			
 	}
 
@@ -310,7 +310,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_transform_exceptions, v
 			size_t* wc = nullptr;
 			auto wa = ublas::strides<ublas::first_order>(n);
 
-			BOOST_REQUIRE_THROW( ublas::transform( n.size(), n.data(), c.data(), wc, a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::length_error );
+			BOOST_REQUIRE_THROW( ublas::transform( n.size(), n.data(), c.data(), wc, a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::runtime_error );
 			
 	}
 
@@ -323,7 +323,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_transform_exceptions, v
 			auto wc = ublas::strides<ublas::first_order>(n);
 			auto wa = ublas::strides<ublas::first_order>(n);
 
-			BOOST_REQUIRE_THROW( ublas::transform( n.size(), m, c.data(), wc.data(), a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::length_error );
+			BOOST_REQUIRE_THROW( ublas::transform( n.size(), m, c.data(), wc.data(), a.data(), wa.data(), [](value_type const& a){ return a + value_type(1);} ), std::runtime_error );
 			
 	}
 }
@@ -363,9 +363,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_accumulate, value,  tes
                 value_type* c0 = nullptr;
                 size_type const*const p0 = nullptr;
 
-                BOOST_CHECK_THROW(ublas::accumulate( n.size(), n.data(), c0, wa.data(), v), std::length_error);
-                BOOST_CHECK_THROW(ublas::accumulate( n.size(), n.data(), a.data(), p0, v), std::length_error);
-                BOOST_CHECK_THROW(ublas::accumulate( n.size(), p0, a.data(), wa.data(), v), std::length_error);
+                BOOST_CHECK_THROW(ublas::accumulate( n.size(), n.data(), c0, wa.data(), v), std::runtime_error);
+                BOOST_CHECK_THROW(ublas::accumulate( n.size(), n.data(), a.data(), p0, v), std::runtime_error);
+                BOOST_CHECK_THROW(ublas::accumulate( n.size(), p0, a.data(), wa.data(), v), std::runtime_error);
 
 
                 auto acc2 = ublas::accumulate( n.size(), n.data(), a.data(), wa.data(), v,
@@ -375,9 +375,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_accumulate, value,  tes
 
                 ublas::accumulate(zero, n.data(), a.data(), wa.data(), v, [](auto const& l, auto const& r){return l + r; });
 
-                BOOST_CHECK_THROW(ublas::accumulate( n.size(), n.data(), c0, wa.data(), v,[](auto const& l, auto const& r){return l + r; }), std::length_error);
-                BOOST_CHECK_THROW(ublas::accumulate( n.size(), n.data(), a.data(), p0, v, [](auto const& l, auto const& r){return l + r; }), std::length_error);
-                BOOST_CHECK_THROW(ublas::accumulate( n.size(), p0, a.data(), wa.data(),v, [](auto const& l, auto const& r){return l + r; }), std::length_error);
+                BOOST_CHECK_THROW(ublas::accumulate( n.size(), n.data(), c0, wa.data(), v,[](auto const& l, auto const& r){return l + r; }), std::runtime_error);
+                BOOST_CHECK_THROW(ublas::accumulate( n.size(), n.data(), a.data(), p0, v, [](auto const& l, auto const& r){return l + r; }), std::runtime_error);
+                BOOST_CHECK_THROW(ublas::accumulate( n.size(), p0, a.data(), wa.data(),v, [](auto const& l, auto const& r){return l + r; }), std::runtime_error);
 
 	}
 }
@@ -395,7 +395,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_accumulate_exceptions, 
 
 		auto wa = ublas::strides<ublas::first_order>(n);
 
-		BOOST_REQUIRE_THROW( ublas::accumulate( n.size(), n.data(), a, wa.data(), value_type{0} ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::accumulate( n.size(), n.data(), a, wa.data(), value_type{0} ), std::runtime_error );
 		
 	}
 
@@ -405,7 +405,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_accumulate_exceptions, 
 
 		auto wa = ublas::strides<ublas::first_order>(n);
 
-		BOOST_REQUIRE_THROW( ublas::accumulate( n.size(), n.data(), a, wa.data(), value_type{0},[](value_type const& a,value_type const& b){ return a + b;} ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::accumulate( n.size(), n.data(), a, wa.data(), value_type{0},[](value_type const& a,value_type const& b){ return a + b;} ), std::runtime_error );
 		
 	}
 
@@ -435,7 +435,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_accumulate_exceptions, 
 
 			size_t* wa = nullptr;
 
-			BOOST_REQUIRE_THROW( ublas::accumulate( n.size(), n.data(), a.data(), wa, value_type{0} ), std::length_error );
+			BOOST_REQUIRE_THROW( ublas::accumulate( n.size(), n.data(), a.data(), wa, value_type{0} ), std::runtime_error );
 			
 	}
 
@@ -447,7 +447,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_accumulate_exceptions, 
 
 			size_t* m = nullptr;
 
-			BOOST_REQUIRE_THROW( ublas::accumulate( n.size(), m, a.data(), wa.data(), value_type{0}, [](value_type const& a,value_type const& b){ return a + b;} ), std::length_error );
+			BOOST_REQUIRE_THROW( ublas::accumulate( n.size(), m, a.data(), wa.data(), value_type{0}, [](value_type const& a,value_type const& b){ return a + b;} ), std::runtime_error );
 			
 	}
 
@@ -550,10 +550,10 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_trans, value,  test_typ
                 value_type *c0 = nullptr;
                 size_type const*const s0 = nullptr;
 
-                BOOST_CHECK_THROW(ublas::trans( p, n.data(), pi.data(), c0, wc.data(),  a.data(), wa.data()), std::length_error);
-                BOOST_CHECK_THROW(ublas::trans( p, s0, pi.data(), c2.data(),wc.data(),  a.data(), wa.data()), std::length_error);
-                BOOST_CHECK_THROW(ublas::trans( p, n.data(), pi.data(), c2.data(), s0,  a.data(), wa.data()), std::length_error);
-                BOOST_CHECK_THROW(ublas::trans( p, n.data(), s0, c2.data(), wc.data(),  a.data(), wa.data()), std::length_error);
+                BOOST_CHECK_THROW(ublas::trans( p, n.data(), pi.data(), c0, wc.data(),  a.data(), wa.data()), std::runtime_error);
+                BOOST_CHECK_THROW(ublas::trans( p, s0, pi.data(), c2.data(),wc.data(),  a.data(), wa.data()), std::runtime_error);
+                BOOST_CHECK_THROW(ublas::trans( p, n.data(), pi.data(), c2.data(), s0,  a.data(), wa.data()), std::runtime_error);
+                BOOST_CHECK_THROW(ublas::trans( p, n.data(), s0, c2.data(), wc.data(),  a.data(), wa.data()), std::runtime_error);
 
         }
 }
@@ -585,7 +585,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_trans_exceptions, value
 		auto wc = strides_type(n);
 		auto wc_pi = typename strides_type::base_type (p);
 
-		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), a, wa.data(),    c.data(), wc.data() ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), a, wa.data(),    c.data(), wc.data() ), std::runtime_error );
 		
 	}
 
@@ -603,7 +603,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_trans_exceptions, value
 			
 		auto wc = strides_type(n);
 
-		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), c.data(), wc.data(),    a, wa.data() ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), c.data(), wc.data(),    a, wa.data() ), std::runtime_error );
 		
 	}
 
@@ -620,7 +620,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_trans_exceptions, value
 			
 		auto wc = strides_type(n);
 
-		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), c, wc.data(),    a, wa.data() ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), c, wc.data(),    a, wa.data() ), std::runtime_error );
 		
 	}
 
@@ -639,7 +639,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_trans_exceptions, value
 			
 		size_t* wc = nullptr;
 
-		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), c.data(), wc,    a.data(), wa.data() ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), c.data(), wc,    a.data(), wa.data() ), std::runtime_error );
 		
 	}
 
@@ -657,7 +657,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_trans_exceptions, value
 			
 		size_t* wa = nullptr;
 
-		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), c.data(), wc.data(),    a.data(), wa ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), c.data(), wc.data(),    a.data(), wa ), std::runtime_error );
 		
 	}
 
@@ -676,7 +676,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_trans_exceptions, value
 			
 		size_t* wa = nullptr;
 
-		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), c.data(), wc,    a.data(), wa ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi.data(), c.data(), wc,    a.data(), wa ), std::runtime_error );
 		
 	}
 
@@ -694,7 +694,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_trans_exceptions, value
 		auto nc = typename extents_type::base_type (p);
 		auto wc = strides_type(n);
 
-		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi, c.data(), wc.data(),    a.data(), wa.data() ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::trans( p, nc.data(), pi, c.data(), wc.data(),    a.data(), wa.data() ), std::runtime_error );
 		
 	}
 
@@ -712,7 +712,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_trans_exceptions, value
 			
 		auto wc = strides_type(n);
 
-		BOOST_REQUIRE_THROW( ublas::trans( p, nc, pi.data(), c.data(), wc.data(),    a.data(), wa.data() ), std::length_error );
+		BOOST_REQUIRE_THROW( ublas::trans( p, nc, pi.data(), c.data(), wc.data(),    a.data(), wa.data() ), std::runtime_error );
 		
 	}
 

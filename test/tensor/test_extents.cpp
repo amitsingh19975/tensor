@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_extents_ctor)
 
 
 struct fixture {
-	using extents_type = boost::numeric::ublas::basic_extents<unsigned>;
+	using extents_type = boost::numeric::ublas::dynamic_extents<>;
 	fixture() : extents{
 	              extents_type{},            // 0
 
@@ -533,6 +533,50 @@ BOOST_FIXTURE_TEST_CASE(test_extents_valid, fixture, *boost::unit_test::label("e
 
 	BOOST_CHECK_THROW( ublas::basic_extents<unsigned>({0,1}), std::length_error );
 	BOOST_CHECK_THROW( ublas::basic_extents<unsigned>({1,0,1}), std::length_error );
+
+}
+
+BOOST_FIXTURE_TEST_CASE(test_extents_comparison, fixture, *boost::unit_test::label("extents") *boost::unit_test::label("compare"))
+{
+
+	using namespace boost::numeric;
+
+	auto s0 = ublas::static_extents<>{};
+	auto s1 = ublas::static_extents<1,1>{};
+	auto s2 = ublas::static_extents<1,4,2,1,3,1>{};
+	auto s3 = ublas::static_extents<1,4,2,1,1,1>{};
+
+	auto e0  = extents[ 0]; // {}
+	auto e1  = extents[ 1]; // {1,1}
+	auto e2	 = extents[12]; // {1,4,2,1,3,1}
+	
+	BOOST_TEST( s0 == e0 );
+	BOOST_TEST( s1 == e1 );
+	BOOST_TEST( s2 == e2 );
+	
+	BOOST_TEST( e0 == s0 );
+	BOOST_TEST( e1 == s1 );
+	BOOST_TEST( e2 == s2 );
+	
+	BOOST_TEST( s0 != e1 );
+	BOOST_TEST( s0 != e2 );
+	BOOST_TEST( s1 != e0 );
+	BOOST_TEST( s1 != e2 );
+	BOOST_TEST( s2 != e0 );
+	BOOST_TEST( s2 != e1 );
+	BOOST_TEST( s3 != e0 );
+	BOOST_TEST( s3 != e1 );
+	BOOST_TEST( s3 != e2 );
+	
+	BOOST_TEST( e1 != s0 );
+	BOOST_TEST( e2 != s0 );
+	BOOST_TEST( e0 != s1 );
+	BOOST_TEST( e2 != s1 );
+	BOOST_TEST( e0 != s2 );
+	BOOST_TEST( e1 != s2 );
+	BOOST_TEST( e0 != s3 );
+	BOOST_TEST( e1 != s3 );
+	BOOST_TEST( e2 != s3 );
 
 }
 

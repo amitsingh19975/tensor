@@ -48,6 +48,18 @@ constexpr bool operator!=(basic_static_extents<T,R,E...> const& lhs, basic_exten
 }
 
 
+template <class T, ptrdiff_t R, ptrdiff_t... E>
+std::ostream& operator<<(std::ostream& os, basic_static_extents<T,R,E...> const& e){
+    return os<<to_string(e);
+}
+
+template <class T>
+std::ostream& operator<<(std::ostream& os, basic_extents<T> const& e){
+    return os<<to_string(e);
+}
+
+
+
 }
 
 #endif

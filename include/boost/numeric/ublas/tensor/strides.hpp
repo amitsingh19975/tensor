@@ -49,6 +49,18 @@ bool operator!=(static_strides<E, __layout> const &lhs,
                 basic_strides<__int_type, __layout> const &rhs) {
   return !(rhs == lhs);
 }
+
+
+template <class E, class L>
+std::ostream& operator<<(std::ostream& os, static_strides<E,L> const& s){
+    return os<<to_string(s);
+}
+
+template <class T, class L>
+std::ostream& operator<<(std::ostream& os, basic_strides<T,L> const& s){
+    return os<<to_string(s);
+}
+
 } // namespace boost::numeric::ublas
 
 #endif

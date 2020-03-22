@@ -103,32 +103,32 @@ int main() {
     auto t8_s = tensor_dynamic_extents_and_dynamic_rank_7.strides();
     auto t9_s = tensor_static_extents_and_static_rank_8.strides();
 
-    std::cout<<"\nExtents: "<<ub::to_string(t1_e)<<'\n';
-    std::cout<<"Strides: "<<ub::to_string(t1_s)<<'\n';
+    std::cout<<"\nExtents: "<<(t1_e)<<'\n';
+    std::cout<<"Strides: "<<(t1_s)<<'\n';
     
-    std::cout<<"\nExtents: "<<ub::to_string(t2_e)<<'\n';
-    std::cout<<"Strides: "<<ub::to_string(t2_s)<<'\n';
+    std::cout<<"\nExtents: "<<(t2_e)<<'\n';
+    std::cout<<"Strides: "<<(t2_s)<<'\n';
 
-    std::cout<<"\nExtents: "<<ub::to_string(t3_e)<<'\n';
-    std::cout<<"Strides: "<<ub::to_string(t3_s)<<'\n';
+    std::cout<<"\nExtents: "<<(t3_e)<<'\n';
+    std::cout<<"Strides: "<<(t3_s)<<'\n';
 
-    std::cout<<"\nExtents: "<<ub::to_string(t4_e)<<'\n';
-    std::cout<<"Strides: "<<ub::to_string(t4_s)<<'\n';
+    std::cout<<"\nExtents: "<<(t4_e)<<'\n';
+    std::cout<<"Strides: "<<(t4_s)<<'\n';
 
-    std::cout<<"\nExtents: "<<ub::to_string(t5_e)<<'\n';
-    std::cout<<"Strides: "<<ub::to_string(t5_s)<<'\n';
+    std::cout<<"\nExtents: "<<(t5_e)<<'\n';
+    std::cout<<"Strides: "<<(t5_s)<<'\n';
 
-    std::cout<<"\nExtents: "<<ub::to_string(t6_e)<<'\n';
-    std::cout<<"Strides: "<<ub::to_string(t6_s)<<'\n';
+    std::cout<<"\nExtents: "<<(t6_e)<<'\n';
+    std::cout<<"Strides: "<<(t6_s)<<'\n';
 
-    std::cout<<"\nExtents: "<<ub::to_string(t7_e)<<'\n';
-    std::cout<<"Strides: "<<ub::to_string(t7_s)<<'\n';
+    std::cout<<"\nExtents: "<<(t7_e)<<'\n';
+    std::cout<<"Strides: "<<(t7_s)<<'\n';
 
-    std::cout<<"\nExtents: "<<ub::to_string(t8_e)<<'\n';
-    std::cout<<"Strides: "<<ub::to_string(t8_s)<<'\n';
+    std::cout<<"\nExtents: "<<(t8_e)<<'\n';
+    std::cout<<"Strides: "<<(t8_s)<<'\n';
 
-    std::cout<<"\nExtents: "<<ub::to_string(t9_e)<<'\n';
-    std::cout<<"Strides: "<<ub::to_string(t9_s)<<'\n';
+    std::cout<<"\nExtents: "<<(t9_e)<<'\n';
+    std::cout<<"Strides: "<<(t9_s)<<'\n';
 
     /**
      *  Checking if layout is first order or not

@@ -110,7 +110,7 @@ namespace boost::numeric::ublas::detail{
   template <class Fn, class ExtentsType, typename std::enable_if<is_static_extents<ExtentsType>::value, int>::type = 0>
   BOOST_UBLAS_INLINE
   constexpr bool none_of( ExtentsType const& e, Fn pred){
-    auto num_list = get_number_list<0,ExtentsType::R>(typename ExtentsType::parent_type{});
+    auto num_list = get_number_list<0,ExtentsType::Rank>(typename ExtentsType::parent_type{});
     if constexpr( decltype(num_list)::size == 0 ){
       return true;
     }else{
@@ -142,7 +142,7 @@ namespace boost::numeric::ublas::detail{
   template <class Fn, class ExtentsType, typename std::enable_if<is_static_extents<ExtentsType>::value, int>::type = 0>
   BOOST_UBLAS_INLINE
   constexpr bool all_of( ExtentsType const& e, Fn pred){
-    auto num_list = get_number_list<0,ExtentsType::R>(typename ExtentsType::parent_type{});
+    auto num_list = get_number_list<0,ExtentsType::Rank>(typename ExtentsType::parent_type{});
     if constexpr( decltype(num_list)::size == 0 ){
       return true;
     }else{
@@ -174,7 +174,7 @@ namespace boost::numeric::ublas::detail{
   template <class Fn, class ExtentsType, typename std::enable_if<is_static_extents<ExtentsType>::value, int>::type = 0>
   BOOST_UBLAS_INLINE
   constexpr bool any_of( ExtentsType const& e, Fn pred){
-    auto num_list = get_number_list<0,ExtentsType::R>(typename ExtentsType::parent_type{});
+    auto num_list = get_number_list<0,ExtentsType::Rank>(typename ExtentsType::parent_type{});
     if constexpr( decltype(num_list)::size == 0 ){
       return false;
     }else{
@@ -232,7 +232,7 @@ namespace boost::numeric::ublas::detail{
 
     using value_type = typename ExtentsType::value_type;
 
-    auto num_list = get_number_list<0,ExtentsType::R>(typename ExtentsType::parent_type{});
+    auto num_list = get_number_list<0,ExtentsType::Rank>(typename ExtentsType::parent_type{});
     auto one_free_num_list = squeeze_impl_remove_one(num_list);
 
     // check after removing 1s from the list are they same

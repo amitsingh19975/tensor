@@ -33,10 +33,10 @@ template <class ExtentsType, size_t... E>
 struct basic_static_extents
     : detail::basic_extents_impl<0, E...> {
 
-  static constexpr auto R = sizeof...(E);
+  static constexpr auto Rank = sizeof...(E);
   
   using parent_type     = detail::basic_extents_impl<0, E...>;
-  using base_type       = std::array<ExtentsType,R>;
+  using base_type       = std::array<ExtentsType,Rank>;
 	using value_type      = typename base_type::value_type;
 	using const_reference = typename base_type::const_reference;
 	using reference       = typename base_type::reference;
@@ -58,7 +58,7 @@ struct basic_static_extents
    */
   [[nodiscard]] BOOST_UBLAS_INLINE
   constexpr value_type at(size_type k) const{ 
-    if ( k >= R ){
+    if ( k >= Rank ){
       throw std::out_of_range("boost::numeric::ublas::basic_static_extents::at: out of bound");
     }
     return parent_type::at(k); 
@@ -89,8 +89,8 @@ struct basic_static_extents
   /** @brief Returns the std::vector containing extents */
   [[nodiscard]] BOOST_UBLAS_INLINE
   auto to_vector() const {
-    std::vector<value_type> temp(R);
-    for (auto i = size_type(0); i < R; i++) {
+    std::vector<value_type> temp(Rank);
+    for (auto i = size_type(0); i < Rank; i++) {
       temp[i] = parent_type::at(i);
     }
     return temp;
@@ -106,7 +106,7 @@ struct basic_static_extents
   [[nodiscard]] BOOST_UBLAS_INLINE
   constexpr auto to_array() const {
     base_type temp;
-    for (auto i = size_type(0); i < R; i++) {
+    for (auto i = size_type(0); i < Rank; i++) {
       temp[i] = parent_type::at(i);
     }
     return temp;
@@ -124,20 +124,20 @@ struct basic_static_extents
    *
    */
   [[nodiscard]] BOOST_UBLAS_INLINE
-  constexpr auto empty() const noexcept { return R == size_type{0}; }
+  constexpr auto empty() const noexcept { return Rank == size_type{0}; }
 
   constexpr value_type back() const noexcept{
-    return at( R - 1 );
+    return at( Rank - 1 );
   }
 
   /** @brief Returns true if both extents are equal else false */
   template <size_t... rhs>
   [[nodiscard]] BOOST_UBLAS_INLINE
   constexpr auto operator==(basic_static_extents<ExtentsType, rhs...> const &other) const {
-    if (R != other.size()) {
+    if (Rank != other.size()) {
       return false;
     }
-    for (auto i = 0u; i < R; i++) {
+    for (auto i = 0u; i < Rank; i++) {
       if (other.at(i) != parent_type::at(i))
         return false;
     }

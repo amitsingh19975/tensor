@@ -75,11 +75,11 @@ namespace boost::numeric::ublas
 
 		auto result_extents = [&](){
 			if constexpr( detail::is_static_rank<extents_type>::value ){
-				auto ret = dynamic_extents< std::max( extents_type::size() - 1, size_type(2) )>();
+				auto ret = dynamic_extents< std::max( size_type( extents_type::Rank - 1 ), size_type(2) )>();
 				ret.fill(typename extents_type::value_type(1));
 				return ret;
 			}else{
-				return dynamic_extents<>{ typename dynamic_extents<>::base_type(std::max( p - 1, size_type(2) ),1) } ;
+				return dynamic_extents<>{ typename dynamic_extents<>::base_type(std::max( size_type(p - 1), size_type(2) ),1) } ;
 			}
 		};
 
@@ -157,7 +157,7 @@ namespace boost::numeric::ublas
 
 		auto result_extents = [&](){
 			if constexpr( detail::is_static_rank<extents_type>::value ){
-				return dynamic_extents<extents_type::rank()>{a.extents()};
+				return dynamic_extents<extents_type::Rank>{a.extents()};
 			}else{
 				return dynamic_extents<>{a.extents()} ;
 			}

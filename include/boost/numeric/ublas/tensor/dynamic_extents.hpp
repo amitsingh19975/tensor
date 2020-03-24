@@ -237,10 +237,13 @@ private:
  * @tparam E parameter pack of extents
  *
  */
-template <class ExtentsType, size_t Rank>
+template <class ExtentsType, size_t R>
 struct basic_fixed_rank_extents
 {
   
+	static constexpr size_t const Rank = R;
+
+
   	using base_type       = std::array<ExtentsType,Rank>;
 	using value_type      = typename base_type::value_type;
 	using const_reference = typename base_type::const_reference;
@@ -248,6 +251,7 @@ struct basic_fixed_rank_extents
 	using const_pointer   = typename base_type::const_pointer;
 	using const_iterator  = typename base_type::const_iterator;
 	using size_type       = typename base_type::size_type;
+
 
 	//@returns the rank of basic_static_extents
 	[[nodiscard]] BOOST_UBLAS_INLINE 
@@ -332,11 +336,6 @@ struct basic_fixed_rank_extents
 			throw std::length_error("Error in basic_fixed_rank_extents::basic_fixed_rank_extents() : shape tuple is not a valid permutation: has zero elements.");
 		}
 	}
-	
-	// default copy constructor
-	constexpr basic_fixed_rank_extents(basic_fixed_rank_extents const&) = default;
-	constexpr basic_fixed_rank_extents& 
-	operator=(basic_fixed_rank_extents const&) = default;
 	
 	// default assign constructor
 	constexpr basic_fixed_rank_extents(basic_fixed_rank_extents&&) = default;

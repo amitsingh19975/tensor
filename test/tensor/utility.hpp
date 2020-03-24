@@ -13,7 +13,6 @@
 #ifndef _BOOST_UBLAS_TEST_TENSOR_UTILITY_
 #define _BOOST_UBLAS_TEST_TENSOR_UTILITY_
 
-#include <boost/numeric/ublas/tensor/detail/shape_helper.hpp>
 #include <utility>
 
 template<class ... types>
@@ -48,40 +47,6 @@ struct zip_helper<std::tuple<types3...>, type1, types1...>
 
 template<class ... types>
 using zip = zip_helper<std::tuple<>,types...>;
-
-
-template < ptrdiff_t index, typename S >
-struct get_impl;
-
-template < ptrdiff_t el  >
-struct get_impl< 0, boost::numeric::ublas::detail::basic_shape< el > >{
-    constexpr ptrdiff_t operator()() const noexcept{
-        return el;
-    }
-};
-
-template < ptrdiff_t el, ptrdiff_t ...Extents >
-struct get_impl<0, boost::numeric::ublas::detail::basic_shape< el, Extents... >>{
-    constexpr ptrdiff_t operator()() const noexcept{
-        return el;
-    }
-};
-
-template < ptrdiff_t index, ptrdiff_t el, ptrdiff_t ...Extents >
-struct get_impl<index, boost::numeric::ublas::detail::basic_shape< el, Extents... >>{
-    
-    static_assert(boost::numeric::ublas::detail::basic_shape< el, Extents... >::rank > index && index >= 0,"");
-
-    constexpr ptrdiff_t operator()() const noexcept{
-        return get_impl<index - 1, boost::numeric::ublas::detail::basic_shape<Extents...> >()();
-    }
-};
-
-template < ptrdiff_t index, class S >
-ptrdiff_t get(){
-    return get_impl<index, S >()();
-}
-
 
 template<size_t I, class CallBack, class...Ts>
 struct for_each_tuple_impl{

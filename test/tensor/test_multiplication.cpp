@@ -57,9 +57,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_mtv, value,  test_types, fixture )
 	using namespace boost::numeric;
 	using value_type   = typename value::first_type;
 	using layout_type  = typename value::second_type;
-	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
 	using extents_type = ublas::dynamic_extents<>;
+	using strides_type = ublas::strides_t<extents_type,layout_type>;
 	using extents_type_base = typename extents_type::base_type;
 	using size_type = typename extents_type_base::value_type;
 
@@ -106,9 +106,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_mtm, value,  test_types, fixture )
 	using namespace boost::numeric;
 	using value_type   = typename value::first_type;
 	using layout_type  = typename value::second_type;
-	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
 	using extents_type = ublas::dynamic_extents<>;
+	using strides_type = ublas::strides_t<extents_type,layout_type>;
 	//	using extents_type_base = typename extents_type::base_type;
 
 
@@ -148,9 +148,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttv, value,  test_types, fixture )
 	using namespace boost::numeric;
 	using value_type   = typename value::first_type;
 	using layout_type  = typename value::second_type;
-	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
 	using extents_type = ublas::dynamic_extents<>;
+	using strides_type = ublas::strides_t<extents_type,layout_type>;
 	using extents_type_base = typename extents_type::base_type;
 	using size_type = typename extents_type_base::value_type;
 
@@ -193,9 +193,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttm, value,  test_types, fixture )
 	using namespace boost::numeric;
 	using value_type   = typename value::first_type;
 	using layout_type  = typename value::second_type;
-	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
 	using extents_type = ublas::dynamic_extents<>;
+	using strides_type = ublas::strides_t<extents_type,layout_type>;
 	using size_type = typename extents_type::value_type;
 
 
@@ -232,9 +232,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttt_permutation, value,  test_type
 	using namespace boost::numeric;
 	using value_type   = typename value::first_type;
 	using layout_type  = typename value::second_type;
-	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
 	using extents_type = ublas::dynamic_extents<>;
+	using strides_type = ublas::strides_t<extents_type,layout_type>;
 	using size_type    = typename strides_type::value_type;
 
 
@@ -340,9 +340,9 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttt, value,  test_types, fixture )
 	using namespace boost::numeric;
 	using value_type   = typename value::first_type;
 	using layout_type  = typename value::second_type;
-	using strides_type = ublas::strides<layout_type>;
 	using vector_type  = std::vector<value_type>;
 	using extents_type = ublas::dynamic_extents<>;
+	using strides_type = ublas::strides_t<extents_type,layout_type>;
 	using size_type    = typename strides_type::value_type;
 
 	// left-hand and right-hand side have the
@@ -423,7 +423,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_inner, value,  test_types, fixture
 	using namespace boost::numeric;
 	using value_type   = typename value::first_type;
 	using layout_type  = typename value::second_type;
-	using strides_type = ublas::strides<layout_type>;
+	using strides_type = ublas::strides_t<ublas::dynamic_extents<>,layout_type>;
 	using vector_type  = std::vector<value_type>;
 
 
@@ -450,7 +450,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_outer, value,  test_types, fixture
 	using value_type   = typename value::first_type;
 	using layout_type  = typename value::second_type;
 	using extents_type = ublas::dynamic_extents<>;
-	using strides_type = ublas::strides<layout_type>;
+	using strides_type = ublas::strides_t<extents_type,layout_type>;
 	using vector_type  = std::vector<value_type>;
 
 

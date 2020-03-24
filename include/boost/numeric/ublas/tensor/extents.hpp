@@ -18,8 +18,10 @@
 
 namespace boost::numeric::ublas {
 
-template <class T, ptrdiff_t R, ptrdiff_t... E>
-constexpr bool operator==(basic_extents<T> const& lhs, basic_static_extents<T,R,E...> const& rhs){
+template <class RExtents, class LExtents,
+    typename std::enable_if_t< detail::is_extents<RExtents>::value && detail::is_extents<LExtents>::value, int > = 0
+>
+constexpr bool operator==(RExtents const& lhs, LExtents const& rhs){
     if( rhs.size() != lhs.size() ){
         return false;
     }
@@ -31,32 +33,20 @@ constexpr bool operator==(basic_extents<T> const& lhs, basic_static_extents<T,R,
     }
     return true;
 }
-
-template <class T, ptrdiff_t R, ptrdiff_t... E>
-constexpr bool operator==(basic_static_extents<T,R,E...> const& lhs, basic_extents<T> const& rhs){
-    return (rhs == lhs);
-}
-
-template <class T, ptrdiff_t R, ptrdiff_t... E>
-constexpr bool operator!=(basic_extents<T> const& lhs, basic_static_extents<T,R,E...> const& rhs){
+template <class RExtents, class LExtents,
+    typename std::enable_if_t< detail::is_extents<RExtents>::value && detail::is_extents<LExtents>::value, int > = 0
+>
+constexpr bool operator!=(RExtents const& lhs, LExtents const& rhs){
     return !(lhs == rhs);
 }
 
-template <class T, ptrdiff_t R, ptrdiff_t... E>
-constexpr bool operator!=(basic_static_extents<T,R,E...> const& lhs, basic_extents<T> const& rhs){
-    return rhs != lhs;
-}
-
-
-template <class T, ptrdiff_t R, ptrdiff_t... E>
-std::ostream& operator<<(std::ostream& os, basic_static_extents<T,R,E...> const& e){
+template <class Extents,
+    typename std::enable_if_t< detail::is_extents<Extents>::value, int > = 0
+>
+std::ostream& operator<<(std::ostream& os, Extents const& e){
     return os<<to_string(e);
 }
 
-template <class T>
-std::ostream& operator<<(std::ostream& os, basic_extents<T> const& e){
-    return os<<to_string(e);
-}
 
 
 

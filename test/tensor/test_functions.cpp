@@ -21,8 +21,8 @@
 
 #include "utility.hpp"
 
-BOOST_AUTO_TEST_SUITE ( test_tensor_functions, * boost::unit_test::depends_on("test_tensor_contraction") )
-// BOOST_AUTO_TEST_SUITE ( test_tensor_functions)
+// BOOST_AUTO_TEST_SUITE ( test_tensor_functions, * boost::unit_test::depends_on("test_tensor_contraction") )
+BOOST_AUTO_TEST_SUITE ( test_tensor_functions)
 
 
 using test_types = zip<int,long,float,double,std::complex<float>>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
@@ -33,8 +33,8 @@ using test_types = zip<int,long,float,double,std::complex<float>>::with_t<boost:
 struct fixture
 {
 	using extents_type = boost::numeric::ublas::dynamic_extents<>;
-	template<ptrdiff_t R, ptrdiff_t... E>
-	using static_extents_type = boost::numeric::ublas::shape<R,E...>;
+	template<size_t... E>
+	using static_extents_type = boost::numeric::ublas::static_extents<E...>;
 	fixture()
 	  : extents {
 	      extents_type{1,1}, // 1
@@ -50,15 +50,15 @@ struct fixture
 	}
 	
 	std::tuple<
-		static_extents_type<2,1,1>, // 1
-		static_extents_type<2,1,2>, // 2
-		static_extents_type<2,2,1>, // 3
-		static_extents_type<2,2,3>, // 4
-		static_extents_type<3,2,3,1>, // 5
-		static_extents_type<3,4,1,3>, // 6
-		static_extents_type<3,1,2,3>, // 7
-		static_extents_type<3,4,2,3>, // 8
-		static_extents_type<4,4,2,3,5> // 9
+		static_extents_type<1,1>, // 1
+		static_extents_type<1,2>, // 2
+		static_extents_type<2,1>, // 3
+		static_extents_type<2,3>, // 4
+		static_extents_type<2,3,1>, // 5
+		static_extents_type<4,1,3>, // 6
+		static_extents_type<1,2,3>, // 7
+		static_extents_type<4,2,3>, // 8
+		static_extents_type<4,2,3,5> // 9
 	> static_extents{};
 
 	std::vector<extents_type> extents;
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE( test_tensor_prod_vector_exception )
 	using value_type   = float;
 	using layout_type  = ublas::first_order;
 	using d_extents_type = ublas::dynamic_extents<>;
-	using s_extents_type = ublas::shape<3,1,2,3>;
+	using s_extents_type = ublas::static_extents<1,2,3>;
 	using d_tensor_type  = ublas::tensor<value_type,d_extents_type,layout_type>;
 	using s_tensor_type  = ublas::tensor<value_type,s_extents_type,layout_type>;
 	using vector_type  = typename d_tensor_type::vector_type;
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE( test_tensor_prod_matrix_exception )
 	using value_type   = float;
 	using layout_type  = ublas::first_order;
 	using d_extents_type = ublas::dynamic_extents<>;
-	using s_extents_type = ublas::shape<3,1,2,3>;
+	using s_extents_type = ublas::static_extents<1,2,3>;
 	using d_tensor_type  = ublas::tensor<value_type,d_extents_type,layout_type>;
 	using s_tensor_type  = ublas::tensor<value_type,s_extents_type,layout_type>;
 	using matrix_type  = typename d_tensor_type::matrix_type;
@@ -373,7 +373,7 @@ BOOST_AUTO_TEST_CASE( test_tensor_prod_tensor_1_exception )
 	using value_type   = float;
 	using layout_type  = ublas::first_order;
 	using d_extents_type = ublas::dynamic_extents<>;
-	using s_extents_type = ublas::shape<3,1,2,3>;
+	using s_extents_type = ublas::static_extents<1,2,3>;
 	using d_tensor_type  = ublas::tensor<value_type,d_extents_type,layout_type>;
 	using s_tensor_type  = ublas::tensor<value_type,s_extents_type,layout_type>;
 
@@ -519,11 +519,11 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_prod_tensor_2, value,  test
 		return nb;
 	};
 	auto permute_extents_s_2 = [](auto const& pi, auto const& na){
-		auto tempn = na.to_vector();
+		auto tempn = na.to_array();
 		assert(pi.size() == na.size());
 		for(auto j = 0u; j < pi.size(); ++j)
 			tempn[pi[j]-1] = na[j];
-		return ublas::shape<std::decay<decltype(na)>::type::rank()>(tempn.begin(),tempn.end());
+		return ublas::dynamic_extents<std::decay<decltype(na)>::type::rank()>(tempn.begin(),tempn.end());
 	};
 
 // 	static and dynamic
@@ -683,7 +683,7 @@ BOOST_AUTO_TEST_CASE( test_tensor_inner_prod_exception )
 	using value_type   = float;
 	using layout_type  = ublas::first_order;
 	using d_extents_type = ublas::dynamic_extents<>;
-	using s_extents_type = ublas::shape<3,1,2,3>;
+	using s_extents_type = ublas::static_extents<1,2,3>;
 	using d_tensor_type  = ublas::tensor<value_type,d_extents_type,layout_type>;
 	using s_tensor_type  = ublas::tensor<value_type,s_extents_type,layout_type>;
 

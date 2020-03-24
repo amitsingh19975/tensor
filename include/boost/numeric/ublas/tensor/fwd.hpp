@@ -17,7 +17,8 @@
 
 namespace boost::numeric::ublas {
 
-template <class T, ptrdiff_t... E> struct basic_static_extents;
+template <class T, size_t... E> struct basic_static_extents;
+template <class T, size_t R> struct basic_fixed_rank_extents;
 
 template <class T> class basic_extents;
 
@@ -37,9 +38,11 @@ template <class E, typename> auto product(E const &e);
 
 template <class E, typename> std::string to_string(E const &e);
 
-template <class int_type, ptrdiff_t... E> struct basic_static_extents;
+template <class int_type, size_t... E> struct basic_static_extents;
 
 template <class __int_type, class __layout> class basic_strides;
+
+template<class __int_type, size_t N, class __layout> class basic_fixed_rank_strides;
 
 /** @brief Forward declaration of static_strides for specialization
  *
@@ -75,11 +78,11 @@ namespace boost::numeric::ublas::detail {
 
 /** @brief stores the extents
  *
- * tparam R of type ptrdiff_t which stands for Rank
+ * tparam R of type size_t which stands for Rank
  * tparam S of type basic_shape
  *
  */
-template <ptrdiff_t R, class S> struct basic_extents_impl;
+template <size_t R, size_t... S> struct basic_extents_impl;
 
 template <class E> struct is_extents_impl;
 
@@ -117,11 +120,11 @@ constexpr bool in_bounds(E const &e, IndexType const &idx, Args... args);
 
 template <class E> constexpr bool in_bounds(E const &e);
 
-template <ptrdiff_t... E> struct dynamic_extents_impl;
+template <size_t... E> struct dynamic_extents_impl;
 
-template <ptrdiff_t... E> struct shape_in_bounds;
+template <size_t... E> struct shape_in_bounds;
 
-template <ptrdiff_t... Extents> struct basic_shape;
+template <size_t... Extents> struct basic_shape;
 
 /** @brief struct declaration which makes the range of dynamic_extents for a
  *given range
@@ -130,7 +133,7 @@ template <ptrdiff_t... Extents> struct basic_shape;
  * @tparam end which is a end of range
  *
  **/
-template <ptrdiff_t start, ptrdiff_t end> struct make_dynamic_basic_shape_impl;
+template <size_t start, size_t end> struct make_dynamic_basic_shape_impl;
 
 /** @brief struct declaration which concat two basic_shapes
  *
@@ -140,17 +143,17 @@ template <ptrdiff_t start, ptrdiff_t end> struct make_dynamic_basic_shape_impl;
  **/
 template <class S1, class S2> struct concat_basic_shape;
 
-template <ptrdiff_t start, ptrdiff_t end> struct make_dynamic_basic_shape_impl;
+template <size_t start, size_t end> struct make_dynamic_basic_shape_impl;
 
 /** @brief struct declaration which makes the basic_shape with given rank and
  *extents
  *
- * @tparam rank which is a rank of tensor of type ptrdiff_t
- * @tparam Extents which is a parameter pack of type ptrdiff_t containing
+ * @tparam rank which is a rank of tensor of type size_t
+ * @tparam Extents which is a parameter pack of type size_t containing
  *extents
  *
  **/
-template <ptrdiff_t rank, ptrdiff_t... Extents> struct make_basic_shape;
+template <size_t rank, size_t... Extents> struct make_basic_shape;
 
 template <class S> struct is_basic_shape;
 
@@ -158,7 +161,7 @@ template <class S> struct is_dynamic_basic_shape;
 
 template <typename T> struct is_stl_array;
 
-template <ptrdiff_t... D> struct product_helper_impl;
+template <size_t... D> struct product_helper_impl;
 
 template <typename E> struct product_helper;
 

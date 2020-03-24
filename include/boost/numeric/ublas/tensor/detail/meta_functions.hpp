@@ -22,10 +22,14 @@ namespace boost::numeric::ublas::detail {
 template <class E>
 struct is_extents_impl : std::integral_constant<bool, false> {};
 
-template <class T, ptrdiff_t R, ptrdiff_t... E>
-struct is_extents_impl<basic_static_extents<T, R, E...>> : std::true_type {};
+template <class T, size_t... E>
+struct is_extents_impl<basic_static_extents<T, E...>> : std::true_type {};
 
-template <class T> struct is_extents_impl<basic_extents<T>> : std::true_type {};
+template <class T, size_t R>
+struct is_extents_impl<basic_fixed_rank_extents<T, R>> : std::true_type {};
+
+template <class T> 
+struct is_extents_impl<basic_extents<T>> : std::true_type {};
 
 template <class E> struct is_extents {
   static constexpr bool value =
@@ -41,6 +45,9 @@ struct is_stride_impl< static_strides<ExtentsType,Layout> > : std::true_type {};
 template <class T, class Layout> 
 struct is_stride_impl< basic_strides<T,Layout> > : std::true_type {};
 
+template <class T, size_t N, class Layout> 
+struct is_stride_impl< basic_fixed_rank_strides<T, N, Layout> > : std::true_type {};
+
 template <class E> struct is_strides {
   static constexpr bool value =
       is_stride_impl<typename std::decay<E>::type>::value;
@@ -49,8 +56,8 @@ template <class E> struct is_strides {
 template <class E>
 struct is_static_extents_impl : std::integral_constant<bool, false> {};
 
-template <class T, ptrdiff_t R, ptrdiff_t... E>
-struct is_static_extents_impl<basic_static_extents<T, R, E...>>
+template <class T, size_t... E>
+struct is_static_extents_impl<basic_static_extents<T, E...>>
     : std::integral_constant<bool, true> {};
 
 template <class E> struct is_static_extents {
@@ -68,12 +75,12 @@ struct is_basic_extents_impl_impl : std::integral_constant<bool, false> {};
 
 /** @brief is_extents_impl specialization
  *
- * @tparam R of ptrdiff_t type
+ * @tparam R of size_t type
  * @tparam S of basic_shape type
  *
  **/
-template <ptrdiff_t R, class S>
-struct is_basic_extents_impl_impl<basic_extents_impl<R, S>>
+template <size_t R, size_t... E>
+struct is_basic_extents_impl_impl<basic_extents_impl<R, E...>>
     : std::integral_constant<bool, true> {};
 
 template <class E> struct is_basic_extents_impl {
@@ -96,18 +103,41 @@ template <class E> struct is_dynamic : std::integral_constant<bool, false> {};
 template <class T>
 struct is_dynamic<basic_extents<T>> : std::integral_constant<bool, true> {};
 
-/** @brief Partial Specialization of is_static with basic_static_extents
+template <class T, size_t R>
+struct is_dynamic<basic_fixed_rank_extents<T,R>> : std::integral_constant<bool, true> {};
+
+/** @brief Checks if the extents has dynamic rank
  *
- * @tparam R rank of ptrdiff_t
- *
- * @tparam E parameter pack of extents
+ * @tparam E of type basic_extents or basic_static_extents
  *
  */
-template <class T, ptrdiff_t R, ptrdiff_t... E>
-struct is_dynamic<basic_static_extents<T, R, E...>> {
-  static constexpr bool value =
-      basic_static_extents<T, R, E...>::DynamicRank != 0;
-};
+template <class E> 
+struct is_dynamic_rank : std::integral_constant<bool, true> {};
+
+template <class T, size_t... E>
+struct is_dynamic_rank<basic_static_extents<T, E...>> : std::integral_constant<bool, false> {};
+
+template <class T, size_t R>
+struct is_dynamic_rank<basic_fixed_rank_extents<T,R>> : std::integral_constant<bool, false> {};
+
+
+/** @brief Checks if the extents has static rank
+ *
+ * @tparam E of type basic_extents or basic_static_extents
+ *
+ */
+template <class E> 
+struct is_static_rank : std::integral_constant<bool, false> {};
+
+template <class T>
+struct is_static_rank<basic_extents<T>> : std::integral_constant<bool, false> {};
+
+template <class T, size_t... E>
+struct is_static_rank<basic_static_extents<T, E...>> : std::integral_constant<bool, true> {};
+template <class T, size_t R>
+
+struct is_static_rank<basic_fixed_rank_extents<T,R>> : std::integral_constant<bool, true> {};
+
 
 /** @brief Checks if the extents is static
  *
@@ -115,16 +145,15 @@ struct is_dynamic<basic_static_extents<T, R, E...>> {
  *
  */
 template <class E> struct is_static {
-  static constexpr bool value = !is_dynamic<E>::value;
+  static constexpr bool value = is_static_extents<E>::value;
 };
 
 template <> struct product_helper_impl<> {
-  static constexpr ptrdiff_t value = 1;
+  static constexpr size_t value = 1;
 };
 
-template <ptrdiff_t E, ptrdiff_t... R> struct product_helper_impl<E, R...> {
-  static constexpr ptrdiff_t value =
-      E != -1 ? E * product_helper_impl<R...>::value : 0;
+template <size_t E, size_t... R> struct product_helper_impl<E, R...> {
+  static constexpr size_t value = E * product_helper_impl<R...>::value;
 };
 
 /** @brief removes the const and refernece
@@ -178,14 +207,6 @@ struct is_iterator<
   static constexpr bool value = true;
 };
 
-template <ptrdiff_t R> struct dynamic_extents_impl<R> {
-  using type = basic_static_extents<std::size_t, R>;
-};
-
-template <> struct dynamic_extents_impl<> {
-  using type = basic_extents<std::size_t>;
-};
-
 template <typename T> struct is_stl_array : std::false_type {};
 template <typename T, std::size_t N>
 struct is_stl_array<std::array<T, N>> : std::true_type {};
@@ -194,20 +215,17 @@ struct is_stl_array<std::array<T, N>> : std::true_type {};
 
 namespace boost::numeric::ublas {
 
-template <typename T, ptrdiff_t S, ptrdiff_t... E>
-struct detail::product_helper<basic_static_extents<T,S,E...>> {
+template <typename T, size_t... E>
+struct detail::product_helper<basic_static_extents<T,E...>> {
   static constexpr T value = detail::product_helper_impl<E...>::value;
 };
-template <typename V, typename F, typename A>
+template <typename V, typename E, typename F, typename A>
 struct tensor_mode_result {
-  using type = std::conditional_t<
-      storage::detail::is_tensor_storage<A>::value,
-      tensor<V, basic_extents<std::size_t>, F, A>,
-      tensor<V, basic_extents<std::size_t>, F, std::vector<V>>>;
+  using type = tensor<V, E, F, A >;
 };
 
-template <typename V, typename F, typename A>
-using tensor_mode_result_t = typename tensor_mode_result<V, F, A>::type;
+template <typename V, typename E, typename F, typename A>
+using tensor_mode_result_t = typename tensor_mode_result<V, E, F, A>::type;
 
 } // namespace boost::numeric::ublas
 
@@ -240,6 +258,29 @@ struct is_dense_storage
 
 } // namespace boost::numeric::ublas::storage::detail
 
+namespace boost::numeric::ublas::detail{
+  
+  template<typename T>
+  class has_resize_member{                                                    
+    using yes_type = char;
+    using no_type = long;
+    template <typename U> static yes_type test(decltype(&U::resize));
+    template <typename U> static no_type  test(...);
+  public:                                                                    
+    static constexpr bool value = sizeof(test<T>(0)) == sizeof(yes_type);
+  };
+
+  template<typename T>
+  class has_assign_member{                                                    
+    using yes_type = char;
+    using no_type = long;
+    template <typename U> static yes_type test(decltype(&U::assign));
+    template <typename U> static no_type  test(...);
+  public:                                                                    
+    static constexpr bool value = sizeof(test<T>(0)) == sizeof(yes_type);
+  };
+
+} // namespace boost::numeric::ublas::detail
 
 
 #endif

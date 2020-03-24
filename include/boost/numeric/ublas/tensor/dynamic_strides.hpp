@@ -83,16 +83,16 @@ public:
 	basic_strides(basic_extents<T> const& s)
 			: _base(s.size(),1)
 	{
-		if( BOOST_UBLAS_TENSOR_UNLIKLY( s.empty() ) )
+		if( s.empty() )
 			return;
 
-		if( BOOST_UBLAS_TENSOR_UNLIKLY( !valid(s) ) )
+		if( !valid(s) )
 			throw std::runtime_error("Error in boost::numeric::ublas::basic_strides() : shape is not valid.");		
 
-		if( BOOST_UBLAS_TENSOR_UNLIKLY( is_vector(s) || is_scalar(s) ) )
+		if( is_vector(s) || is_scalar(s) )
 			return;
 
-		if( BOOST_UBLAS_TENSOR_UNLIKLY( this->size() < 2 ) )
+		if( this->size() < 2 )
 			throw std::runtime_error("Error in boost::numeric::ublas::basic_strides() : size of strides must be greater or equal 2.");
 
 
@@ -150,6 +150,13 @@ public:
 		return _base.at(p);
 	}
 
+	const_reference back () const{
+		return _base[_base.size() - 1];
+	}
+
+	reference back (){
+		return _base[_base.size() - 1];
+	}
 
 	bool empty() const{
 		return _base.empty();
@@ -198,8 +205,156 @@ protected:
 	base_type _base;
 };
 
-template<class layout_type>
-using strides = basic_strides<std::size_t, layout_type>;
+
+/** @brief Template class for storing tensor strides for iteration with runtime variable size.
+ *
+ * Proxy template class of std::array<int_type,N>.
+ *
+ */
+template<class __int_type, size_t N, class __layout>
+class basic_fixed_rank_strides
+{
+public:
+
+	using base_type = std::array<__int_type, N>;
+
+	static_assert( std::numeric_limits<typename base_type::value_type>::is_integer,
+								 "Static error in boost::numeric::ublas::basic_fixed_rank_strides: type must be of type integer.");
+	static_assert(!std::numeric_limits<typename base_type::value_type>::is_signed,
+								"Static error in boost::numeric::ublas::basic_fixed_rank_strides: type must be of type unsigned integer.");
+	static_assert(std::is_same<__layout,first_order>::value || std::is_same<__layout,last_order>::value,
+								"Static error in boost::numeric::ublas::basic_fixed_rank_strides: layout type must either first or last order");
+
+
+	using layout_type 		= __layout;
+	using value_type 		= typename base_type::value_type;
+	using reference 		= typename base_type::reference;
+	using const_reference 	= typename base_type::const_reference;
+	using size_type 		= typename base_type::size_type;
+	using const_pointer 	= typename base_type::const_pointer;
+	using const_iterator 	= typename base_type::const_iterator;
+
+
+	/** @brief Default constructs basic_fixed_rank_strides
+	 *
+	 * @code auto ex = basic_fixed_rank_strides<unsigned>{};
+	 */
+	constexpr explicit basic_fixed_rank_strides()
+		: _base{}
+	{
+	}
+
+	/** @brief Constructs basic_fixed_rank_strides from basic_extents for the first- and last-order storage formats
+	 *
+	 * @code auto strides = basic_fixed_rank_strides<unsigned>( basic_extents<std::size_t>{2,3,4} );
+	 *
+	 */
+	template <class T>
+	basic_fixed_rank_strides(basic_fixed_rank_extents<T,N> const& s)
+	{
+		_base.fill(value_type(1));
+
+		if( s.empty() )
+			return;
+
+		if( !valid(s) )
+			throw std::runtime_error("Error in boost::numeric::ublas::basic_fixed_rank_strides() : shape is not valid.");		
+
+		if( is_vector(s) || is_scalar(s) )
+			return;
+
+		if( this->size() < 2 )
+			throw std::runtime_error("Error in boost::numeric::ublas::basic_fixed_rank_strides() : size of strides must be greater or equal 2.");
+
+
+		if constexpr (std::is_same<layout_type,first_order>::value){
+			size_type k = 1ul, kend = this->size();
+			for(; k < kend; ++k)
+				_base[k] = _base[k-1] * s[k-1];
+		}
+		else {
+			size_type k = this->size()-2, kend = 0ul;
+			for(; k > kend; --k)
+				_base[k] = _base[k+1] * s[k+1];
+			_base[0] = _base[1] * s[1];
+		}
+	}
+
+	basic_fixed_rank_strides(basic_fixed_rank_strides const& l)
+	    : _base(l._base)
+	{}
+
+	basic_fixed_rank_strides(basic_fixed_rank_strides && l )
+	    : _base(std::move(l._base))
+	{}
+
+	basic_fixed_rank_strides(base_type const& l )
+	    : _base(l)
+	{}
+
+	basic_fixed_rank_strides(base_type && l )
+			: _base(std::move(l))
+	{}
+
+	~basic_fixed_rank_strides() = default;
+
+
+	basic_fixed_rank_strides& operator=(basic_fixed_rank_strides other)
+	{
+		swap (*this, other);
+		return *this;
+	}
+
+	friend void swap(basic_fixed_rank_strides& lhs, basic_fixed_rank_strides& rhs) {
+		std::swap(lhs._base   , rhs._base);
+	}
+
+	const_reference operator[] (size_type p) const{
+		return _base[p];
+	}
+
+	const_pointer data() const{
+		return _base.data();
+	}
+
+	const_reference at (size_type p) const{
+		return _base.at(p);
+	}
+
+	const_reference back () const{
+		return _base[N - 1];
+	}
+
+	reference back (){
+		return _base[N - 1];
+	}
+
+	bool empty() const{
+		return _base.empty();
+	}
+
+	size_type size() const{
+		return _base.size();
+	}
+
+	const_iterator begin() const{
+		return _base.begin();
+	}
+
+	const_iterator end() const{
+		return _base.end();
+	}
+	
+	base_type const& base() const{
+		return this->_base;
+	}
+
+
+protected:
+	base_type _base;
+};
+
+// template<typename Extents>
 
 namespace detail {
 
@@ -235,6 +390,45 @@ auto access(std::vector<size_type> const& i, basic_strides<size_type,layout_type
 BOOST_UBLAS_INLINE
 template<std::size_t r, class layout_type, class ... size_types>
 auto access(std::size_t sum, basic_strides<std::size_t, layout_type> const& w, std::size_t i, size_types ... is)
+{	
+	sum += i*w[r];
+	if constexpr (sizeof...(is) == 0)
+		return sum;
+	else
+		return detail::access<r+1>(sum,w,std::forward<size_types>(is)...);
+}
+
+/** @brief Returns relative memory index with respect to a multi-index
+ *
+ * @code auto j = access(std::vector{3,4,5}, strides{shape{4,2,3},first_order}); @endcode
+ *
+ * @param[in] i multi-index of length p
+ * @param[in] w stride vector of length p
+ * @returns relative memory location depending on \c i and \c w
+*/
+BOOST_UBLAS_INLINE
+template<class size_type, size_t N, class layout_type>
+auto access(std::vector<size_type> const& i, basic_fixed_rank_strides<size_type, N, layout_type> const& w)
+{
+	const auto p = i.size();
+	size_type sum = 0u;
+	for(auto r = 0u; r < p; ++r)
+		sum += i[r]*w[r];
+	return sum;
+}
+
+/** @brief Returns relative memory index with respect to a multi-index
+ *
+ * @code auto j = access(0, strides{shape{4,2,3},first_order}, 2,3,4); @endcode
+ *
+ * @param[in] i   first element of the partial multi-index
+ * @param[in] is  the following elements of the partial multi-index
+ * @param[in] sum the current relative memory index
+ * @returns relative memory location depending on \c i and \c w
+*/
+BOOST_UBLAS_INLINE
+template<std::size_t r, size_t N, class layout_type, class ... size_types>
+auto access(std::size_t sum, basic_fixed_rank_strides<std::size_t, N, layout_type> const& w, std::size_t i, size_types ... is)
 {	
 	sum += i*w[r];
 	if constexpr (sizeof...(is) == 0)

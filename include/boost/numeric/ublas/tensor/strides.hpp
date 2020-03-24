@@ -18,9 +18,11 @@
 
 namespace boost::numeric::ublas {
 
-template <class __int_type, class E, class __layout>
-bool operator==(basic_strides<__int_type, __layout> const &lhs,
-                static_strides<E, __layout> const &rhs) {
+template <class LStrides, class RStrides,
+  typename std::enable_if_t< detail::is_strides<LStrides>::value && detail::is_strides<RStrides>::value, int > = 0
+>
+bool operator==(LStrides const &lhs,
+                RStrides const &rhs) {
   if (lhs.size() != rhs.size()) {
     return false;
   }
@@ -32,34 +34,78 @@ bool operator==(basic_strides<__int_type, __layout> const &lhs,
   return true;
 }
 
-template <class __int_type, class E, class __layout>
-bool operator!=(basic_strides<__int_type, __layout> const &lhs,
-                static_strides<E, __layout> const &rhs) {
+template <class LStrides, class RStrides,
+  typename std::enable_if_t< detail::is_strides<LStrides>::value && detail::is_strides<RStrides>::value, int > = 0
+>
+bool operator!=(LStrides const &lhs,
+                RStrides const &rhs) {
   return !(lhs == rhs);
 }
 
-template <class __int_type, class E, class __layout>
-bool operator==(static_strides<E, __layout> const &lhs,
-                basic_strides<__int_type, __layout> const &rhs) {
-  return rhs == lhs;
-}
-
-template <class __int_type, class E, class __layout>
-bool operator!=(static_strides<E, __layout> const &lhs,
-                basic_strides<__int_type, __layout> const &rhs) {
-  return !(rhs == lhs);
-}
-
-
-template <class E, class L>
-std::ostream& operator<<(std::ostream& os, static_strides<E,L> const& s){
+template <class Strides,
+  typename std::enable_if_t< detail::is_strides<Strides>::value, int > = 0
+>
+std::ostream& operator<<(std::ostream& os, Strides const& s){
     return os<<to_string(s);
 }
 
-template <class T, class L>
-std::ostream& operator<<(std::ostream& os, basic_strides<T,L> const& s){
-    return os<<to_string(s);
-}
+
+
+template <class Layout, class T> struct strides;
+
+/** @brief Partial Specialization of strides for basic_static_extents
+ *
+ *
+ * @tparam Layout either first_order or last_order
+ *
+ * @tparam R rank of extents
+ *
+ * @tparam Extents parameter pack of extents
+ *
+ */
+template <class Layout, class T, size_t... Extents>
+struct strides<basic_static_extents<T, Extents...>, Layout>
+{
+  using type = static_strides<basic_static_extents<T, Extents...>, Layout>;
+};
+
+/** @brief Partial Specialization of strides for basic_extents
+ *
+ *
+ * @tparam Layout either first_order or last_order
+ *
+ * @tparam T extents type
+ *
+ */
+template <class Layout, class T>
+struct strides<basic_extents<T>, Layout>
+{
+  using type = basic_strides<T, Layout>;
+};
+
+/** @brief Partial Specialization of strides for basic_fixed_rank_strides
+ *
+ *
+ * @tparam Layout either first_order or last_order
+ *
+ * @tparam T extents type
+ *
+ */
+template <class Layout, size_t N, class T>
+struct strides<basic_fixed_rank_extents<T,N>, Layout>
+{
+  using type = basic_fixed_rank_strides<T, N, Layout>;
+};
+
+/** @brief type alias of result of strides::type
+ *
+ * @tparam E extents type either basic_extents or basic_static_extents
+ *
+ * @tparam Layout either first_order or last_order
+ *
+ */
+template <class E, class Layout>
+using strides_t = typename strides<E, Layout>::type;
 
 } // namespace boost::numeric::ublas
 

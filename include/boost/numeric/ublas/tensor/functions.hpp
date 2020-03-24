@@ -30,6 +30,59 @@
 namespace boost::numeric::ublas
 {
 
+	namespace detail{
+		// MSVC 14.1 bug
+		// cannot use ::Rank inside constexpr function
+		// basic_extents does not contains Rank member because of which
+		// it complains about it
+
+		template<typename E, 
+			typename = std::enable_if_t< is_static_rank<E>::value, E >
+		>
+		constexpr auto extents_result_type_tensor_times_vector( E const& ){
+			using size_type = typename E::size_type;
+			auto ret = dynamic_extents< std::max( size_type( E::Rank - 1 ), size_type(2) )>();
+			ret.fill(typename E::value_type(1));
+			return ret;
+		}
+
+		template<typename T>
+		constexpr auto extents_result_type_tensor_times_vector( basic_extents<T> const& e ){
+			using size_type = typename basic_extents<T>::size_type;
+			return dynamic_extents<>{ typename dynamic_extents<>::base_type(std::max( size_type( e.size() - 1), size_type(2) ),1) } ;
+		}
+		
+		template<typename E, 
+			typename = std::enable_if_t< is_static_rank<E>::value, E >
+		>
+		constexpr auto extents_result_type_tensor_times_matrix( E const& a ){
+			return dynamic_extents<E::Rank>(a);
+		}
+
+		template<typename T>
+		constexpr auto extents_result_type_tensor_times_matrix( basic_extents<T> const& e ){
+			return dynamic_extents<>{ e } ;
+		}
+
+		template<typename E1, typename E2, 
+			std::enable_if_t< is_static_rank<E1>::value && is_static_rank<E2>::value, int > = 0
+		>
+		constexpr auto extents_result_type_outer_prod( E1 const&, E2 const& ){
+			return dynamic_extents<E1::Rank + E2::Rank>();
+		}
+
+		template<typename E1, typename E2,
+			std::enable_if_t< 
+				!( is_static_rank<E1>::value && is_static_rank<E2>::value ),
+				int
+			> = 0
+		>
+		auto extents_result_type_outer_prod( E1 const& e1, E2 const& e2){
+			return dynamic_extents<>( std::vector<typename E1::value_type>( e1.size() + e2.size(), 1 ) );
+		}
+
+	} // namespace detail
+	
 	/** @brief Computes the m-mode tensor-times-vector product
 	 *
 	 * Implements C[i1,...,im-1,im+1,...,ip] = A[i1,i2,...,ip] * b[im]
@@ -73,20 +126,10 @@ namespace boost::numeric::ublas
 				"error in boost::numeric::ublas::prod(ttv): second "
 				"argument vector should not be empty.");
 
-		auto result_extents = [&](){
-			if constexpr( detail::is_static_rank<extents_type>::value ){
-				auto ret = dynamic_extents< std::max( size_type( extents_type::Rank - 1 ), size_type(2) )>();
-				ret.fill(typename extents_type::value_type(1));
-				return ret;
-			}else{
-				return dynamic_extents<>{ typename dynamic_extents<>::base_type(std::max( size_type(p - 1), size_type(2) ),1) } ;
-			}
-		};
-
-		auto nc = result_extents();
+		auto nc = detail::extents_result_type_tensor_times_vector(a.extents());
 		auto nb = std::vector<typename extents_type::value_type>{b.size(), 1};
 		auto a_extents = a.extents();
-		for (auto i = 0u, j = 0u; i < p; ++i)
+		for (auto i = size_type(0), j = size_type(0); i < p; ++i)
 			if (i != m - 1)
 				nc[j++] = a_extents.at(i);
 
@@ -155,15 +198,7 @@ namespace boost::numeric::ublas
 				"error in boost::numeric::ublas::prod(ttm): second "
 				"argument matrix should not be empty.");
 
-		auto result_extents = [&](){
-			if constexpr( detail::is_static_rank<extents_type>::value ){
-				return dynamic_extents<extents_type::Rank>{a.extents()};
-			}else{
-				return dynamic_extents<>{a.extents()} ;
-			}
-		};
-
-		auto nc = result_extents();
+		auto nc = detail::extents_result_type_tensor_times_matrix(a.extents());
 		auto nb = dynamic_extents<>{b.size1(), b.size2()};
 
 		auto wb = dynamic_strides_type(nb);
@@ -455,15 +490,7 @@ namespace boost::numeric::ublas
 				"error in boost::numeric::ublas::outer_prod: "
 				"tensors should not be empty.");
 
-		auto result_extents = [&](){
-			if constexpr( detail::is_static_rank<extents_type_1>::value && detail::is_static_rank<extents_type_2>::value ){
-				return dynamic_extents<extents_type_1::rank() + extents_type_2::rank()>();
-			}else{
-				return dynamic_extents<>( std::vector<typename extents_type_1::value_type>( a.rank() + b.rank(), 1 ) );
-			}
-		};
-
-		auto nc = result_extents();
+		auto nc = detail::extents_result_type_outer_prod(a.extents(), b.extents());
 
 		auto a_extents = a.extents();
 		auto b_extents = b.extents();

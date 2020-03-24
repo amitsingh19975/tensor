@@ -131,7 +131,10 @@ public:
 
 
 	template<typename OtherExtentsType,
-		std::enable_if_t< detail::is_extents<OtherExtentsType>::value, int > = 0
+		std::enable_if_t< 
+			detail::is_extents<OtherExtentsType>::value
+			&& ( !std::is_same_v<basic_extents, OtherExtentsType> )
+			,int > = 0
 	>
 	basic_extents(OtherExtentsType const& e){
 		_base.resize(e.size());
@@ -313,7 +316,10 @@ struct basic_fixed_rank_extents
 	}
 	
 	template<typename OtherExtentsType,
-		std::enable_if_t< detail::is_extents<OtherExtentsType>::value, int > = 0
+		std::enable_if_t< 
+			detail::is_extents<OtherExtentsType>::value
+			&& ( !std::is_same_v<basic_fixed_rank_extents, OtherExtentsType> )
+			,int > = 0
 	>
 	constexpr basic_fixed_rank_extents(OtherExtentsType const& e){
 		for(auto i = size_type(0); i < size(); ++i){
@@ -341,6 +347,10 @@ struct basic_fixed_rank_extents
 	constexpr basic_fixed_rank_extents(basic_fixed_rank_extents&&) = default;
 	constexpr basic_fixed_rank_extents& 
 	operator=(basic_fixed_rank_extents&&) = default;
+	
+	constexpr basic_fixed_rank_extents(basic_fixed_rank_extents const&) = default;
+	constexpr basic_fixed_rank_extents& 
+	operator=(basic_fixed_rank_extents const&) = default;
 
 	/** @brief Returns the std::vector containing extents */
 	[[nodiscard]] BOOST_UBLAS_INLINE
@@ -374,12 +384,6 @@ struct basic_fixed_rank_extents
 	[[nodiscard]] BOOST_UBLAS_INLINE
 	constexpr auto empty() const noexcept { return Rank == size_type{0}; }
 
-	basic_fixed_rank_extents& operator=(basic_fixed_rank_extents other) noexcept
-	{
-		swap (*this, other);
-		return *this;
-	}
-
 	friend void swap(basic_fixed_rank_extents& lhs, basic_fixed_rank_extents& rhs) {
 		std::swap(lhs._base   , rhs._base   );
 	}
@@ -412,11 +416,7 @@ struct basic_fixed_rank_extents
 	/** @brief Returns true if both extents are equal else false */
 	[[nodiscard]] BOOST_UBLAS_INLINE
 	constexpr auto operator==(basic_fixed_rank_extents const &other) const {
-		for (auto i = 0u; i < Rank; i++) {
-		if (other[i] != at(i))
-			return false;
-		}
-		return true;
+		return _base == other._base;
 	}
 
 	/** @brief Returns false if both extents are equal else true */
@@ -434,7 +434,7 @@ private:
 
 namespace detail{
 	
-	template <ptrdiff_t R> struct dynamic_extents_impl<R> {
+	template <size_t R> struct dynamic_extents_impl<R> {
 		using type = basic_fixed_rank_extents<size_t, R>;
 	};
 
@@ -445,7 +445,7 @@ namespace detail{
 } // namespace detail
 
 
-template<ptrdiff_t... E>
+template<size_t... E>
 using dynamic_extents = typename detail::dynamic_extents_impl<E...>::type;
 
 } // namespace ublas

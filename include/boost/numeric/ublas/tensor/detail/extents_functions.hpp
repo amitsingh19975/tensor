@@ -42,9 +42,9 @@ namespace boost::numeric::ublas::detail{
   template<size_t E, size_t...N>
   constexpr auto push_front(number_list<N...>) -> number_list<E,N...>;
 
-  template<typename T, size_t... E, size_t... N>
+  template<typename T, size_t... E>
   BOOST_UBLAS_INLINE
-  constexpr auto get_number_list( basic_static_extents<T, E...> const&){
+  constexpr auto get_number_list( basic_static_extents<T, E...> const&) {
     return number_list<E...>{};
   }
 
@@ -55,7 +55,7 @@ namespace boost::numeric::ublas::detail{
   BOOST_UBLAS_INLINE
   constexpr auto squeeze_impl_remove_one( number_list<E0,E...>, number_list<N...> num = number_list<>{} ){
     // executed when number_list is size of 1
-    // @code number_list<E0> @code
+    // @code number_list<E0> @endcode
     if constexpr( sizeof...(E) == 0ul ){
       // if element E0 is 1 we return number list but we do not append
       // it to the list

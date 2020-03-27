@@ -160,61 +160,6 @@ template <size_t E, size_t... R> struct product_helper_impl<E, R...> {
   static constexpr size_t value = E * product_helper_impl<R...>::value;
 };
 
-/** @brief removes the const and refernece
- *
- * @tparam T any type
- *
- **/
-template <class T> struct remove_cvref {
-  using type = std::remove_cv_t<std::remove_reference_t<T>>;
-};
-
-// empty struct for tagging valid iterator
-struct iterator_tag {};
-
-// empty struct for tagging invalid iterator
-struct invalid_iterator_tag {};
-
-/** @brief checks and gives back the appropriate tag
- *
- * @tparam I type of iterator
- *
- **/
-template <class I>
-using iterator_tag_t = std::conditional_t<
-    std::is_same<typename std::iterator_traits<I>::iterator_category,
-                 std::output_iterator_tag>::value,
-    invalid_iterator_tag,
-    std::conditional_t<
-        std::numeric_limits<typename remove_cvref<
-            typename std::iterator_traits<I>::reference>::type>::is_integer,
-        iterator_tag, invalid_iterator_tag>>;
-
-/** @brief checks if given type is iterator or not
- *
- * @tparam T any type
- *
- **/
-template <class T, class = void> struct is_iterator {
-  static constexpr bool value = false;
-};
-
-/** @brief Partial specialization for is_iterator
- *
- * @tparam T any type
- *
- **/
-template <class T>
-struct is_iterator<
-    T, typename std::enable_if_t<!std::is_same<
-           typename std::iterator_traits<T>::value_type, void>::value>> {
-  static constexpr bool value = true;
-};
-
-template <typename T> struct is_stl_array : std::false_type {};
-template <typename T, std::size_t N>
-struct is_stl_array<std::array<T, N>> : std::true_type {};
-
 } // namespace boost::numeric::ublas::detail
 
 namespace boost::numeric::ublas {

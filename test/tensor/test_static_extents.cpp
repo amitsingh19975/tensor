@@ -298,19 +298,6 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
 
 BOOST_FIXTURE_TEST_CASE(test_static_extents_to_functions, fixture, *boost::unit_test::label("static_extents") *boost::unit_test::label("to_functions"))
 {
-  for_each_tuple(scalars,[](auto const& I, auto const& e){
-    auto v = e.to_vector();
-    for(auto i = 0; i < v.size(); i++){
-      BOOST_CHECK(v[i] == e[i]);
-    }
-  });
-
-  for_each_tuple(scalars,[](auto const& I, auto const& e){
-    auto v = e.to_array();
-    for(auto i = 0; i < v.size(); i++){
-      BOOST_CHECK(v[i] == e[i]);
-    }
-  });
 
   for_each_tuple(scalars,[](auto const& I, auto const& e){
     if (e.size() > 1){
@@ -319,64 +306,17 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents_to_functions, fixture, *boost::unit_
     }
   });
 
-
-
-  for_each_tuple(vectors,[](auto const& I, auto const& e){
-    auto v = e.to_vector();
-    for(auto i = 0; i < v.size(); i++){
-      BOOST_CHECK(v[i] == e[i]);
-    }
-  });
-
-  for_each_tuple(vectors,[](auto const& I, auto const& e){
-    auto v = e.to_array();
-    for(auto i = 0; i < v.size(); i++){
-      BOOST_CHECK(v[i] == e[i]);
-    }
-  });
-
   for_each_tuple(vectors,[](auto const& I, auto const& e){
     auto d = e.to_dynamic_extents();
     BOOST_CHECK(d == e);
   });
 
 
-
-  for_each_tuple(matrices,[](auto const& I, auto const& e){
-    auto v = e.to_vector();
-    for(auto i = 0; i < v.size(); i++){
-      BOOST_CHECK(v[i] == e[i]);
-    }
-  });
-
-  for_each_tuple(matrices,[](auto const& I, auto const& e){
-    auto v = e.to_array();
-    for(auto i = 0; i < v.size(); i++){
-      BOOST_CHECK(v[i] == e[i]);
-    }
-  });
-
   for_each_tuple(matrices,[](auto const& I, auto const& e){
     auto d = e.to_dynamic_extents();
     BOOST_CHECK(d == e);
   });
 
-
-
-  for_each_tuple(tensors,[](auto const& I, auto const& e){
-    auto v = e.to_vector();
-    for(auto i = 0; i < v.size(); i++){
-      BOOST_CHECK(v[i] == e[i]);
-    }
-  });
-
-  for_each_tuple(tensors,[](auto const& I, auto const& e){
-    auto v = e.to_array();
-    for(auto i = 0; i < v.size(); i++){
-      BOOST_CHECK(v[i] == e[i]);
-    }
-  });
-  
   for_each_tuple(tensors,[](auto const& I, auto const& e){
     auto d = e.to_dynamic_extents();
     BOOST_CHECK(d == e);

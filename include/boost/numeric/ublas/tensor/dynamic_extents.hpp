@@ -20,7 +20,6 @@
 #include <numeric>
 #include <stdexcept>
 #include <vector>
-#include <boost/numeric/ublas/tensor/detail/extents_helper.hpp>
 
 #include <cassert>
 
@@ -244,6 +243,7 @@ template <class ExtentsType, size_t R>
 struct basic_fixed_rank_extents
 {
   
+
 	static constexpr size_t const Rank = R;
 
 
@@ -255,6 +255,8 @@ struct basic_fixed_rank_extents
 	using const_iterator  = typename base_type::const_iterator;
 	using size_type       = typename base_type::size_type;
 
+	static_assert( std::numeric_limits<value_type>::is_integer, "Static error in basic_fixed_rank_extents: type must be of type integer.");
+	static_assert(!std::numeric_limits<value_type>::is_signed,  "Static error in basic_fixed_rank_extents: type must be of type unsigned integer.");
 
 	//@returns the rank of basic_static_extents
 	[[nodiscard]] BOOST_UBLAS_INLINE 

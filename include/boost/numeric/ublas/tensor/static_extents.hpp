@@ -12,8 +12,7 @@
 #ifndef _BOOST_NUMERIC_UBLAS_TENSOR_STATIC_EXTENTS_HPP_
 #define _BOOST_NUMERIC_UBLAS_TENSOR_STATIC_EXTENTS_HPP_
 
-// #include <boost/numeric/ublas/tensor/fwd.hpp>
-#include <boost/numeric/ublas/tensor/detail/extents_helper.hpp>
+#include <boost/numeric/ublas/detail/config.hpp>
 #include <array>
 #include <initializer_list>
 #include <vector>
@@ -30,12 +29,10 @@ template <class ExtentsType> class basic_extents;
  *
  */
 template <class ExtentsType, size_t... E>
-struct basic_static_extents
-    : detail::basic_extents_impl<0, E...> {
+struct basic_static_extents{
 
   static constexpr auto Rank = sizeof...(E);
   
-  using parent_type     = detail::basic_extents_impl<0, E...>;
   using base_type       = std::array<ExtentsType,Rank>;
 	using value_type      = typename base_type::value_type;
 	using const_reference = typename base_type::const_reference;
@@ -44,37 +41,33 @@ struct basic_static_extents
 	using const_iterator  = typename base_type::const_iterator;
 	using size_type       = typename base_type::size_type;
 
+  static_assert( std::numeric_limits<value_type>::is_integer, "Static error in basic_static_extents: type must be of type integer.");
+	static_assert(!std::numeric_limits<value_type>::is_signed,  "Static error in basic_static_extents: type must be of type unsigned integer.");
+
   //@returns the rank of basic_static_extents
   [[nodiscard]] BOOST_UBLAS_INLINE 
-  static constexpr auto size() noexcept { return parent_type::Rank; }
+  static constexpr size_type size() noexcept { return Rank; }
   
   //@returns the rank of basic_static_extents
   [[nodiscard]] BOOST_UBLAS_INLINE 
-  static constexpr auto rank() noexcept { return parent_type::Rank; }
+  constexpr size_type rank() noexcept { return Rank; }
 
   /**
    * @param k pos of extent
    * @returns the element at given pos
    */
   [[nodiscard]] BOOST_UBLAS_INLINE
-  constexpr value_type at(size_type k) const{ 
-    if ( k >= Rank ){
-      throw std::out_of_range("boost::numeric::ublas::basic_static_extents::at: out of bound");
-    }
-    return parent_type::at(k); 
+  static constexpr value_type const& at(size_type k){
+    return m_data.at(k); 
   }
 
   [[nodiscard]] BOOST_UBLAS_INLINE
-  constexpr value_type operator[](size_type k) const noexcept{ 
-    return parent_type::at(k); 
+  constexpr value_type const& operator[](size_type k) const noexcept{ 
+    return m_data[k]; 
   }
 
   // default constructor
   constexpr basic_static_extents() = default;
-  
-  constexpr basic_static_extents( detail::basic_extents_impl<0, E...> )
-    : parent_type()
-  {}
  
   // default copy constructor
   constexpr basic_static_extents(basic_static_extents const&) = default;
@@ -90,26 +83,20 @@ struct basic_static_extents
   [[nodiscard]] BOOST_UBLAS_INLINE
   auto to_vector() const {
     std::vector<value_type> temp(Rank);
-    for (auto i = size_type(0); i < Rank; i++) {
-      temp[i] = parent_type::at(i);
-    }
+    std::copy(begin(), end(), temp.begin());
     return temp;
   }
 
-  /** @brief Returns the std::vector containing extents */
+  /** @brief Returns ref to the std::array containing extents */
   [[nodiscard]] BOOST_UBLAS_INLINE
-  constexpr auto base() const {
-    return this->to_array();
+  constexpr auto const& base() const noexcept{
+    return m_data;
   }
 
-  /** @brief Returns the std::array containing extents */
+  /** @brief Returns pointer to the std::array containing extents */
   [[nodiscard]] BOOST_UBLAS_INLINE
-  constexpr auto to_array() const {
-    base_type temp;
-    for (auto i = size_type(0); i < Rank; i++) {
-      temp[i] = parent_type::at(i);
-    }
-    return temp;
+  constexpr const_pointer data() const noexcept{
+    return m_data.data();
   }
 
   /** @brief Returns the basic_extents containing extents */
@@ -124,41 +111,57 @@ struct basic_static_extents
    *
    */
   [[nodiscard]] BOOST_UBLAS_INLINE
-  constexpr auto empty() const noexcept { return Rank == size_type{0}; }
+  constexpr auto empty() const noexcept { return m_data.empty(); }
 
   constexpr value_type back() const noexcept{
-    return at( Rank - 1 );
+    return m_data.back();
   }
 
   /** @brief Returns true if both extents are equal else false */
-  template <size_t... rhs>
+  template <size_t... RE>
   [[nodiscard]] BOOST_UBLAS_INLINE
-  constexpr auto operator==(basic_static_extents<ExtentsType, rhs...> const &other) const {
-    if (Rank != other.size()) {
+  constexpr auto operator==(basic_static_extents<ExtentsType, RE...> const &rhs) const {
+    if constexpr( Rank != basic_static_extents<ExtentsType, RE...>::Rank ){
       return false;
+    }else{
+      for(auto i = size_type(0); i < Rank; ++i){
+        if( m_data[i] != rhs[i] ){
+          return false;
+        }
+      }
+      return true;
     }
-    for (auto i = 0u; i < Rank; i++) {
-      if (other.at(i) != parent_type::at(i))
-        return false;
-    }
-    return true;
   }
 
   /** @brief Returns false if both extents are equal else true */
-  template <size_t... rhs>
+  template <size_t... RE>
   [[nodiscard]] BOOST_UBLAS_INLINE
-  constexpr auto operator!=(basic_static_extents<ExtentsType, rhs...> const &other) const {
-    return !(*this == other);
+  constexpr auto operator!=(basic_static_extents<ExtentsType, RE...> const &rhs) const {
+    return !(*this == rhs);
+  }
+
+  [[nodiscard]] BOOST_UBLAS_INLINE
+  constexpr const_iterator begin() const noexcept{
+    return m_data.begin();
+  }
+
+  [[nodiscard]] BOOST_UBLAS_INLINE
+  constexpr const_iterator end() const noexcept{
+    return m_data.end();
   }
 
   ~basic_static_extents() = default;
+
+// private:
+  template<typename T, size_t...>
+  friend struct basic_static_extents;
+
+// private:
+  static constexpr base_type const m_data{E...};
 };
 
 template<size_t... E>
 using static_extents = basic_static_extents<size_t,E...>;
-
-template<size_t... E>
-basic_static_extents(detail::basic_extents_impl<0, E...>) -> basic_static_extents<size_t,E...>;
 
 } // namespace boost::numeric::ublas
 

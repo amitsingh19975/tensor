@@ -26,6 +26,7 @@
 #include <boost/numeric/ublas/tensor/storage_traits.hpp>
 #include <boost/numeric/ublas/tensor/extents.hpp>
 #include <boost/numeric/ublas/tensor/strides.hpp>
+#include <boost/numeric/ublas/tensor/static_functions.hpp>
 
 namespace boost::numeric::ublas
 {
@@ -136,23 +137,10 @@ namespace boost::numeric::ublas
 
 		auto c = tensor_mode_result_t<value_type, decltype(nc), F, std::vector<V> >(nc, value_type{});
 		auto bb = &(b(0));
-
-		if constexpr (detail::is_static<extents_type>::value)
-		{
-			auto a_static_extents = a.extents().base();
-			auto a_static_strides = a.strides().base();
-			ttv(m, p,
-				c.data(), c.extents().data(), c.strides().data(),
-				a.data(), a_static_extents.data(), a_static_strides.data(),
-				bb, nb.data(), nb.data());
-		}
-		else
-		{
-			ttv(m, p,
-				c.data(), c.extents().data(), c.strides().data(),
-				a.data(), a.extents().data(), a.strides().data(),
-				bb, nb.data(), nb.data());
-		}
+		ttv(m, p,
+			c.data(), c.extents().data(), c.strides().data(),
+			a.data(), a.extents().data(), a.strides().data(),
+			bb, nb.data(), nb.data());
 		return c;
 	}
 
@@ -172,7 +160,6 @@ namespace boost::numeric::ublas
 	BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, E, F, A1> const &a, matrix<V, F, A2> const &b, const std::size_t m)
 	{
 		using tensor_type = tensor<V, E, F, A1>;
-		using extents_type = typename tensor_type::extents_type;
 		using dynamic_strides_type = strides_t<dynamic_extents<>,F>;
 		using value_type = typename tensor_type::value_type;
 
@@ -208,23 +195,10 @@ namespace boost::numeric::ublas
 		auto c = tensor(nc, value_type{});
 
 		auto bb = &(b(0, 0));
-
-		if constexpr (detail::is_static<extents_type>::value)
-		{
-			auto a_static_extents = a.extents().base();
-			auto a_static_strides = a.strides().base();
-			ttm(m, p,
-				c.data(), c.extents().data(), c.strides().data(),
-				a.data(), a_static_extents.data(), a_static_strides.data(),
-				bb, nb.data(), wb.data());
-		}
-		else
-		{
-			ttm(m, p,
-				c.data(), c.extents().data(), c.strides().data(),
-				a.data(), a.extents().data(), a.strides().data(),
-				bb, nb.data(), wb.data());
-		}
+		ttm(m, p,
+			c.data(), c.extents().data(), c.strides().data(),
+			a.data(), a.extents().data(), a.strides().data(),
+			bb, nb.data(), wb.data());
 
 		return c;
 	}
@@ -252,7 +226,6 @@ namespace boost::numeric::ublas
 
 		using tensor_type = tensor<V, E1, F, A1>;
 		using extents_type_1 = E1;
-		using extents_type_2 = E2;
 		using value_type = typename tensor_type::value_type;
 		using size_type = typename extents_type_1::value_type;
 		using result_tensor_type = tensor<V, dynamic_extents<>, F, std::vector<V>>;
@@ -320,54 +293,11 @@ namespace boost::numeric::ublas
 		assert(phib1.size() == pb);
 
 		auto c = result_tensor_type(dynamic_extents<>(nc), value_type{});
-
-		if constexpr (detail::is_static<extents_type_1>::value &&
-					detail::is_static<extents_type_2>::value)
-		{
-
-			auto a_static_extents = a.extents().base();
-			auto a_static_strides = a.strides().base();
-			auto b_static_extents = b.extents().base();
-			auto b_static_strides = b.strides().base();
-			ttt(pa, pb, q,
-				phia1.data(), phib1.data(),
-				c.data(), c.extents().data(), c.strides().data(),
-				a.data(), a_static_extents.data(), a_static_strides.data(),
-				b.data(), b_static_extents.data(), b_static_strides.data());
-		}
-		else if constexpr (detail::is_static<extents_type_1>::value &&
-						!detail::is_static<extents_type_2>::value)
-		{
-
-			auto a_static_extents = a.extents().base();
-			auto a_static_strides = a.strides().base();
-			ttt(pa, pb, q,
-				phia1.data(), phib1.data(),
-				c.data(), c.extents().data(), c.strides().data(),
-				a.data(), a_static_extents.data(), a_static_strides.data(),
-				b.data(), b.extents().data(), b.strides().data());
-		}
-		else if constexpr (!detail::is_static<extents_type_1>::value &&
-						detail::is_static<extents_type_2>::value)
-		{
-
-			auto b_static_extents = b.extents().base();
-			auto b_static_strides = b.strides().base();
-			ttt(pa, pb, q,
-				phia1.data(), phib1.data(),
-				c.data(), c.extents().data(), c.strides().data(),
-				a.data(), a.extents().data(), a.strides().data(),
-				b.data(), b_static_extents.data(), b_static_strides.data());
-		}
-		else
-		{
-
-			ttt(pa, pb, q,
-				phia1.data(), phib1.data(),
-				c.data(), c.extents().data(), c.strides().data(),
-				a.data(), a.extents().data(), a.strides().data(),
-				b.data(), b.extents().data(), b.strides().data());
-		}
+		ttt(pa, pb, q,
+			phia1.data(), phib1.data(),
+			c.data(), c.extents().data(), c.strides().data(),
+			a.data(), a.extents().data(), a.strides().data(),
+			b.data(), b.extents().data(), b.strides().data());
 
 		return c;
 	}
@@ -412,8 +342,6 @@ namespace boost::numeric::ublas
 	BOOST_UBLAS_INLINE decltype(auto) inner_prod(tensor<V, E1, F, A1> const &a, tensor<V, E2, F, A2> const &b)
 	{
 		using value_type = typename tensor<V, E1, F, A1>::value_type;
-		using extents_type_1 = E1;
-		using extents_type_2 = E2;
 
 		if (a.rank() != b.rank())
 			throw std::length_error("error in boost::numeric::ublas::inner_prod: Rank of both tensors must be the same.");
@@ -423,47 +351,10 @@ namespace boost::numeric::ublas
 
 		if (a.extents() != b.extents())
 			throw std::length_error("error in boost::numeric::ublas::inner_prod: Tensor extents should be the same.");
-
-		if constexpr (detail::is_static<extents_type_1>::value &&
-					detail::is_static<extents_type_2>::value)
-		{
-
-			auto a_static_extents = a.extents().base();
-			auto a_static_strides = a.strides().base();
-			auto b_static_strides = b.strides().base();
-
-			return inner(a.rank(), a_static_extents.data(),
-						a.data(), a_static_strides.data(),
-						b.data(), b_static_strides.data(), value_type{0});
-		}
-		else if constexpr (detail::is_static<extents_type_1>::value &&
-						!detail::is_static<extents_type_2>::value)
-		{
-
-			auto a_static_extents = a.extents().base();
-			auto a_static_strides = a.strides().base();
-
-			return inner(a.rank(), a_static_extents.data(),
-						a.data(), a_static_strides.data(),
-						b.data(), b.strides().data(), value_type{0});
-		}
-		else if constexpr (!detail::is_static<extents_type_1>::value &&
-						detail::is_static<extents_type_2>::value)
-		{
-
-			auto b_static_strides = b.strides().base();
-
-			return inner(a.rank(), a.extents().data(),
-						a.data(), a.strides().data(),
-						b.data(), b_static_strides.data(), value_type{0});
-		}
-		else
-		{
-
-			return inner(a.rank(), a.extents().data(),
-						a.data(), a.strides().data(),
-						b.data(), b.strides().data(), value_type{0});
-		}
+		
+		return inner(a.rank(), a.extents().data(),
+					a.data(), a.strides().data(),
+					b.data(), b.strides().data(), value_type{0});
 	}
 
 	/** @brief Computes the outer product of two tensors
@@ -477,13 +368,14 @@ namespace boost::numeric::ublas
 	 *
 	 * @returns tensor object C with the same storage format F and allocator type A1
 	*/
-	template <class V, class E1, class E2, class F, class A1, class A2>
+	template <class V, class E1, class E2, class F, class A1, class A2,
+		std::enable_if_t<
+			!( detail::is_static<E1>::value &&
+			detail::is_static<E2>::value )
+			,int> = 0
+	>
 	BOOST_UBLAS_INLINE decltype(auto) outer_prod(tensor<V, E1, F, A1> const &a, tensor<V, E2, F, A2> const &b)
 	{
-		using tensor_type_1 = tensor<V, E1, F, A1>;
-		using tensor_type_2 = tensor<V, E2, F, A2>;
-		using extents_type_1 = typename tensor_type_1::extents_type;
-		using extents_type_2 = typename tensor_type_2::extents_type;
 
 		if (a.empty() || b.empty())
 			throw std::runtime_error(
@@ -503,48 +395,9 @@ namespace boost::numeric::ublas
 		
 		auto c = tensor(nc, V{});
 
-		if constexpr (detail::is_static<extents_type_1>::value &&
-					detail::is_static<extents_type_2>::value)
-		{
-
-			auto a_static_extents = a_extents.base();
-			auto a_static_strides = a.strides().base();
-			auto b_static_extents = b_extents.base();
-			auto b_static_strides = b.strides().base();
-
-			outer(c.data(), c.rank(), c.extents().data(), c.strides().data(),
-				a.data(), a.rank(), a_static_extents.data(), a_static_strides.data(),
-				b.data(), b.rank(), b_static_extents.data(), b_static_strides.data());
-		}
-		else if constexpr (detail::is_static<extents_type_1>::value &&
-						!detail::is_static<extents_type_2>::value)
-		{
-
-			auto a_static_extents = a_extents.base();
-			auto a_static_strides = a.strides().base();
-
-			outer(c.data(), c.rank(), c.extents().data(), c.strides().data(),
-				a.data(), a.rank(), a_static_extents.data(), a_static_strides.data(),
-				b.data(), b.rank(), b_extents.data(), b.strides().data());
-		}
-		else if constexpr (!detail::is_static<extents_type_1>::value &&
-						detail::is_static<extents_type_2>::value)
-		{
-
-			auto b_static_extents = b_extents.base();
-			auto b_static_strides = b.strides().base();
-
-			outer(c.data(), c.rank(), c.extents().data(), c.strides().data(),
-				a.data(), a.rank(), a_extents.data(), a.strides().data(),
-				b.data(), b.rank(), b_static_extents.data(), b_static_strides.data());
-		}
-		else
-		{
-
-			outer(c.data(), c.rank(), c.extents().data(), c.strides().data(),
-				a.data(), a.rank(), a_extents.data(), a.strides().data(),
-				b.data(), b.rank(), b_extents.data(), b.strides().data());
-		}
+		outer(c.data(), c.rank(), c.extents().data(), c.strides().data(),
+			a.data(), a.rank(), a_extents.data(), a.strides().data(),
+			b.data(), b.rank(), b_extents.data(), b.strides().data());
 
 		return c;
 	}
@@ -562,8 +415,6 @@ namespace boost::numeric::ublas
 	template <class V, class E, class F, class A>
 	BOOST_UBLAS_INLINE decltype(auto) trans(tensor<V, E, F, A> const &a, std::vector<std::size_t> const &tau)
 	{
-		using tensor_type = tensor<V, E, F, A>;
-		using extents_type = typename tensor_type::extents_type;
 		using result_tensor_type = tensor<V, dynamic_extents<>, F, std::vector<V>>;
 		//	using strides_type = typename tensor_type::strides_type;
 
@@ -580,22 +431,9 @@ namespace boost::numeric::ublas
 		//	auto wc = strides_type(extents_type(nc));
 		auto c = result_tensor_type(dynamic_extents<>(nc));
 
-		if constexpr (detail::is_static<extents_type>::value)
-		{
-
-			auto a_static_extents = a.extents().base();
-			auto a_static_strides = a.strides().base();
-
-			trans(a.rank(), a_static_extents.data(), tau.data(),
-				c.data(), c.strides().data(),
-				a.data(), a_static_strides.data());
-		}
-		else
-		{
-			trans(a.rank(), a.extents().data(), tau.data(),
-				c.data(), c.strides().data(),
-				a.data(), a.strides().data());
-		}
+		trans(a.rank(), a.extents().data(), tau.data(),
+			c.data(), c.strides().data(),
+			a.data(), a.strides().data());
 
 		//	auto wc_pi = typename strides_type::base_type (p);
 		//	for(auto i = 0u; i < p; ++i)
@@ -627,7 +465,6 @@ namespace boost::numeric::ublas
 	BOOST_UBLAS_INLINE decltype(auto) norm(tensor<V, E, F, A> const &a)
 	{
 		using tensor_type = tensor<V, E, F, A>;
-		using extents_type = typename tensor_type::extents_type;
 		using value_type = typename tensor_type::value_type;
 		
 		static_assert(std::is_default_constructible<V>::value,
@@ -639,20 +476,8 @@ namespace boost::numeric::ublas
 				"error in boost::numeric::ublas::norm: tensors should not be empty.");
 		}
 
-		if constexpr (detail::is_static<extents_type>::value)
-		{
-
-			auto a_static_extents = a.extents().base();
-			auto a_static_strides = a.strides().base();
-
-			return std::sqrt(accumulate(a.order(), a_static_extents.data(), a.data(), a_static_strides.data(), value_type{},
-										[](auto const &l, auto const &r) { return l + r * r; }));
-		}
-		else
-		{
-			return std::sqrt(accumulate(a.order(), a.extents().data(), a.data(), a.strides().data(), value_type{},
-										[](auto const &l, auto const &r) { return l + r * r; }));
-		}
+		return std::sqrt(accumulate(a.order(), a.extents().data(), a.data(), a.strides().data(), value_type{},
+									[](auto const &l, auto const &r) { return l + r * r; }));
 	}
 
 

@@ -149,7 +149,11 @@ template <class E> struct is_static {
 };
 
 template <> struct product_helper_impl<> {
-  static constexpr size_t value = 1;
+  static constexpr size_t value = 0;
+};
+
+template <size_t E> struct product_helper_impl<E> {
+  static constexpr size_t value = E;
 };
 
 template <size_t E, size_t... R> struct product_helper_impl<E, R...> {

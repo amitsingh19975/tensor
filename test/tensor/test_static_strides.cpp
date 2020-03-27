@@ -171,36 +171,4 @@ BOOST_AUTO_TEST_CASE(test_static_strides_ctor_access_last_order) {
   BOOST_CHECK_EQUAL(s8[2], 1);
 }
 
-BOOST_AUTO_TEST_CASE(test_static_strides_exceptions_first_order) {
-  using namespace boost::numeric::ublas;
-  static_strides<extents_type<>,first_order> s1;
-  BOOST_REQUIRE_EQUAL(s1.rank(),0);
-  BOOST_REQUIRE_THROW((void)s1[1],std::out_of_range);
-  
-  static_strides<extents_type<1,2,3>,first_order> s2;
-  BOOST_REQUIRE_EQUAL(s2.rank(),3);
-  BOOST_REQUIRE_THROW((void)s2[4],std::out_of_range);
-  
-  static_strides<extents_type<3>,first_order> s3;
-  BOOST_REQUIRE_EQUAL(s3.rank(),1);
-  BOOST_REQUIRE_THROW((void)s3[1],std::out_of_range);
-  BOOST_REQUIRE_THROW((void)s3[0],std::runtime_error);
-}
-
-BOOST_AUTO_TEST_CASE(test_static_strides_exceptions_last_order) {
-  using namespace boost::numeric::ublas;
-  static_strides<extents_type<>,last_order> s1;
-  BOOST_REQUIRE_EQUAL(s1.rank(),0);
-  BOOST_REQUIRE_THROW((void)s1[1],std::out_of_range);
-  
-  static_strides<extents_type<1,2,3>,last_order> s2;
-  BOOST_REQUIRE_EQUAL(s2.rank(),3);
-  BOOST_REQUIRE_THROW((void)s2[4],std::out_of_range);
-  
-  static_strides<extents_type<3>,last_order> s3;
-  BOOST_REQUIRE_EQUAL(s3.rank(),1);
-  BOOST_REQUIRE_THROW((void)s3[1],std::out_of_range);
-  BOOST_REQUIRE_THROW((void)s3[0],std::runtime_error);
-}
-
 BOOST_AUTO_TEST_SUITE_END()

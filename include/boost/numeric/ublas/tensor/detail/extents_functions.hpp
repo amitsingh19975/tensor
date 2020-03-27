@@ -30,8 +30,6 @@ namespace boost::numeric::ublas{
 
 
 namespace boost::numeric::ublas::detail{
-  
-  template <size_t R, size_t...> struct basic_extents_impl;
 
   template<size_t... N> 
   struct number_list{
@@ -44,154 +42,14 @@ namespace boost::numeric::ublas::detail{
   template<size_t E, size_t...N>
   constexpr auto push_front(number_list<N...>) -> number_list<E,N...>;
 
-  template<size_t I, size_t E, typename T>
-  struct is_same;
-  
-  template<size_t I, size_t Element, size_t N0, size_t...N>
-  struct is_same<I,Element, number_list<N0,N...> >{
-    static constexpr bool const value = is_same<I - 1, Element, number_list<N...> >::value;
-  };
-
-  template<size_t Element, size_t N0, size_t...N>
-  struct is_same<0,Element, number_list<N0,N...> >{
-    static constexpr bool const value = (Element == N0);
-  };
-
-  template< class ExtentsType, size_t... E >
-  constexpr auto number_list_to_static_extents( number_list<E...> ) -> basic_static_extents<ExtentsType, E...>;
-
-  template<size_t Begin, size_t End, size_t I = 0, size_t R, size_t... N>
+  template<typename T, size_t... E, size_t... N>
   BOOST_UBLAS_INLINE
-  constexpr auto get_number_list( basic_extents_impl<R>, number_list<N...> num = number_list<>{} ){
-    return num;
+  constexpr auto get_number_list( basic_static_extents<T, E...> const&){
+    return number_list<E...>{};
   }
 
-  template<size_t Begin, size_t End, size_t I = 0, size_t R, size_t E0, size_t... E, size_t... N>
-  BOOST_UBLAS_INLINE
-  constexpr auto get_number_list( basic_extents_impl<R, E0, E...>, number_list<N...> num = number_list<>{} ){
-    // if range is out bound we reture num
-    if constexpr( Begin >= End || I >= End){
-      return num;
-    // if current position is less than start of range
-    // we just skip the push
-    }else if constexpr( I < Begin ){
-      if constexpr( sizeof...(E) == 0ul ){
-        return num;
-      }else{
-        return get_number_list<Begin,End,I+1>(basic_extents_impl<R, E...>{}, num);
-      }
-
-    // if current position is less than end of range
-    // we push the extents to the number list
-    }else if constexpr( I < End ){
-      auto n_num_list = decltype( push_back<E0>(num) ){};
-      if constexpr( sizeof...(E) == 0ul ){
-        return n_num_list;
-      }else{
-        return get_number_list<Begin,End,I+1>(basic_extents_impl<R, E...>{}, n_num_list);
-      }
-    }
-  }
-
-  template<typename Fn, size_t E0, size_t... E>
-  BOOST_UBLAS_INLINE
-  constexpr bool none_of_helper( number_list< E0, E...>, Fn pred){
-    if constexpr( sizeof...(E) == 0ul ){
-      return !pred(E0);
-    }else{
-      if( pred(E0) ){
-        return false;
-      }else{
-        return none_of_helper( number_list<E...>{}, std::move(pred) );
-      }
-    }
-  }
-
-  template <class Fn, class ExtentsType, typename std::enable_if<is_static_extents<ExtentsType>::value, int>::type = 0>
-  BOOST_UBLAS_INLINE
-  constexpr bool none_of( ExtentsType const&, Fn pred){
-    auto num_list = get_number_list<0,ExtentsType::Rank>(typename ExtentsType::parent_type{});
-    if constexpr( decltype(num_list)::size == 0 ){
-      return true;
-    }else{
-      return none_of_helper(num_list, std::move(pred));
-    }
-  }
-
-  template <size_t Begin, size_t End, class Fn, class ExtentsType, typename std::enable_if<is_static_extents<ExtentsType>::value, int>::type = 0>
-  BOOST_UBLAS_INLINE
-  constexpr bool none_of( ExtentsType const&, Fn pred){
-    auto num_list = get_number_list<Begin,End>(typename ExtentsType::parent_type{});
-    if constexpr( decltype(num_list)::size == 0 ){
-      return true;
-    }else{
-      return none_of_helper(num_list, std::move(pred));
-    }
-  }
-
-  template<typename Fn, size_t E0, size_t... E>
-  BOOST_UBLAS_INLINE
-  constexpr bool all_of_helper( number_list< E0, E...>, Fn pred){
-    if constexpr( sizeof...(E) == 0ul ){
-      return pred(E0);
-    }else{
-      return pred(E0) && all_of_helper(number_list<E...>{}, std::move(pred));
-    }
-  }
-
-  template <class Fn, class ExtentsType, typename std::enable_if<is_static_extents<ExtentsType>::value, int>::type = 0>
-  BOOST_UBLAS_INLINE
-  constexpr bool all_of( ExtentsType const&, Fn pred){
-    auto num_list = get_number_list<0,ExtentsType::Rank>(typename ExtentsType::parent_type{});
-    if constexpr( decltype(num_list)::size == 0 ){
-      return true;
-    }else{
-      return all_of_helper(num_list, std::move(pred));
-    }
-  }
-
-  template <size_t Begin, size_t End, class Fn, class ExtentsType, typename std::enable_if<is_static_extents<ExtentsType>::value, int>::type = 0>
-  BOOST_UBLAS_INLINE
-  constexpr bool all_of( ExtentsType const&, Fn pred){
-    auto num_list = get_number_list<Begin,End>(typename ExtentsType::parent_type{});
-    if constexpr( decltype(num_list)::size == 0 ){
-      return true;
-    }else{
-      return all_of_helper(num_list, std::move(pred));
-    }
-  }
-
-  template<typename Fn, size_t E0, size_t... E>
-  BOOST_UBLAS_INLINE
-  constexpr bool any_of_helper( number_list< E0, E...>, Fn pred){
-    if constexpr( sizeof...(E) == 0ul ){
-      return pred(E0);
-    }else{
-      return pred(E0) || any_of_helper(number_list<E...>{}, std::move(pred));
-    }
-  }
-
-  template <class Fn, class ExtentsType, typename std::enable_if<is_static_extents<ExtentsType>::value, int>::type = 0>
-  BOOST_UBLAS_INLINE
-  constexpr bool any_of( ExtentsType const&, Fn pred){
-    auto num_list = get_number_list<0,ExtentsType::Rank>(typename ExtentsType::parent_type{});
-    if constexpr( decltype(num_list)::size == 0 ){
-      return false;
-    }else{
-      return any_of_helper(num_list, std::move(pred));
-    }
-  }
-
-  template <size_t Begin, size_t End, class Fn, class ExtentsType, typename std::enable_if<is_static_extents<ExtentsType>::value, int>::type = 0>
-  BOOST_UBLAS_INLINE
-  constexpr bool any_of( ExtentsType const&, Fn pred){
-    auto num_list = get_number_list<Begin,End>(typename ExtentsType::parent_type{});
-    if constexpr( decltype(num_list)::size == 0 ){
-      return false;
-    }else{
-      return any_of_helper(num_list, std::move(pred));
-    }
-  }
+  template<typename T, size_t... E>
+  constexpr auto number_list_to_static_extents(number_list<E...> const&) -> basic_static_extents<T,E...>; 
 
   template <size_t E0, size_t... E, size_t... N>
   BOOST_UBLAS_INLINE
@@ -232,7 +90,7 @@ namespace boost::numeric::ublas::detail{
 
     using value_type = typename ExtentsType::value_type;
 
-    auto num_list = get_number_list<0,ExtentsType::Rank>(typename ExtentsType::parent_type{});
+    auto num_list = get_number_list(e);
     auto one_free_num_list = squeeze_impl_remove_one(num_list);
 
     // check after removing 1s from the list are they same
@@ -250,14 +108,14 @@ namespace boost::numeric::ublas::detail{
         // to comply with GNU Octave this check is made
         // if position 2 contains 1 we push at back
         // else we push at front
-        if constexpr( is_same<1, 1ul, decltype(num_list) >::value ){
+        if constexpr( ExtentsType::at(1) == 1ul ){
           return decltype( number_list_to_static_extents<value_type>(
-                    decltype(push_back<value_type(1)>(one_free_num_list)){}
-                  ) ){};
+                    decltype( push_back<value_type(1)>(one_free_num_list)){} ) 
+                  ){};
         }else{
           return decltype( number_list_to_static_extents<value_type>(
-                    decltype(push_front<value_type(1)>(one_free_num_list)){}
-                  ) ){};
+                    decltype( push_front<value_type(1)>(one_free_num_list)){} ) 
+                  ){};
         }
 
       }else{
@@ -335,21 +193,13 @@ namespace boost::numeric::ublas {
 template <class ExtentsType, typename std::enable_if<detail::is_extents<ExtentsType>::value, int>::type = 0>
 BOOST_UBLAS_INLINE 
 constexpr bool valid(ExtentsType const &e) {
-
-  if (e.size() == 1 && e[0] == 1)
-      return true;
-
-  if constexpr (detail::is_dynamic<ExtentsType>::value) {
-    return e.size() > typename ExtentsType::size_type(1) &&
-           std::none_of(e.begin(), e.end(), [](auto const &a) {
-             return a == typename ExtentsType::value_type(0);
-           });
-  } else {
-    return e.size() > typename ExtentsType::size_type(1) &&
-           none_of(e, [](auto const &a) {
-             return a == typename ExtentsType::value_type(0);
-           });
+  if ( e.size() == 1 && e[0] == 1 ){
+    return true;
   }
+  return ( e.size() > typename ExtentsType::size_type(1) ) &&
+          std::none_of(e.begin(), e.end(), [](auto const &a) {
+            return a == typename ExtentsType::value_type(0);
+          });
 }
 
 /**
@@ -375,7 +225,7 @@ std::string to_string(T const &e) {
   std::string s = "[ ";
   
   for (auto i = typename T::size_type(0); i < e.size() - 1; i++) {
-      s += std::to_string(e.at(i)) + ", ";
+      s += std::to_string(e[i]) + ", ";
   }
   
   s += std::to_string(e.back()) + " ]";
@@ -390,18 +240,12 @@ std::string to_string(T const &e) {
 template <class ExtentsType, typename std::enable_if<detail::is_extents<ExtentsType>::value, int>::type = 0>
 BOOST_UBLAS_INLINE 
 constexpr bool is_scalar(ExtentsType const &e) {
-  if (e.size() == typename ExtentsType::size_type(0)) {
+  if ( e.size() == typename ExtentsType::size_type(0) ){
     return false;
   }
-  if constexpr (detail::is_dynamic<ExtentsType>::value) {
-    return std::all_of(e.begin(), e.end(), [](auto const &a) {
-      return a == typename ExtentsType::value_type(1);
-    });
-  } else {
-    return detail::all_of(e, [](auto const &a) {
-      return a == typename ExtentsType::value_type(1);
-    });
-  }
+  return std::all_of(e.begin(), e.end(), [](auto const &a) {
+    return a == typename ExtentsType::value_type(1);
+  });
 }
 
 /**
@@ -440,15 +284,9 @@ constexpr bool is_vector(ExtentsType const &e) {
   };
   auto equal_one = [](auto const &a) { return a == typename ExtentsType::value_type(1); };
 
-  if constexpr (detail::is_dynamic<ExtentsType>::value) {
-    return std::any_of(e.begin(), e.begin() + 2, greater_one) &&
-           std::any_of(e.begin(), e.begin() + 2, equal_one) &&
-           std::all_of(e.begin() + 2, e.end(), equal_one);
-  } else {
-    return detail::any_of<0, 2>(e, greater_one) &&
-           detail::any_of<0, 2>(e, equal_one) &&
-           detail::all_of<2, ExtentsType::rank()>(e, equal_one);
-  }
+  return std::any_of(e.begin(), e.begin() + 2, greater_one) &&
+          std::any_of(e.begin(), e.begin() + 2, equal_one) &&
+          std::all_of(e.begin() + 2, e.end(), equal_one);
 }
 
 /** @brief Returns true if this has a matrix shape
@@ -467,13 +305,8 @@ constexpr bool is_matrix(ExtentsType const &e) {
   };
   auto equal_one = [](auto const &a) { return a == typename ExtentsType::value_type(1); };
 
-  if constexpr (detail::is_dynamic<ExtentsType>::value) {
-    return std::all_of(e.begin(), e.begin() + 2, greater_one) &&
-           std::all_of(e.begin() + 2, e.end(), equal_one);
-  } else {
-    return detail::all_of<0,2>(e, greater_one) &&
-           detail::all_of<2,ExtentsType::rank()>(e, equal_one);
-  }
+  return std::all_of(e.begin(), e.begin() + 2, greater_one) &&
+          std::all_of(e.begin() + 2, e.end(), equal_one);
 }
 
 /** @brief Returns true if this is has a tensor shape
@@ -491,11 +324,7 @@ constexpr bool is_tensor(ExtentsType const &e) {
     return a > typename ExtentsType::value_type(1);
   };
 
-  if constexpr (detail::is_dynamic<ExtentsType>::value) {
-    return std::any_of(e.begin() + 2, e.end(), greater_one);
-  } else {
-    return detail::any_of<2,ExtentsType::rank()>(e, greater_one);
-  }
+  return std::any_of(e.begin() + 2, e.end(), greater_one);
 }
 
 /** @brief Eliminates singleton dimensions when size > 2
@@ -520,16 +349,16 @@ auto squeeze(ExtentsType const &e) {
 template <class ExtentsType, typename std::enable_if<detail::is_extents<ExtentsType>::value, int>::type = 0>
 BOOST_UBLAS_INLINE
 constexpr auto product(ExtentsType const &e) {
-
-  if (e.empty()) {
-    return typename ExtentsType::value_type(0);
-  }
-
-  if constexpr( detail::is_static<ExtentsType>::value){
-      return detail::product_helper<ExtentsType>::value;
-  }else {
-    return typename ExtentsType::value_type(
-        std::accumulate(e.begin(), e.end(), 1ul, std::multiplies<>()));
+  if constexpr( detail::is_static<ExtentsType>::value ){
+    return detail::product_helper<ExtentsType>::value;
+  }else{
+    if (e.empty()) {
+      return typename ExtentsType::value_type(0);
+    }else{
+      return typename ExtentsType::value_type(
+          std::accumulate(e.begin(), e.end(), 1ul, std::multiplies<>())
+        );
+    }
   }
 }
 

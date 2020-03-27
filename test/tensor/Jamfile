@@ -38,7 +38,6 @@ test-suite boost-ublas-tensor-test
           test_einstein_notation.cpp
           test_algorithms.cpp
           test_tensor_matrix_vector.cpp
-          test_extents_helper.cpp
           test_static_extents.cpp
           test_static_strides.cpp
           unit_test_framework ]

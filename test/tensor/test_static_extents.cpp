@@ -119,6 +119,8 @@ struct fixture {
 BOOST_FIXTURE_TEST_CASE(test_static_extents_product, fixture,
                         *boost::unit_test::label("static_extents") *
                             boost::unit_test::label("product")) {
+  
+  using namespace boost::numeric::ublas;
 
   auto p0   = product( e0);   // {}
   auto p1   = product( e1);   // {1,2,3,4}
@@ -126,6 +128,13 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents_product, fixture,
   auto p3   = product( e3);   // {4,2,3}
   auto p4   = product( e4);   // {4,2,1,3}
   auto p5   = product( e5);   // {1,4,2,1,3,1}
+  
+  auto sp0   = static_traits::product_v< std::decay_t<decltype(e0)> >;   // {}
+  auto sp1   = static_traits::product_v< std::decay_t<decltype(e1)> >;   // {1,2,3,4}
+  auto sp2   = static_traits::product_v< std::decay_t<decltype(e2)> >;   // {1,2,3}
+  auto sp3   = static_traits::product_v< std::decay_t<decltype(e3)> >;   // {4,2,3}
+  auto sp4   = static_traits::product_v< std::decay_t<decltype(e4)> >;   // {4,2,1,3}
+  auto sp5   = static_traits::product_v< std::decay_t<decltype(e5)> >;   // {1,4,2,1,3,1}
 
   BOOST_CHECK_EQUAL(p0, 0);
   BOOST_CHECK_EQUAL(p1, 24);
@@ -133,6 +142,13 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents_product, fixture,
   BOOST_CHECK_EQUAL(p3, 24);
   BOOST_CHECK_EQUAL(p4, 24);
   BOOST_CHECK_EQUAL(p5, 24);
+  
+  BOOST_CHECK_EQUAL(sp0, 0);
+  BOOST_CHECK_EQUAL(sp1, 24);
+  BOOST_CHECK_EQUAL(sp2, 6);
+  BOOST_CHECK_EQUAL(sp3, 24);
+  BOOST_CHECK_EQUAL(sp4, 24);
+  BOOST_CHECK_EQUAL(sp5, 24);
 }
 
 BOOST_FIXTURE_TEST_CASE(test_static_extents_access, fixture,
@@ -179,6 +195,7 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
                         *boost::unit_test::label("static_extents") *
                             boost::unit_test::label("query")) {
 
+  using namespace boost::numeric::ublas;
   // e0  ==> {}
   // e1  ==> {0,0,0,0}
   // e2  ==> {1,2,3}
@@ -191,36 +208,60 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
   BOOST_CHECK( !is_vector( e0));
   BOOST_CHECK( !is_matrix( e0));
   BOOST_CHECK( !is_tensor( e0));
+  BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e0)> >);
+  BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e0)> >);
+  BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e0)> >);
+  BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e0)> >);
 
   BOOST_CHECK( ! e1.empty(   ) );
   BOOST_CHECK( !is_scalar( e1) );
   BOOST_CHECK( !is_vector( e1) );
   BOOST_CHECK( !is_matrix( e1) );
   BOOST_CHECK(  is_tensor( e1) );
+  BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e1)> >);
+  BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e1)> >);
+  BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e1)> >);
+  BOOST_CHECK(  static_traits::is_tensor_v< std::decay_t<decltype(e1)> >);
 
   BOOST_CHECK( ! e2.empty(   ) );
   BOOST_CHECK( !is_scalar( e2) );
   BOOST_CHECK( !is_vector( e2) );
   BOOST_CHECK( !is_matrix( e2) );
   BOOST_CHECK(  is_tensor( e2) );
+  BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e2)> >);
+  BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e2)> >);
+  BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e2)> >);
+  BOOST_CHECK(  static_traits::is_tensor_v< std::decay_t<decltype(e2)> >);
 
   BOOST_CHECK( ! e3.empty(   ) );
   BOOST_CHECK( !is_scalar( e3) );
   BOOST_CHECK( !is_vector( e3) );
   BOOST_CHECK( !is_matrix( e3) );
   BOOST_CHECK(  is_tensor( e3) );
+  BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e3)> >);
+  BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e3)> >);
+  BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e3)> >);
+  BOOST_CHECK(  static_traits::is_tensor_v< std::decay_t<decltype(e3)> >);
 
   BOOST_CHECK( ! e4.empty(   ) );
   BOOST_CHECK( !is_scalar( e4) );
   BOOST_CHECK( !is_vector( e4) );
   BOOST_CHECK( !is_matrix( e4) );
   BOOST_CHECK(  is_tensor( e4) );
+  BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e4)> >);
+  BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e4)> >);
+  BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e4)> >);
+  BOOST_CHECK(  static_traits::is_tensor_v< std::decay_t<decltype(e4)> >);
 
   BOOST_CHECK( ! e5.empty(   ) );
   BOOST_CHECK( !is_scalar( e5) );
   BOOST_CHECK( !is_vector( e5) );
   BOOST_CHECK( !is_matrix( e5) );
   BOOST_CHECK(  is_tensor( e5) );
+  BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e5)> >);
+  BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e5)> >);
+  BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e5)> >);
+  BOOST_CHECK(  static_traits::is_tensor_v< std::decay_t<decltype(e5)> >);
 
   boost::numeric::ublas::basic_static_extents<size_t,1,3> e14;
   BOOST_CHECK( ! e14.empty(   ) );
@@ -228,6 +269,10 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
   BOOST_CHECK(   is_vector(e14) );
   BOOST_CHECK( ! is_matrix(e14) );
   BOOST_CHECK( ! is_tensor(e14) );
+  BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e14)> >);
+  BOOST_CHECK(  static_traits::is_vector_v< std::decay_t<decltype(e14)> >);
+  BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e14)> >);
+  BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e14)> >);
 
 
   for_each_tuple(rank_0_extents,[](auto const& I, auto const& e){
@@ -235,6 +280,10 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
     BOOST_CHECK( !is_vector(e) );
     BOOST_CHECK( !is_matrix(e) );
     BOOST_CHECK( !is_tensor(e) );
+    BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e)> >);
+    BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e)> >);
+    BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e)> >);
+    BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e)> >);
   });
 
 
@@ -244,11 +293,19 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
       BOOST_CHECK( !is_vector(e) );
       BOOST_CHECK( !is_matrix(e) );
       BOOST_CHECK( !is_tensor(e) );
+      BOOST_CHECK(  static_traits::is_scalar_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e)> >);
     }else{
       BOOST_CHECK( !is_scalar(e) );
       BOOST_CHECK(  is_vector(e) );
       BOOST_CHECK( !is_matrix(e) );
       BOOST_CHECK( !is_tensor(e) );
+      BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK(  static_traits::is_vector_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e)> >);
     }
   });
 
@@ -258,11 +315,19 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
       BOOST_CHECK( !is_vector(e) );
       BOOST_CHECK( !is_matrix(e) );
       BOOST_CHECK( !is_tensor(e) );
+      BOOST_CHECK(  static_traits::is_scalar_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e)> >);
     }else{
       BOOST_CHECK( !is_scalar(e) );
       BOOST_CHECK( !is_vector(e) );
       BOOST_CHECK(  is_matrix(e) );
       BOOST_CHECK( !is_tensor(e) );
+      BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK(  static_traits::is_matrix_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e)> >);
     }
   });
 
@@ -271,6 +336,10 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
       BOOST_CHECK( !is_vector(e) );
       BOOST_CHECK( !is_matrix(e) );
       BOOST_CHECK( !is_tensor(e) );
+      BOOST_CHECK(  static_traits::is_scalar_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e)> >);
   });
 
   for_each_tuple(vectors,[](auto const& I, auto const& e){
@@ -278,6 +347,10 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
       BOOST_CHECK(  is_vector(e) );
       BOOST_CHECK( !is_matrix(e) );
       BOOST_CHECK( !is_tensor(e) );
+      BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK(  static_traits::is_vector_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e)> >);
   });
 
   for_each_tuple(matrices,[](auto const& I, auto const& e){
@@ -285,6 +358,11 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
       BOOST_CHECK( !is_vector(e) );
       BOOST_CHECK(  is_matrix(e) );
       BOOST_CHECK( !is_tensor(e) );
+      BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK(  static_traits::is_matrix_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e)> >);
+      
   });
 
   for_each_tuple(tensors,[](auto const& I, auto const& e){
@@ -292,6 +370,10 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
       BOOST_CHECK( !is_vector(e) );
       BOOST_CHECK( !is_matrix(e) );
       BOOST_CHECK(  is_tensor(e) );
+      BOOST_CHECK( !static_traits::is_scalar_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_vector_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK( !static_traits::is_matrix_v< std::decay_t<decltype(e)> >);
+      BOOST_CHECK(  static_traits::is_tensor_v< std::decay_t<decltype(e)> >);
   });
 
 }
@@ -326,36 +408,45 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents_to_functions, fixture, *boost::unit_
 
 BOOST_FIXTURE_TEST_CASE(test_static_extents_valid, fixture, *boost::unit_test::label("static_extents") *boost::unit_test::label("valid"))
 {
+  using namespace boost::numeric::ublas;
   for_each_tuple(rank_0_extents,[](auto const& I, auto const& e){
     BOOST_CHECK(!valid(e));
+    BOOST_CHECK(!static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
 
   for_each_tuple(rank_1_extents,[](auto const& I, auto const& e){
     if( I == 0 ){
       BOOST_CHECK(valid(e));
+      BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
     }else{
       BOOST_CHECK(!valid(e));
+      BOOST_CHECK(!static_traits::is_valid_v< std::decay_t<decltype(e)> >);
     }
   });
 
   for_each_tuple(rank_2_extents,[](auto const& I, auto const& e){
       BOOST_CHECK(valid(e));
+      BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
   
   for_each_tuple(scalars,[](auto const& I, auto const& e){
       BOOST_CHECK(valid(e));
+      BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
   
   for_each_tuple(vectors,[](auto const& I, auto const& e){
       BOOST_CHECK(valid(e));
+      BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
   
   for_each_tuple(matrices,[](auto const& I, auto const& e){
       BOOST_CHECK(valid(e));
+      BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
   
   for_each_tuple(tensors,[](auto const& I, auto const& e){
       BOOST_CHECK(valid(e));
+      BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
 }
 
@@ -438,7 +529,7 @@ BOOST_AUTO_TEST_CASE(test_static_extents_exception)
   using namespace boost::numeric::ublas;
   
   basic_static_extents<size_t,3,1,2,3> e1;
-  for(auto i = e1.size(); i < 100; i++){
+  for(auto i = e1.size(); i < 3; i++){
     BOOST_REQUIRE_THROW( (void)e1.at(i),std::out_of_range );
   }
   

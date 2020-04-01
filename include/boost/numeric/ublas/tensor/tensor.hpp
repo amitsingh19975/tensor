@@ -18,8 +18,6 @@
 
 #include <initializer_list>
 
-#include <boost/config.hpp>
-
 #include <boost/numeric/ublas/tensor/algorithms.hpp>
 #include <boost/numeric/ublas/tensor/storage.hpp>
 #include <boost/numeric/ublas/tensor/expression.hpp>
@@ -27,7 +25,7 @@
 #include <boost/numeric/ublas/tensor/extents.hpp>
 #include <boost/numeric/ublas/tensor/strides.hpp>
 #include <boost/numeric/ublas/tensor/index.hpp>
-#include <boost/numeric/ublas/tensor/detail/meta_functions.hpp>
+#include <boost/numeric/ublas/tensor/detail/type_traits.hpp>
 
 namespace boost { namespace numeric { namespace ublas {
 
@@ -47,11 +45,11 @@ namespace boost { namespace numeric { namespace ublas {
 //	typedef C container_type;
 //	typedef tensor_tag type_category;
 
-//	BOOST_UBLAS_INLINE
+//	inline
 //	const container_type &operator () () const {
 //			return *static_cast<const container_type *> (this);
 //	}
-//	BOOST_UBLAS_INLINE
+//	inline
 //	container_type &operator () () {
 //			return *static_cast<container_type *> (this);
 //	}
@@ -131,7 +129,7 @@ public:
 	 * @note the tensor needs to reshaped for further use.
 	 *
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	constexpr tensor ()
 		: tensor_expression_type<self_type>() // container_type
 		, extents_()
@@ -151,7 +149,7 @@ public:
 	 *
 	 * @param l initializer list for setting the dimension extents of the tensor
 	 */
-	explicit BOOST_UBLAS_INLINE
+	explicit inline
 	tensor (std::initializer_list<size_type> l)
 		: tensor_expression_type<self_type>()
 		, extents_ (std::move(l))
@@ -170,7 +168,7 @@ public:
 	 *
 	 * @param s initial tensor dimension extents
 	 */
-	explicit BOOST_UBLAS_INLINE
+	explicit inline
 	tensor (extents_type const& s)
 		: tensor_expression_type<self_type>() //tensor_container<self_type>()
 		, extents_ (s)
@@ -190,7 +188,7 @@ public:
 	 *  @param s initial tensor dimension extents
 	 *  @param a container of \c array_type that is copied according to the storage layout
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	tensor (extents_type const& s, const array_type &a)
 		: tensor_expression_type<self_type>() //tensor_container<self_type>()
 		, extents_ (s)
@@ -210,7 +208,7 @@ public:
 	 *  @param e initial tensor dimension extents
 	 *  @param i initial value of all elements of type \c value_type
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	tensor (extents_type const& e, const value_type &i)
 		: tensor_expression_type<self_type>() //tensor_container<self_type> ()
 		, extents_ (e)
@@ -230,7 +228,7 @@ public:
 	//  *  @param i initial value of all elements of type \c value_type
 	//  */
 	// template<class U = E>
-	// BOOST_UBLAS_INLINE
+	// inline
 	// tensor (shape_t<typename extents_type::value_type, dynamic_rank> const& e, const value_type &i, typename std::enable_if<detail::is_static_extents<U>::value>::type* = nullptr)
 	// 	: tensor_expression_type<self_type>() //tensor_container<self_type> ()
 	// 	, extents_ (e.begin(),e.end())
@@ -244,7 +242,7 @@ public:
 	 *
 	 *  @param v tensor to be copied.
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	tensor (const tensor &v)
 		: tensor_expression_type<self_type>()
 		, extents_ (v.extents_)
@@ -258,7 +256,7 @@ public:
 	 *
 	 *  @param v tensor to be moved.
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	tensor (tensor &&v)
 		: tensor_expression_type<self_type>() //tensor_container<self_type> ()
 		, extents_ (std::move(v.extents_))
@@ -273,7 +271,7 @@ public:
 	 *
 	 *  @param v matrix to be copied.
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	tensor (const matrix_type &v)
 		: tensor_expression_type<self_type>()
 		, extents_ ()
@@ -304,7 +302,7 @@ public:
 	 *
 	 *  @param v matrix to be moved.
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	tensor (matrix_type &&v)
 		: tensor_expression_type<self_type>()
 		, extents_ {}
@@ -328,7 +326,9 @@ public:
 				extents_ = extents_type{v.size1(),v.size2()};
 				strides_ = strides_type(extents_);
 			}
-			std::move(v.data().begin(), v.data().end(),data_.begin());
+			for(auto i = size_type{}; i < sz; ++i){
+				data_[i] = std::move(v.data()[i]);
+			}
 		}
 	}
 
@@ -339,7 +339,7 @@ public:
 	 *
 	 *  @param v vector to be copied.
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	tensor (const vector_type &v)
 		: tensor_expression_type<self_type>()
 		, extents_ ()
@@ -370,7 +370,7 @@ public:
 	 *
 	 *  @param v vector to be moved.
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	tensor (vector_type &&v)
 		: tensor_expression_type<self_type>()
 		, extents_ {}
@@ -393,7 +393,10 @@ public:
 				extents_ = extents_type{v.size(),1};
 				strides_ = strides_type(extents_);
 			}
-			std::move(v.data().begin(), v.data().end(),data_.begin());
+			
+			for(auto i = size_type{}; i < sz; ++i){
+				data_[i] = std::move(v.data()[i]);
+			}
 		}
 	}
 
@@ -508,57 +511,57 @@ public:
 	}
 
 	/** @brief Returns true if the tensor is empty (\c size==0) */
-	BOOST_UBLAS_INLINE
+	inline
 	bool empty () const {
 		return this->data_.empty();
 	}
 
 
 	/** @brief Returns the size of the tensor */
-	BOOST_UBLAS_INLINE
+	inline
 	size_type size () const {
 		return this->data_.size ();
 	}
 
 	/** @brief Returns the size of the tensor */
-	BOOST_UBLAS_INLINE
+	inline
 	size_type size (size_type r) const {
 		return this->extents_.at(r);
 	}
 
 	/** @brief Returns the number of dimensions/modes of the tensor */
-	BOOST_UBLAS_INLINE
+	inline
 	size_type rank () const {
 		return this->extents_.size();
 	}
 
 	/** @brief Returns the number of dimensions/modes of the tensor */
-	BOOST_UBLAS_INLINE
+	inline
 	size_type order () const {
 		return this->extents_.size();
 	}
 
 	/** @brief Returns the strides of the tensor */
-	BOOST_UBLAS_INLINE
+	inline
 	strides_type const& strides () const {
 		return this->strides_;
 	}
 
 	/** @brief Returns the extents of the tensor */
-	BOOST_UBLAS_INLINE
+	inline
 	extents_type const& extents () const {
 		return this->extents_;
 	}
 
 
 	/** @brief Returns a \c const reference to the container. */
-	BOOST_UBLAS_INLINE
+	inline
 	const_pointer data () const {
 		return this->data_.data();
 	}
 
 	/** @brief Returns a \c const reference to the container. */
-	BOOST_UBLAS_INLINE
+	inline
 	pointer data () {
 		return this->data_.data();
 	}
@@ -569,7 +572,7 @@ public:
 	 *
 	 *  @param i zero-based index where 0 <= i < this->size()
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	const_reference operator [] (size_type i) const {
 		return this->data_[i];
 	}
@@ -580,7 +583,7 @@ public:
 	 *
 	 *  @param i zero-based index where 0 <= i < this->size()
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	reference operator [] (size_type i) {
 		return this->data_[i];
 	}
@@ -595,7 +598,7 @@ public:
 	 *  @param is zero-based indices where 0 <= is[r] < this->size(r) where  0 < r < this->rank()
 	 */
 	template<class ... size_types>
-	BOOST_UBLAS_INLINE
+	inline
 	const_reference at (size_type i, size_types ... is) const {
 		if constexpr (sizeof...(is) == 0)
 			return this->data_[i];
@@ -613,7 +616,7 @@ public:
 	 *  @param is zero-based indices where 0 <= is[r] < this->size(r) where  0 < r < this->rank()
 	 */
 	template<class ... size_types>
-	BOOST_UBLAS_INLINE
+	inline
 	reference at (size_type i, size_types ... is) {
 		if constexpr (sizeof...(is) == 0)
 			return this->data_[i];
@@ -630,7 +633,7 @@ public:
 	 *
 	 *  @param i zero-based index where 0 <= i < this->size()
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	const_reference operator()(size_type i) const {
 		return this->data_[i];
 	}
@@ -642,7 +645,7 @@ public:
 	 *
 	 *  @param i zero-based index where 0 <= i < this->size()
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	reference operator()(size_type i){
 		return this->data_[i];
 	}
@@ -656,7 +659,7 @@ public:
 	 *  @param is zero-based indices where 0 <= is[r] < this->size(r) where  0 < r < this->rank()
 	 */
 	template<std::size_t I, class ... index_types>
-	BOOST_UBLAS_INLINE
+	inline
 	decltype(auto) operator() (index::index_type<I> p, index_types ... ps) const
 	{
 		constexpr auto N = sizeof...(ps)+1;
@@ -684,10 +687,10 @@ public:
 	 * @param e extents with which the tensor is reshaped.
 	 * @param v value which is appended if the tensor is enlarged.
 	 */
-	BOOST_UBLAS_INLINE
+	inline
 	void reshape (extents_type const& e, value_type v = value_type{})
 	{
-		static_assert(detail::is_static_extents<extents_type>::value == false,
+		static_assert(detail::is_dynamic_v<extents_type>,
 			"Error in boost::numeric::ublas::tensor: static extents cannot be reshaped");
 		this->extents_ = e;
 		this->strides_ = strides_type(this->extents_);
@@ -708,73 +711,73 @@ public:
 
 
 	/// \brief return an iterator on the first element of the tensor
-	BOOST_UBLAS_INLINE
+	inline
 	const_iterator begin () const {
 		return data_.begin ();
 	}
 
 	/// \brief return an iterator on the first element of the tensor
-	BOOST_UBLAS_INLINE
+	inline
 	const_iterator cbegin () const {
 		return data_.cbegin ();
 	}
 
 	/// \brief return an iterator after the last element of the tensor
-	BOOST_UBLAS_INLINE
+	inline
 	const_iterator end () const {
 		return data_.end();
 	}
 
 	/// \brief return an iterator after the last element of the tensor
-	BOOST_UBLAS_INLINE
+	inline
 	const_iterator cend () const {
 		return data_.cend ();
 	}
 
 	/// \brief Return an iterator on the first element of the tensor
-	BOOST_UBLAS_INLINE
+	inline
 	iterator begin () {
 		return data_.begin();
 	}
 
 	/// \brief Return an iterator at the end of the tensor
-	BOOST_UBLAS_INLINE
+	inline
 	iterator end () {
 		return data_.end();
 	}
 
 	/// \brief Return a const reverse iterator before the first element of the reversed tensor (i.e. end() of normal tensor)
-	BOOST_UBLAS_INLINE
+	inline
 	const_reverse_iterator rbegin () const {
 		return data_.rbegin();
 	}
 
 	/// \brief Return a const reverse iterator before the first element of the reversed tensor (i.e. end() of normal tensor)
-	BOOST_UBLAS_INLINE
+	inline
 	const_reverse_iterator crbegin () const {
 		return data_.crbegin();
 	}
 
 	/// \brief Return a const reverse iterator on the end of the reverse tensor (i.e. first element of the normal tensor)
-	BOOST_UBLAS_INLINE
+	inline
 	const_reverse_iterator rend () const {
 		return data_.rend();
 	}
 
 	/// \brief Return a const reverse iterator on the end of the reverse tensor (i.e. first element of the normal tensor)
-	BOOST_UBLAS_INLINE
+	inline
 	const_reverse_iterator crend () const {
 		return data_.crend();
 	}
 
 	/// \brief Return a const reverse iterator before the first element of the reversed tensor (i.e. end() of normal tensor)
-	BOOST_UBLAS_INLINE
+	inline
 	reverse_iterator rbegin () {
 		return data_.rbegin();
 	}
 
 	/// \brief Return a const reverse iterator on the end of the reverse tensor (i.e. first element of the normal tensor)
-	BOOST_UBLAS_INLINE
+	inline
 	reverse_iterator rend () {
 		return data_.rend();
 	}

@@ -23,7 +23,6 @@
 #include <boost/numeric/ublas/tensor/algorithms.hpp>
 #include <boost/numeric/ublas/tensor/expression.hpp>
 #include <boost/numeric/ublas/tensor/expression_evaluation.hpp>
-#include <boost/numeric/ublas/tensor/storage_traits.hpp>
 #include <boost/numeric/ublas/tensor/extents.hpp>
 #include <boost/numeric/ublas/tensor/strides.hpp>
 
@@ -32,8 +31,8 @@ namespace boost::numeric::ublas
 
 	namespace detail{
 
-		template<size_t M, size_t I, typename T, size_t E0, size_t... E, size_t O0, size_t... OtherE, size_t... R>
-		BOOST_UBLAS_INLINE
+		template<size_t M, size_t I, typename T, T E0, T... E, T O0, T... OtherE, T... R>
+		inline
 		constexpr auto extents_result_type_tensor_times_vector(basic_static_extents<T,E0,E...>, 
 			basic_static_extents<T, O0, OtherE...> ones, basic_static_extents<T, R...> res = basic_static_extents<T>{})
 		{
@@ -46,16 +45,16 @@ namespace boost::numeric::ublas
 			}
 		}
 
-		template<size_t M, size_t I, typename T, size_t... E, size_t... R>
-		BOOST_UBLAS_INLINE
+		template<size_t M, size_t I, typename T, T... E, T... R>
+		inline
 		constexpr auto extents_result_type_tensor_times_vector(basic_static_extents<T>, 
 			basic_static_extents<T, E...> ones, basic_static_extents<T, R...>)
 		{
 			return basic_static_extents<T, R..., E...>{};
 		}
 
-		template<size_t I, typename T, size_t... OtherE>
-		BOOST_UBLAS_INLINE
+		template<size_t I, typename T, T... OtherE>
+		inline
 		constexpr auto extents_result_set_to_ones(
 			basic_static_extents<T,OtherE...> res = basic_static_extents<T>{})
 		{
@@ -66,8 +65,8 @@ namespace boost::numeric::ublas
 			}
 		}
 
-		template<size_t M, typename T, size_t E0, size_t... E>
-		BOOST_UBLAS_INLINE
+		template<size_t M, typename T, T E0, T... E>
+		inline
 		constexpr auto extents_result_type_tensor_times_vector(basic_static_extents<T,E0,E...> const& e)
 		{
 			using size_type = typename basic_static_extents<T>::size_type;
@@ -75,8 +74,8 @@ namespace boost::numeric::ublas
 			return extents_result_type_tensor_times_vector<M,0>(e, ones);
 		}
 
-		template<size_t I, size_t NE, typename T, size_t E0, size_t... E, size_t... OtherE>
-		BOOST_UBLAS_INLINE
+		template<size_t I, size_t NE, typename T, T E0, T... E, T... OtherE>
+		inline
 		constexpr auto static_extents_set_at
 			( basic_static_extents<T,E0,E...> const& e, basic_static_extents<T,OtherE...> res = basic_static_extents<T>{}){
 			static_assert( I < sizeof...(E) + 1, "boost::numeric::ublas::detail::static_extents_set_at(): out of bound");
@@ -95,10 +94,11 @@ namespace boost::numeric::ublas
 			}
 		}
 
-		template<typename T, size_t... E, size_t... OtherE>
-		BOOST_UBLAS_INLINE
-		constexpr auto concat_static_extents( basic_static_extents<T, E...> const&, basic_static_extents<T,OtherE...> const& ){
-			return basic_static_extents<T, E..., OtherE...>();
+		namespace impl{
+			template<typename T, T... E1, T... E2>
+			struct concat< basic_static_extents<T, E1...>, basic_static_extents<T, E2...> >{
+				using type = basic_static_extents<T, E1..., E2...>;
+			};
 		}
 
 	} // namespace detail
@@ -118,7 +118,7 @@ namespace boost::numeric::ublas
 	template <size_t M, class V, class E, class F, class A1, class A2, 
 		std::enable_if_t<detail::is_static<E>::value,int> = 0
 	>
-	BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, E, F, A1> const &a, vector<V, A2> const &b)
+	inline decltype(auto) prod(tensor<V, E, F, A1> const &a, vector<V, A2> const &b)
 	{
 
 		using tensor_type = tensor<V, E, F, A1>;
@@ -179,7 +179,7 @@ namespace boost::numeric::ublas
 	template <size_t M, size_t MatricRow, class V, class E, class F, class A1, class A2,
 		std::enable_if_t<detail::is_static<E>::value,int> = 0
 	>
-	BOOST_UBLAS_INLINE decltype(auto) prod(tensor<V, E, F, A1> const &a, matrix<V, F, A2> const &b)
+	inline decltype(auto) prod(tensor<V, E, F, A1> const &a, matrix<V, F, A2> const &b)
 	{
 		using tensor_type = tensor<V, E, F, A1>;
 		using dynamic_strides_type = strides_t<dynamic_extents<>,F>;
@@ -243,14 +243,15 @@ namespace boost::numeric::ublas
 			detail::is_static<E2>::value
 			,int> = 0
 	>
-	BOOST_UBLAS_INLINE decltype(auto) outer_prod(tensor<V, E1, F, A1> const &a, tensor<V, E2, F, A2> const &b)
+	inline decltype(auto) outer_prod(tensor<V, E1, F, A1> const &a, tensor<V, E2, F, A2> const &b)
 	{
 		if (a.empty() || b.empty())
 			throw std::runtime_error(
 				"error in boost::numeric::ublas::outer_prod: "
 				"tensors should not be empty.");
-
-		auto nc = detail::concat_static_extents(a.extents(), b.extents());
+		using extents_type1 = std::decay_t< decltype(a.extents()) >;
+		using extents_type2 = std::decay_t< decltype(b.extents()) >;
+		auto nc = detail::impl::concat_t<extents_type1, extents_type2>{};
 
 		auto a_extents = a.extents();
 		auto b_extents = b.extents();

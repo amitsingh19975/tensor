@@ -89,6 +89,11 @@ class matrix;
 template<class T, class A>
 class vector;
 
+namespace test{
+	template<class C>
+	class tensor;
+}
+
 }
 }
 }
@@ -114,13 +119,7 @@ std::ostream& operator << (std::ostream& out, boost::numeric::ublas::tensor<V,E,
 		out << ']';
 	}
 	else{
-		if constexpr(boost::numeric::ublas::detail::is_static_extents<E>::value){
-			auto s = t.strides().base();
-			auto e = t.extents().base();
-			boost::numeric::ublas::detail::print(out, t.rank()-1, t.data(), s.data(), e.data());
-		}else{
-			boost::numeric::ublas::detail::print(out, t.rank()-1, t.data(), t.strides().data(), t.extents().data());
-		}
+		boost::numeric::ublas::detail::print(out, t.rank()-1, t.data(), t.strides().data(), t.extents().data());
 	}
 	return out;
 }

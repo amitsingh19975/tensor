@@ -14,7 +14,6 @@
 
 #include <cstddef>
 #include <boost/numeric/ublas/expression_types.hpp>
-#include "fwd.hpp"
 
 
 namespace boost   {
@@ -50,7 +49,7 @@ struct tensor_expression
 	using type_category = tensor_tag;
 	using tensor_type = T;
 
-	BOOST_UBLAS_INLINE
+	inline
 	auto const& operator()() const { return *static_cast<const expression_type*> (this); }
 
 protected :
@@ -80,7 +79,7 @@ struct binary_tensor_expression
 	binary_tensor_expression(binary_tensor_expression&& l)
 	  : el(l.el), er(l.er), op(l.op) {}
 
-	BOOST_UBLAS_INLINE
+	inline
 	decltype(auto)  operator()(size_type i) const { return op(el(i), er(i)); }
 
 	expression_type_left const& el;
@@ -140,7 +139,7 @@ struct unary_tensor_expression
 	unary_tensor_expression(unary_tensor_expression&& l)
 	  : e(l.e), op(op.l) {}
 
-	BOOST_UBLAS_INLINE
+	inline
 	decltype(auto) operator()(size_type i) const { return op(e(i)); }
 
 	E const& e;

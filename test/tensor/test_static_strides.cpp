@@ -26,10 +26,6 @@ using strides_type = boost::numeric::ublas::strides_t<E, L>;
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_static_strides_ctor, value, test_types) {
   using namespace boost::numeric;
 
-  strides_type<extents_type<>, ublas::first_order> s0{};
-  BOOST_CHECK(s0.empty());
-  BOOST_CHECK_EQUAL(s0.size(), 0);
-
   strides_type<extents_type<1, 1>, ublas::first_order> s1{};
   BOOST_CHECK(!s1.empty());
   BOOST_CHECK_EQUAL(s1.size(), 2);

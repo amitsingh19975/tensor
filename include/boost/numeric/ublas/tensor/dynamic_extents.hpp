@@ -259,29 +259,29 @@ struct basic_fixed_rank_extents
 	static_assert(!std::numeric_limits<value_type>::is_signed,  "Static error in basic_fixed_rank_extents: type must be of type unsigned integer.");
 
 	//@returns the rank of basic_static_extents
-	[[nodiscard]] BOOST_UBLAS_INLINE 
+	[[nodiscard]] inline 
 	static constexpr size_type size() noexcept { return Rank; }
 	
 	//@returns the rank of basic_static_extents
-	[[nodiscard]] BOOST_UBLAS_INLINE 
+	[[nodiscard]] inline 
 	static constexpr size_type rank() noexcept { return Rank; }
 
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	constexpr const_reference at(size_type k) const{ 
 		return _base.at(k);
 	}
 
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	constexpr reference at(size_type k){ 
 		return _base.at(k);
 	}
 
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	constexpr const_reference operator[](size_type k) const noexcept{ 
 		return _base[k];
 	}
 
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	constexpr reference operator[](size_type k) noexcept{ 
 		return _base[k];
 	}
@@ -355,25 +355,25 @@ struct basic_fixed_rank_extents
 	operator=(basic_fixed_rank_extents const&) = default;
 
 	/** @brief Returns the std::vector containing extents */
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	auto to_vector() const {
 		return std::vector<value_type>( _base.begin(), _base.end() );
 	}
 
 	/** @brief Returns the std::vector containing extents */
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	constexpr auto const& base() const {
 		return _base;
 	}
 
 	/** @brief Returns the std::vector containing extents */
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	constexpr auto& base() {
 		return _base;
 	}
 
 	/** @brief Returns the basic_extents containing extents */
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	auto to_dynamic_extents() const {
 		return basic_extents<value_type>(this->to_vector());
 	}
@@ -383,27 +383,27 @@ struct basic_fixed_rank_extents
 	 * @returns true if rank is 0 else false
 	 *
 	 */
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	constexpr auto empty() const noexcept { return Rank == size_type{0}; }
 
 	friend void swap(basic_fixed_rank_extents& lhs, basic_fixed_rank_extents& rhs) {
 		std::swap(lhs._base   , rhs._base   );
 	}
 
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	const_pointer data() const
 	{
 		return this->_base.data();
 	}
 
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	const_iterator
 	begin() const
 	{
 		return _base.begin();
 	}
 
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	const_iterator
 	end() const
 	{
@@ -416,13 +416,13 @@ struct basic_fixed_rank_extents
 	}
 
 	/** @brief Returns true if both extents are equal else false */
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	constexpr auto operator==(basic_fixed_rank_extents const &other) const {
 		return _base == other._base;
 	}
 
 	/** @brief Returns false if both extents are equal else true */
-	[[nodiscard]] BOOST_UBLAS_INLINE
+	[[nodiscard]] inline
 	constexpr auto operator!=(basic_fixed_rank_extents const &other) const {
 		return !(*this == other);
 	}
@@ -435,7 +435,9 @@ private:
 
 
 namespace detail{
-	
+	template<size_t... R>
+	struct dynamic_extents_impl;
+
 	template <size_t R> struct dynamic_extents_impl<R> {
 		using type = basic_fixed_rank_extents<size_t, R>;
 	};

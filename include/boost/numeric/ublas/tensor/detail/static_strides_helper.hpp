@@ -12,9 +12,8 @@
 #ifndef _BOOST_NUMERIC_UBLAS_TENSOR_STATIC_STRIDE_HELPER_HPP_
 #define _BOOST_NUMERIC_UBLAS_TENSOR_STATIC_STRIDE_HELPER_HPP_
 
-#include <boost/numeric/ublas/detail/config.hpp>
 #include <boost/numeric/ublas/functional.hpp>
-
+#include <boost/numeric/ublas/tensor/detail/static_traits.hpp>
 #include <algorithm>
 #include <type_traits>
 #include <utility>
@@ -26,14 +25,7 @@ namespace boost::numeric::ublas{
   using first_order = column_major;
   using last_order = row_major;
   
-  template <class E, class L> struct static_strides;
-
-  namespace detail{
-    
-    template< size_t... > struct static_stride_helper;
-
-  } // namespace detail
-  
+  template <class E, class L> struct basic_static_strides;
 
 } // namespace boost::numeric::ublas
 
@@ -41,43 +33,21 @@ namespace boost::numeric::ublas{
 namespace boost::numeric::ublas::detail{
 
   // list for storing stides as types
-  template< typename T, size_t... P > 
+  template< typename T, T... P > 
   struct static_stride_list{
+      using extents_type = basic_static_extents<T, P...>;
       using type = std::array<T, sizeof...(P)>;
-      static constexpr type const value = {static_cast<T>(P)...};
+      static constexpr type const value = {P...};
   };
 
   namespace impl{
-    
-    // used to get E0 * E1 * ... En
-    template<size_t... E>
-    struct static_stride_product;
-
-    template<size_t E0, size_t... E>
-    struct static_stride_product<E0, E...>{
-      static constexpr auto const value = E0 * static_stride_product<E...>::value;
-    };
-
-    template<size_t E>
-    struct static_stride_product<E>{
-      static constexpr auto const value = E;
-    };
-
-    template<>
-    struct static_stride_product<>{
-      static constexpr auto const value = 1;
-    };
-
-    // check is all Es are ones
-    template<size_t... E>
-    struct is_all_ones;
-
+ 
     // concat two static_stride_list togather
     // @code using type = typename concat< static_stride_list<int, 1,2,3>, static_stride_list<int, 4,5,6> >::type @endcode
     template<typename L1, typename L2>
     struct concat;
 
-    template<typename T, size_t... N1, size_t... N2>
+    template<typename T, T... N1, T... N2>
     struct concat< static_stride_list<T, N1...>, static_stride_list<T, N2...> > {
       using type = static_stride_list<T, N1..., N2...>;
     };
@@ -87,93 +57,39 @@ namespace boost::numeric::ublas::detail{
 
     // generates static_stride_list containing ones with specific size
     template<typename T, size_t N> 
-    struct gen_all_one_list;
+    struct make_sequence_of_ones;
 
     template<typename T, size_t N> 
-    using gen_all_one_list_t = typename gen_all_one_list<T, N>::type;
+    using make_sequence_of_ones_t = typename make_sequence_of_ones<T, N>::type;
 
     template<typename T, size_t N>
-    struct gen_all_one_list {
-      using type = concat_t<gen_all_one_list_t<T, N/2>, gen_all_one_list_t<T, N - N/2>>;
+    struct make_sequence_of_ones {
+      using type = concat_t<make_sequence_of_ones_t<T, N/2>, make_sequence_of_ones_t<T, N - N/2>>;
     };
 
-    template<typename T> struct gen_all_one_list<T,0> {
+    template<typename T> 
+    struct make_sequence_of_ones<T, 0ul> {
       using type = static_stride_list<T>;
     };
-    template<typename T> struct gen_all_one_list<T,1>{ 
-      using type = static_stride_list<T,1>;
-    };
-
-    // check if Extents list is vector or not
-    template<size_t... E>
-    struct is_vector_static_stride_list;
-    
-    template<size_t E0, size_t E1, size_t E2, size_t... E>
-    struct is_vector_static_stride_list<E0, E1, E2, E...>{
-      static constexpr bool const value = (E0 > 1 || E1 > 1) && (E0 == 1 || E1 == 1) && is_all_ones<E2,E...>::value;
-    };
-    
-    template<size_t E0, size_t E1>
-    struct is_vector_static_stride_list<E0, E1>{
-      static constexpr bool const value = (E0 > 1 || E1 > 1) && (E0 == 1 || E1 == 1);
-    };
-
-    template<size_t E0>
-    struct is_vector_static_stride_list<E0>{
-      static constexpr bool const value = E0 > 1;
-    };
-
-    template<>
-    struct is_vector_static_stride_list<> : std::integral_constant<bool,false>{};
-    
-    
-    template<size_t E0, size_t... E>
-    struct is_all_ones<E0,E...>{
-      static constexpr bool const value = (E0 == 1) && is_all_ones<E...>::value;
-    };
-
-    template<size_t E>
-    struct is_all_ones<E> {
-      static constexpr bool const value = (E == 1);
-    };
-
-    template<>
-    struct is_all_ones<> : std::integral_constant<bool,false>{};
-    
-    // check if Extents is vector or scalar
-    template<size_t... E>
-    struct is_valid_static_stride_list{
-      static constexpr bool const value = is_all_ones<E...>::value || is_vector_static_stride_list<E...>::value;
+    template<typename T> 
+    struct make_sequence_of_ones<T, 1ul>{ 
+      using type = static_stride_list<T, T(1)>;
     };
 
   } // impl
 
 
-  
-  template<typename T, size_t N> 
-  using gen_all_one_list_t = impl::gen_all_one_list_t<T,N>;
-
-  template<size_t... E>
-  inline static constexpr bool is_all_ones_v = impl::is_all_ones<E...>::value;
-
-  template<size_t... E>
-  inline static constexpr size_t static_stride_product_v = impl::static_stride_product<E...>::value;
-  
-  template<size_t... E>
-  inline static constexpr bool is_vector_static_stride_list_v = impl::is_vector_static_stride_list<E...>::value;
-  
-  template<size_t... E>
-  inline static constexpr bool is_valid_static_stride_list_v = impl::is_valid_static_stride_list<E...>::value;
-
+  template<typename T, T N> 
+  using make_sequence_of_ones_t = impl::make_sequence_of_ones_t<T,N>;
 
   // @returns the static_stride_list containing strides for first order
   // It is a helper function or implementation
-  template<typename T, size_t E0, size_t... E, size_t... R, size_t... P>
-  constexpr auto get_strides_first_order_helper( static_stride_list<T, E0, E...>, 
+  template<typename T, T E0, T... E, T... R, T... P>
+  constexpr auto make_first_order_strides_helper( static_stride_list<T, E0, E...>, 
     static_stride_list<T,R...>, static_stride_list<T,P...>)
   {
     if constexpr( sizeof...(E) == 0 ){
-      return static_stride_list<T, 1ul, P...>{};
+      return static_stride_list<T, T(1), P...>{};
     }else{
       // add extent to the list which will be used for
       // take product for next iteration
@@ -181,38 +97,39 @@ namespace boost::numeric::ublas::detail{
 
       // result list containing the strides
       // on each iteration calculate the product
-      auto np = static_stride_list< T, P..., static_stride_product_v<R..., E0> >{};
-      return get_strides_first_order_helper( static_stride_list<T, E...>{}, n, np );
+      auto np = static_stride_list< T, P..., static_traits::product_v< basic_static_extents<T, R..., E0> > >{};
+      return make_first_order_strides_helper( static_stride_list<T, E...>{}, n, np );
     }
   }
 
 
   // @returns the static_stride_list containing strides for first order
-  template<typename T, size_t... E>
-  constexpr auto get_strides_first_order( static_stride_list<T, E...> )
+  template<typename T, T... E>
+  constexpr auto make_first_order_strides( static_stride_list<T, E...> )
   {
+    using extents_type = typename static_stride_list<T, E...>::extents_type;
     // checks if extents are vector or scalar
-    if constexpr( !is_valid_static_stride_list_v<E...> ){
+    if constexpr( !( static_traits::is_scalar_v<extents_type> || static_traits::is_vector_v<extents_type> )){
       // if extents are empty return empty list
       if constexpr ( sizeof...(E) == 0 ){
         return static_stride_list<T>{};
       }else{
-        return get_strides_first_order_helper(static_stride_list<T, E...>{}, static_stride_list<T>{}, static_stride_list<T>{});
+        return make_first_order_strides_helper(static_stride_list<T, E...>{}, static_stride_list<T>{}, static_stride_list<T>{});
       }
     }else{
       // @returns list contining ones if it is vector or scalar
-      return gen_all_one_list_t<T, sizeof...(E)>{};
+      return make_sequence_of_ones_t<T, sizeof...(E)>{};
     }
   }
 
     // @returns the static_stride_list containing strides for last order
   // It is a helper function or implementation
-  template<typename T, size_t E0, size_t... E, size_t... R, size_t... P>
-  constexpr auto get_strides_last_order_helper( static_stride_list<T, E0, E...>, 
+  template<typename T, T E0, T... E, T... R, T... P>
+  constexpr auto make_last_order_strides_helper( static_stride_list<T, E0, E...>, 
     static_stride_list<T, R...>, static_stride_list<T, P...>)
   {
     if constexpr( sizeof...(E) == 0 ){
-      return static_stride_list<T, P..., E0, 1ul>{};
+      return static_stride_list<T, P..., E0, T(1)>{};
     }else{
       // add extent to the list which will be used for
       // take product for next iteration
@@ -220,56 +137,57 @@ namespace boost::numeric::ublas::detail{
 
       // result list containing the strides
       // on each iteration calculate the product
-      auto np = static_stride_list< T, P..., static_stride_product_v<E..., E0> >{};
-      return get_strides_last_order_helper( static_stride_list<T, E...>{}, n, np );
+      auto np = static_stride_list< T, P..., static_traits::product_v< basic_static_extents<T, E..., E0> > >{};
+      return make_last_order_strides_helper( static_stride_list<T, E...>{}, n, np );
     }
   }
 
   // @returns the static_stride_list containing strides for last order
-  template<typename T, size_t E0, size_t... E>
-  constexpr auto get_strides_last_order( static_stride_list<T, E0, E...> )
+  template<typename T, T E0, T... E>
+  constexpr auto make_last_order_strides( static_stride_list<T, E0, E...> )
   {
+    using extents_type = typename static_stride_list<T, E0, E...>::extents_type;
     // checks if extents are vector or scalar
-    if constexpr( !is_valid_static_stride_list_v<E0,E...> ){
-      // if extent contains only one element return static_stride_list<T,1ul>
+    if constexpr( !( static_traits::is_scalar_v<extents_type> || static_traits::is_vector_v<extents_type> ) ){
+      // if extent contains only one element return static_stride_list<T,T(1)>
       if constexpr( sizeof...(E) == 0 ){
-        return static_stride_list<T,1ul>{};
+        return static_stride_list<T,T(1)>{};
       }else{
-        return get_strides_last_order_helper(static_stride_list<T, E...>{}, static_stride_list<T>{}, static_stride_list<T>{});
+        return make_last_order_strides_helper(static_stride_list<T, E...>{}, static_stride_list<T>{}, static_stride_list<T>{});
       }
     }else{
       // @returns list contining ones if it is vector or scalar
-      return gen_all_one_list_t<T, sizeof...(E) + 1>{};
+      return make_sequence_of_ones_t<T, sizeof...(E) + 1>{};
     }
   }
   
   // if extents are empty return empty list
   template<typename T>
-  constexpr auto get_strides_last_order( static_stride_list<T> )
+  constexpr auto make_last_order_strides( static_stride_list<T> )
   {
     return static_stride_list<T>{};
   }
 
-  template<typename Layout, typename T, size_t... E>
+  template<typename Layout, typename T, T... E>
   struct strides_helper;
 
   // It is use for first order to
   // get std::array containing strides
-  template<typename T, size_t... E>
+  template<typename T, T... E>
   struct strides_helper<first_order,T, E...>{
-    using type = decltype( get_strides_first_order(static_stride_list<T, E...>{}) );
+    using type = decltype( make_first_order_strides(static_stride_list<T, E...>{}) );
     static constexpr auto value = type::value;
   };
   
   // It is use for last order to
   // get std::array containing strides
-  template<typename T, size_t... E>
+  template<typename T, T... E>
   struct strides_helper<last_order, T, E...>{
-    using type = decltype( get_strides_last_order(static_stride_list<T, E...>{}) );
+    using type = decltype( make_last_order_strides(static_stride_list<T, E...>{}) );
     static constexpr auto value = type::value;
   };
 
-  template<typename Layout, typename T, size_t... E>
+  template<typename Layout, typename T, T... E>
   inline static constexpr auto strides_helper_v = strides_helper<Layout, T, E...>::value;
 
 } // namespace boost::numeric::ublas::detail

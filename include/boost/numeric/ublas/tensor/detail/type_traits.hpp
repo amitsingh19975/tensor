@@ -61,17 +61,23 @@ inline static constexpr bool const is_static_rank_v = is_static_rank<E>::value;
 
 /** @brief Checks if type has member function resize with
  * prototype resize(size_type) and return type can be 
- * anything.
+ * anything and type should have empty constructor.
  * @code 
  * 
  * struct test1{
- *  ...
+ *  test1(){...}
  *  void resize(size_t){...}
  *  ...
  * };
  * 
  * struct test2{
+ *  test2(){...}
  *  ...
+ * };
+ * 
+ * struct test3{
+ *  test2(int){...}
+ *  void resize(size_t){...}
  * };
  * 
  * auto v = std::vector<int>{}; 
@@ -82,6 +88,8 @@ inline static constexpr bool const is_static_rank_v = is_static_rank<E>::value;
  * 
  * auto test1_val = is_resizable_v<test1>; // arr_val == true;
  * auto test2_val = is_resizable_v<test2>; // arr_val == false;
+ * auto test3_val = is_resizable_v<test3>; // arr_val == false bacause test3 does not have empty constuctor.
+ * 
  * @endcode
 */
 template<typename T, typename = void>

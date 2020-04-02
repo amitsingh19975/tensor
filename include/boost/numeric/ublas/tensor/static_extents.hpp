@@ -45,38 +45,28 @@ struct basic_static_extents{
 
   //@returns the rank of basic_static_extents
   [[nodiscard]] inline 
-  static constexpr size_type size() noexcept { return Rank; }
+  constexpr size_type size() const noexcept { return Rank; }
   
   //@returns the rank of basic_static_extents
   [[nodiscard]] inline 
-  constexpr size_type rank() noexcept { return Rank; }
+  constexpr size_type rank() const noexcept { return Rank; }
 
   /**
    * @param k pos of extent
    * @returns the element at given pos
    */
   [[nodiscard]] inline
-  static constexpr value_type const& at(size_type k){
+  static constexpr const_reference at(size_type k){
     return m_data.at(k); 
   }
 
   [[nodiscard]] inline
-  constexpr value_type const& operator[](size_type k) const noexcept{ 
+  constexpr const_reference operator[](size_type k) const noexcept{ 
     return m_data[k]; 
   }
 
   // default constructor
   constexpr basic_static_extents() = default;
- 
-  // default copy constructor
-  constexpr basic_static_extents(basic_static_extents const&) = default;
-  constexpr basic_static_extents& 
-  operator=(basic_static_extents const&) = default;
- 
-  // default assign constructor
-  constexpr basic_static_extents(basic_static_extents&&) = default;
-  constexpr basic_static_extents& 
-  operator=(basic_static_extents&&) = default;
 
   /** @brief Returns the std::vector containing extents */
   [[nodiscard]] inline
@@ -88,7 +78,7 @@ struct basic_static_extents{
 
   /** @brief Returns ref to the std::array containing extents */
   [[nodiscard]] inline
-  constexpr auto const& base() const noexcept{
+  constexpr base_type const& base() const noexcept{
     return m_data;
   }
 
@@ -110,7 +100,7 @@ struct basic_static_extents{
    *
    */
   [[nodiscard]] inline
-  constexpr auto empty() const noexcept { return m_data.empty(); }
+  constexpr bool empty() const noexcept { return m_data.empty(); }
 
   constexpr value_type back() const noexcept{
     return m_data.back();
@@ -119,23 +109,18 @@ struct basic_static_extents{
   /** @brief Returns true if both extents are equal else false */
   template <ExtentsType... RE>
   [[nodiscard]] inline
-  constexpr auto operator==(basic_static_extents<ExtentsType, RE...> const &rhs) const {
+  constexpr bool operator==(basic_static_extents<ExtentsType, RE...> const &rhs) const {
     if constexpr( Rank != basic_static_extents<ExtentsType, RE...>::Rank ){
       return false;
     }else{
-      for(auto i = size_type(0); i < Rank; ++i){
-        if( m_data[i] != rhs[i] ){
-          return false;
-        }
-      }
-      return true;
+      return std::equal(begin(), end(), rhs.begin());
     }
   }
 
   /** @brief Returns false if both extents are equal else true */
   template <ExtentsType... RE>
   [[nodiscard]] inline
-  constexpr auto operator!=(basic_static_extents<ExtentsType, RE...> const &rhs) const {
+  constexpr bool operator!=(basic_static_extents<ExtentsType, RE...> const &rhs) const {
     return !(*this == rhs);
   }
 

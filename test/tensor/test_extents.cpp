@@ -22,35 +22,35 @@ BOOST_AUTO_TEST_CASE(test_extents_ctor)
 
 	auto e0 = extents{};
 	BOOST_CHECK( e0.empty());
-	BOOST_CHECK_EQUAL ( e0.size(),0);
+	BOOST_CHECK ( e0.size() == 0 );
 
 	auto e1 = extents{1,1};
 	BOOST_CHECK(!e1.empty());
-	BOOST_CHECK_EQUAL ( e1.size(),2);
+	BOOST_CHECK ( e1.size() == 2 );
 
 	auto e2 = extents{1,2};
 	BOOST_CHECK(!e2.empty());
-	BOOST_CHECK_EQUAL ( e2.size(),2);
+	BOOST_CHECK ( e2.size() == 2 );
 
 	auto e3 = extents{2,1};
 	BOOST_CHECK (!e3.empty());
-	BOOST_CHECK_EQUAL  ( e3.size(),2);
+	BOOST_CHECK  ( e3.size() == 2 );
 
 	auto e4 = extents{2,3};
 	BOOST_CHECK(!e4.empty());
-	BOOST_CHECK_EQUAL ( e4.size(),2);
+	BOOST_CHECK ( e4.size() == 2 );
 
 	auto e5 = extents{2,3,1};
 	BOOST_CHECK (!e5.empty());
-	BOOST_CHECK_EQUAL  ( e5.size(),3);
+	BOOST_CHECK  ( e5.size() == 3 );
 
 	auto e6 = extents{1,2,3}; // 6
 	BOOST_CHECK(!e6.empty());
-	BOOST_CHECK_EQUAL ( e6.size(),3);
+	BOOST_CHECK ( e6.size() == 3 );
 
 	auto e7 = extents{4,2,3};  // 7
 	BOOST_CHECK(!e7.empty());
-	BOOST_CHECK_EQUAL ( e7.size(),3);
+	BOOST_CHECK ( e7.size() == 3 );
 
 	BOOST_CHECK_THROW( extents({1,0}), std::length_error);
 	BOOST_CHECK_THROW( extents({0}  ), std::length_error);
@@ -65,35 +65,35 @@ BOOST_AUTO_TEST_CASE(test_static_rank_extents_ctor)
 
 	auto e0 = ub::dynamic_extents<0>{};
 	BOOST_CHECK( e0.empty());
-	BOOST_CHECK_EQUAL ( e0.size(),0);
+	BOOST_CHECK ( e0.size() == 0);
 
 	auto e1 = ub::dynamic_extents<2>{1,1};
 	BOOST_CHECK(!e1.empty());
-	BOOST_CHECK_EQUAL ( e1.size(),2);
+	BOOST_CHECK ( e1.size() == 2);
 
 	auto e2 = ub::dynamic_extents<2>{1,2};
 	BOOST_CHECK(!e2.empty());
-	BOOST_CHECK_EQUAL ( e2.size(),2);
+	BOOST_CHECK ( e2.size() == 2);
 
 	auto e3 = ub::dynamic_extents<2>{2,1};
 	BOOST_CHECK (!e3.empty());
-	BOOST_CHECK_EQUAL  ( e3.size(),2);
+	BOOST_CHECK ( e3.size() == 2);
 
 	auto e4 = ub::dynamic_extents<2>{2,3};
 	BOOST_CHECK(!e4.empty());
-	BOOST_CHECK_EQUAL ( e4.size(),2);
+	BOOST_CHECK ( e4.size() == 2);
 
 	auto e5 = ub::dynamic_extents<3>{2,3,1};
 	BOOST_CHECK (!e5.empty());
-	BOOST_CHECK_EQUAL  ( e5.size(),3);
+	BOOST_CHECK  ( e5.size() == 3);
 
 	auto e6 = ub::dynamic_extents<3>{1,2,3}; // 6
 	BOOST_CHECK(!e6.empty());
-	BOOST_CHECK_EQUAL ( e6.size(),3);
+	BOOST_CHECK ( e6.size() == 3);
 
 	auto e7 = ub::dynamic_extents<3>{4,2,3};  // 7
 	BOOST_CHECK(!e7.empty());
-	BOOST_CHECK_EQUAL ( e7.size(),3);
+	BOOST_CHECK ( e7.size() == 3);
 
 	BOOST_CHECK_THROW( ub::dynamic_extents<2>({1,0}), 	std::length_error);
 	BOOST_CHECK_THROW( ub::dynamic_extents<1>({0}  ), 	std::length_error);
@@ -270,7 +270,7 @@ BOOST_FIXTURE_TEST_CASE(test_extents_access, fixture, *boost::unit_test::label("
 	BOOST_CHECK_EQUAL(extents[17][5],1);
 }
 
-BOOST_FIXTURE_TEST_CASE(test_static_rank_extents_access, fixture, *boost::unit_test::label("extents") *boost::unit_test::label("access"))
+BOOST_FIXTURE_TEST_CASE(test_static_rank_extents_access, fixture, *boost::unit_test::label("basic_fixed_rank_extents") *boost::unit_test::label("access"))
 {
 	using namespace boost::numeric;
 
@@ -508,7 +508,7 @@ BOOST_FIXTURE_TEST_CASE(test_extents_copy_ctor, fixture, *boost::unit_test::labe
 
 }
 
-BOOST_FIXTURE_TEST_CASE(test_static_rank_extents_copy_ctor, fixture, *boost::unit_test::label("extents") *boost::unit_test::label("copy_ctor"))
+BOOST_FIXTURE_TEST_CASE(test_static_rank_extents_copy_ctor, fixture, *boost::unit_test::label("basic_fixed_rank_extents") *boost::unit_test::label("copy_ctor"))
 {
 
 	auto e0  = de0; // {}
@@ -768,7 +768,7 @@ BOOST_FIXTURE_TEST_CASE(test_extents_is, fixture, *boost::unit_test::label("exte
 	BOOST_CHECK(   is_tensor(e17) );
 }
 
-BOOST_FIXTURE_TEST_CASE(test_static_rank_extents_is, fixture, *boost::unit_test::label("extents") *boost::unit_test::label("query"))
+BOOST_FIXTURE_TEST_CASE(test_static_rank_extents_is, fixture, *boost::unit_test::label("basic_fixed_rank_extents") *boost::unit_test::label("query"))
 {
 
 	auto e0  = de0; // {}
@@ -950,7 +950,7 @@ BOOST_FIXTURE_TEST_CASE(test_extents_squeeze, fixture, *boost::unit_test::label(
 
 }
 
-BOOST_FIXTURE_TEST_CASE(test_static_rank_extents_squeeze, fixture, *boost::unit_test::label("extents") *boost::unit_test::label("squeeze"))
+BOOST_FIXTURE_TEST_CASE(test_static_rank_extents_squeeze, fixture, *boost::unit_test::label("basic_fixed_rank_extents") *boost::unit_test::label("squeeze"))
 {
 	BOOST_REQUIRE_EQUAL(extents.size(),18);
 
@@ -1020,24 +1020,24 @@ BOOST_FIXTURE_TEST_CASE(test_extents_valid, fixture, *boost::unit_test::label("e
 	BOOST_CHECK_THROW( ublas::basic_extents<unsigned>({0,1}), std::length_error );
 	BOOST_CHECK_THROW( ublas::basic_extents<unsigned>({1,0,1}), std::length_error );
 
-	BOOST_CHECK_EQUAL(valid(de0),false);
-	BOOST_CHECK_EQUAL(valid(de1),true);
-	BOOST_CHECK_EQUAL(valid(de2),true);
-	BOOST_CHECK_EQUAL(valid(de3),true);
-	BOOST_CHECK_EQUAL(valid(de4),true);
-	BOOST_CHECK_EQUAL(valid(de5),true);
-	BOOST_CHECK_EQUAL(valid(de6),true);
-	BOOST_CHECK_EQUAL(valid(de7),true);
-	BOOST_CHECK_EQUAL(valid(de8),true);
-	BOOST_CHECK_EQUAL(valid(de9),true);
-	BOOST_CHECK_EQUAL(valid(de10),true);
-	BOOST_CHECK_EQUAL(valid(de11),true);
-	BOOST_CHECK_EQUAL(valid(de12),true);
-	BOOST_CHECK_EQUAL(valid(de13),true);
-	BOOST_CHECK_EQUAL(valid(de14),true);
-	BOOST_CHECK_EQUAL(valid(de15),true);
-	BOOST_CHECK_EQUAL(valid(de16),true);
-	BOOST_CHECK_EQUAL(valid(de17),true);
+	BOOST_CHECK(!valid(de0));
+	BOOST_CHECK(valid(de1));
+	BOOST_CHECK(valid(de2));
+	BOOST_CHECK(valid(de3));
+	BOOST_CHECK(valid(de4));
+	BOOST_CHECK(valid(de5));
+	BOOST_CHECK(valid(de6));
+	BOOST_CHECK(valid(de7));
+	BOOST_CHECK(valid(de8));
+	BOOST_CHECK(valid(de9));
+	BOOST_CHECK(valid(de10));
+	BOOST_CHECK(valid(de11));
+	BOOST_CHECK(valid(de12));
+	BOOST_CHECK(valid(de13));
+	BOOST_CHECK(valid(de14));
+	BOOST_CHECK(valid(de15));
+	BOOST_CHECK(valid(de16));
+	BOOST_CHECK(valid(de17));
 
 }
 
@@ -1204,7 +1204,7 @@ BOOST_FIXTURE_TEST_CASE(test_extents_product, fixture, *boost::unit_test::label(
 }
 
 
-BOOST_FIXTURE_TEST_CASE(test_static_rank_extents_product, fixture, *boost::unit_test::label("extents") *boost::unit_test::label("product"))
+BOOST_FIXTURE_TEST_CASE(test_static_rank_extents_product, fixture, *boost::unit_test::label("basic_fixed_rank_extents") *boost::unit_test::label("product"))
 {
 
 	auto e0  = product( de0 ); // {}

@@ -63,7 +63,7 @@ namespace boost::numeric::ublas::detail{
     
     using extents_type = basic_static_extents<T,E...>;
 
-    if constexpr( extents_type::size() <= typename extents_type::size_type(2) ){
+    if constexpr( extents_type::Rank <= typename extents_type::size_type(2) ){
       return e;
     }
 

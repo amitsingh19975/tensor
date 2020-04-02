@@ -20,6 +20,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <vector>
+#include <array>
 
 #include <cassert>
 
@@ -52,7 +53,7 @@ public:
 	 *
 	 * @code auto ex = basic_extents<unsigned>{};
 	 */
-	constexpr explicit basic_extents()
+	basic_extents()
 	  : _base{}
 	{
 	}
@@ -259,11 +260,11 @@ struct basic_fixed_rank_extents
 	static_assert(!std::numeric_limits<value_type>::is_signed,  "Static error in basic_fixed_rank_extents: type must be of type unsigned integer.");
 
 	//@returns the rank of basic_static_extents
-	[[nodiscard]] inline 
+	[[nodiscard]] 
 	static constexpr size_type size() noexcept { return Rank; }
 	
 	//@returns the rank of basic_static_extents
-	[[nodiscard]] inline 
+	[[nodiscard]] 
 	static constexpr size_type rank() noexcept { return Rank; }
 
 	[[nodiscard]] inline
@@ -313,7 +314,7 @@ struct basic_fixed_rank_extents
 		}
 	}
 	
-	constexpr void fill( value_type value ){
+	void fill( value_type value ){
 		_base.fill(value);
 	}
 	
@@ -344,15 +345,6 @@ struct basic_fixed_rank_extents
 			throw std::length_error("Error in basic_fixed_rank_extents::basic_fixed_rank_extents() : shape tuple is not a valid permutation: has zero elements.");
 		}
 	}
-	
-	// default assign constructor
-	constexpr basic_fixed_rank_extents(basic_fixed_rank_extents&&) = default;
-	constexpr basic_fixed_rank_extents& 
-	operator=(basic_fixed_rank_extents&&) = default;
-	
-	constexpr basic_fixed_rank_extents(basic_fixed_rank_extents const&) = default;
-	constexpr basic_fixed_rank_extents& 
-	operator=(basic_fixed_rank_extents const&) = default;
 
 	/** @brief Returns the std::vector containing extents */
 	[[nodiscard]] inline
@@ -362,13 +354,13 @@ struct basic_fixed_rank_extents
 
 	/** @brief Returns the std::vector containing extents */
 	[[nodiscard]] inline
-	constexpr auto const& base() const {
+	constexpr base_type const& base() const {
 		return _base;
 	}
 
 	/** @brief Returns the std::vector containing extents */
 	[[nodiscard]] inline
-	constexpr auto& base() {
+	constexpr base_type& base() {
 		return _base;
 	}
 
@@ -384,7 +376,7 @@ struct basic_fixed_rank_extents
 	 *
 	 */
 	[[nodiscard]] inline
-	constexpr auto empty() const noexcept { return Rank == size_type{0}; }
+	constexpr bool empty() const noexcept { return Rank == size_type{0}; }
 
 	friend void swap(basic_fixed_rank_extents& lhs, basic_fixed_rank_extents& rhs) {
 		std::swap(lhs._base   , rhs._base   );
@@ -393,7 +385,7 @@ struct basic_fixed_rank_extents
 	[[nodiscard]] inline
 	const_pointer data() const
 	{
-		return this->_base.data();
+		return _base.data();
 	}
 
 	[[nodiscard]] inline
@@ -417,13 +409,13 @@ struct basic_fixed_rank_extents
 
 	/** @brief Returns true if both extents are equal else false */
 	[[nodiscard]] inline
-	constexpr auto operator==(basic_fixed_rank_extents const &other) const {
+	constexpr bool operator==(basic_fixed_rank_extents const &other) const {
 		return _base == other._base;
 	}
 
 	/** @brief Returns false if both extents are equal else true */
 	[[nodiscard]] inline
-	constexpr auto operator!=(basic_fixed_rank_extents const &other) const {
+	constexpr bool operator!=(basic_fixed_rank_extents const &other) const {
 		return !(*this == other);
 	}
 

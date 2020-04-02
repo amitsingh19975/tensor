@@ -414,19 +414,9 @@ public:
 		if constexpr(detail::is_dynamic<extents_type>::value){
 			data_.resize(product(extents_));
 		}
-
-		if constexpr (detail::is_static<extents_type>::value){
-			auto e = this->extents().base(); 
-			auto s = this->strides().base(); 
-			auto o_s = other.strides().base(); 
-			copy(this->rank(), e.data(),
-				 this->data(), s.data(),
-				 other.data(), o_s.data());
-		}else{
-			copy(this->rank(), this->extents().data(),
-				 this->data(), this->strides().data(),
-				 other.data(), other.strides().data());
-		}
+		copy(this->rank(), this->extents().data(),
+				this->data(), this->strides().data(),
+				other.data(), other.strides().data());
 		
 	}
 

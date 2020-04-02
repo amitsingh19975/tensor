@@ -12,14 +12,7 @@
 #ifndef BOOST_UBLAS_TENSOR_STORAGE_HPP
 #define BOOST_UBLAS_TENSOR_STORAGE_HPP
 
-#include <algorithm>
 #include <array>
-#include <functional>
-#include <initializer_list>
-#include <iostream>
-#include <numeric>
-#include <type_traits>
-#include <unordered_map>
 #include <vector>
 #include <boost/numeric/ublas/tensor/detail/type_traits.hpp>
 #include <boost/numeric/ublas/tensor/detail/extents_functions.hpp>

@@ -89,11 +89,6 @@ class matrix;
 template<class T, class A>
 class vector;
 
-namespace test{
-	template<class C>
-	class tensor;
-}
-
 }
 }
 }

@@ -59,6 +59,40 @@ struct is_static_rank : std::false_type {};
 template <class E> 
 inline static constexpr bool const is_static_rank_v = is_static_rank<E>::value;
 
+/** @brief Checks if type has member function resize with
+ * prototype resize(size_type) and return type can be 
+ * anything.
+ * @code 
+ * 
+ * struct test1{
+ *  ...
+ *  void resize(size_t){...}
+ *  ...
+ * };
+ * 
+ * struct test2{
+ *  ...
+ * };
+ * 
+ * auto v = std::vector<int>{}; 
+ * auto vec_val = is_resizable_v<decltype(v)>; // vec_val == true;
+ * 
+ * auto a = std::array<int,10>{}; 
+ * auto arr_val = is_resizable_v<decltype(a)>; // arr_val == false;
+ * 
+ * auto test1_val = is_resizable_v<test1>; // arr_val == true;
+ * auto test2_val = is_resizable_v<test2>; // arr_val == false;
+ * @endcode
+*/
+template<typename T, typename = void>
+struct is_resizable : std::false_type{};
+
+template<typename T>
+struct is_resizable< T, std::void_t< decltype(T{}.resize(0)) > >: std::true_type{};
+
+template<typename T>
+inline static constexpr bool const is_resizable_v = is_resizable<T>::value;
+
 } // namespace boost::numeric::ublas::detail
 
 #include <boost/numeric/ublas/tensor/detail/type_traits_extents.hpp>

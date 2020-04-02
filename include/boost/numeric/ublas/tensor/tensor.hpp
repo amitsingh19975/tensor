@@ -271,15 +271,19 @@ public:
 		auto const sz = v.size1() * v.size2();
 		if(sz){
 			if constexpr (detail::is_static<extents_type>::value){
-				static_assert(extents_.size() == 2 && ( extents_[0] == v.size1() || extents_[1] == v.size2() )
+				static_assert(extents_.size() == 2
 					, "Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : invalid extents size");
+				if( !( extents_[0] == v.size1() || extents_[1] == v.size2() ) ){
+					throw std::runtime_error("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : rank of extents not correct, please check!");
+				}
 			}else {
 				if constexpr( detail::is_static_rank<extents_type>::value ){
 					static_assert(extents_type::size() == 2, "Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : rank of extents not correct, please check!");
 				}
-				data_.resize(sz);
+				resize(sz);
 				extents_ = extents_type{v.size1(),v.size2()};
 				strides_ = strides_type(extents_);
 			}
@@ -304,16 +308,20 @@ public:
 		auto const sz = v.size1() * v.size2();
 		if(sz){
 			if constexpr (detail::is_static<extents_type>::value){
-				static_assert(extents_.size() == 2 && ( extents_[0] == v.size1() || extents_[1] == v.size2() )
+				static_assert(extents_.size() == 2
 					, "Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : invalid extents size");
+				if( !( extents_[0] == v.size1() || extents_[1] == v.size2() ) ){
+					throw std::runtime_error("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : rank of extents not correct, please check!");
+				}
 			}else {
 				if constexpr( detail::is_static_rank<extents_type>::value ){
 					static_assert(extents_type::size() == 2, "Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : rank of extents not correct, please check!");
 				}
 				
-				data_.resize(sz);
+				resize(sz);
 				extents_ = extents_type{v.size1(),v.size2()};
 				strides_ = strides_type(extents_);
 			}
@@ -339,16 +347,20 @@ public:
 		auto const sz = v.size();
 		if(sz){
 			if constexpr (detail::is_static<extents_type>::value){
-				static_assert(extents_.size() == 2 && ( extents_[0] == v.size() || extents_[1] == 1 )
-					, "Error in boost::numeric::ublas::tensor(const vector &v)"
-											" : extents not correct, please check!");
+				static_assert(extents_.size() == 2
+					, "Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : invalid extents size");
+				if( !( extents_[0] == v.size1() || extents_[1] == v.size2() ) ){
+					throw std::runtime_error("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : rank of extents not correct, please check!");
+				}
 			}else{
 				if constexpr( detail::is_static_rank<extents_type>::value ){
 					static_assert(extents_type::size() == 2, "Error in boost::numeric::ublas::tensor(const vector &v)"
 											" : rank of extents not correct, please check!");
 				}
 				
-				data_.resize(sz);
+				resize(sz);
 				extents_ = extents_type{v.size(),1};
 				strides_ = strides_type(extents_);
 			}
@@ -371,16 +383,20 @@ public:
 		auto const sz = v.size();
 		if(sz){
 			if constexpr (detail::is_static<extents_type>::value){
-				static_assert(extents_.size() == 2 && ( extents_[0] == v.size() || extents_[1] == 1 )
-					, "Error in boost::numeric::ublas::tensor(const vector &v)"
-											" : extents not correct, please check!");
+				static_assert(extents_.size() == 2
+					, "Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : invalid extents size");
+				if( !( extents_[0] == v.size1() || extents_[1] == v.size2() ) ){
+					throw std::runtime_error("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
+											" : rank of extents not correct, please check!");
+				}
 			}else{
 				if constexpr( detail::is_static_rank<extents_type>::value ){
 					static_assert(extents_type::size() == 2, "Error in boost::numeric::ublas::tensor(const vector &v)"
 											" : rank of extents not correct, please check!");
 				}
 				
-				data_.resize(sz);
+				resize(sz);
 				extents_ = extents_type{v.size(),1};
 				strides_ = strides_type(extents_);
 			}
@@ -761,8 +777,15 @@ private:
 
 	inline
 	void resize( extents_type const& e ){
-		if constexpr( detail::is_dynamic_v<extents_type> ){
+		if constexpr( detail::is_resizable_v<array_type>){
 			data_.resize(product(e));
+		}
+	}
+
+	inline
+	void resize( size_type sz ){
+		if constexpr( detail::is_resizable_v<array_type>){
+			data_.resize(sz);
 		}
 	}
 

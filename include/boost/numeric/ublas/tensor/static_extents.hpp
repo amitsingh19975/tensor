@@ -156,8 +156,8 @@ private:
   static constexpr base_type const m_data{E...};
 };
 
-template<size_t... E>
-using static_extents = basic_static_extents<size_t,E...>;
+template<std::size_t... E>
+using static_extents = basic_static_extents<std::size_t,E...>;
 
 } // namespace boost::numeric::ublas
 

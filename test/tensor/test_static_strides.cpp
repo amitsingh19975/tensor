@@ -27,31 +27,31 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_static_strides_ctor, value, test_types) {
   using namespace boost::numeric;
 
   strides_type<extents_type<1, 1>, ublas::first_order> s1{};
-  BOOST_CHECK(!s1.empty());
+  BOOST_CHECK_EQUAL(s1.empty(), false);
   BOOST_CHECK_EQUAL(s1.size(), 2);
 
   strides_type<extents_type<1, 2>, ublas::first_order> s2{};
-  BOOST_CHECK(!s2.empty());
+  BOOST_CHECK_EQUAL(s2.empty(), false);
   BOOST_CHECK_EQUAL(s2.size(), 2);
 
   strides_type<extents_type<2, 1>, ublas::first_order> s3{};
-  BOOST_CHECK(!s3.empty());
+  BOOST_CHECK_EQUAL(s3.empty(), false);
   BOOST_CHECK_EQUAL(s3.size(), 2);
 
   strides_type<extents_type<2, 3>, ublas::first_order> s4{};
-  BOOST_CHECK(!s4.empty());
+  BOOST_CHECK_EQUAL(s4.empty(), false);
   BOOST_CHECK_EQUAL(s4.size(), 2);
 
   strides_type<extents_type<2, 3, 1>, ublas::first_order> s5{};
-  BOOST_CHECK(!s5.empty());
+  BOOST_CHECK_EQUAL(s5.empty(), false);
   BOOST_CHECK_EQUAL(s5.size(), 3);
 
   strides_type<extents_type<1, 2, 3>, ublas::first_order> s6{};
-  BOOST_CHECK(!s6.empty());
+  BOOST_CHECK_EQUAL(s6.empty(), false);
   BOOST_CHECK_EQUAL(s6.size(), 3);
 
   strides_type<extents_type<4, 2, 3>, ublas::first_order> s7{};
-  BOOST_CHECK(!s7.empty());
+  BOOST_CHECK_EQUAL(s7.empty(), false);
   BOOST_CHECK_EQUAL(s7.size(), 3);
 }
 

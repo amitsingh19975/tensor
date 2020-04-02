@@ -15,11 +15,11 @@
 namespace boost::numeric::ublas{
   
   template <class ExtentsType, ExtentsType... E> struct basic_static_extents;
-  template <class ExtentsType, size_t Rank> struct basic_fixed_rank_extents;
+  template <class ExtentsType, std::size_t Rank> struct basic_fixed_rank_extents;
   template<class ExtentsType> class basic_extents;
 
   template <class E, class L> struct basic_static_strides;
-  template<class T, size_t R, class L> class basic_fixed_rank_strides;
+  template<class T, std::size_t R, class L> class basic_fixed_rank_strides;
   template<class T, class L> class basic_strides;
 
 } // namespace boost::numeric::ublas::
@@ -34,7 +34,7 @@ struct is_strides : std::false_type {};
 template <class L, class T, T... E>
 struct is_strides< basic_static_strides< basic_static_extents<T, E...>, L > > : std::true_type {};
 
-template <class L, class T, size_t R>
+template <class L, class T, std::size_t R>
 struct is_strides< basic_fixed_rank_strides< T, R, L> > : std::true_type {};
 
 template <class L, class T> 
@@ -43,7 +43,7 @@ struct is_strides<basic_strides<T,L>> : std::true_type {};
 template <class T, class L>
 struct is_dynamic< basic_strides<T,L> > : std::true_type {};
 
-template <class T, size_t R, class L>
+template <class T, std::size_t R, class L>
 struct is_dynamic< basic_fixed_rank_strides<T,R,L> > : std::true_type {};
 
 template <class T, T... E, class L>
@@ -55,7 +55,7 @@ struct is_dynamic_rank< basic_strides<T, L> > : std::true_type {};
 template <class T, T... E, class L>
 struct is_static_rank< basic_static_strides< basic_static_extents<T, E...>, L > > : std::true_type {};
 
-template <class T, size_t R, class L>
+template <class T, std::size_t R, class L>
 struct is_static_rank< basic_fixed_rank_strides<T,R,L> > : std::true_type {};
 
 } // namespace boost::numeric::ublas::detail

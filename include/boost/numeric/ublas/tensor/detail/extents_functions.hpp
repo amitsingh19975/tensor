@@ -140,7 +140,7 @@ namespace boost::numeric::ublas::detail{
     return extents_type(n_extents); 
   }
 
-  template <class T, size_t N>
+  template <class T, std::size_t N>
   inline
   constexpr auto squeeze_impl( basic_fixed_rank_extents<T,N> const& e ){
     if constexpr( N <= 2 ){

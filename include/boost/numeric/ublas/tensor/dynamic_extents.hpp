@@ -239,12 +239,12 @@ private:
  * @tparam E parameter pack of extents
  *
  */
-template <class ExtentsType, size_t R>
+template <class ExtentsType, std::size_t R>
 struct basic_fixed_rank_extents
 {
   
 
-	static constexpr size_t const Rank = R;
+	static constexpr std::size_t const Rank = R;
 
 
   	using base_type       = std::array<ExtentsType,Rank>;
@@ -435,21 +435,21 @@ private:
 
 
 namespace detail{
-	template<size_t... R>
+	template<std::size_t... R>
 	struct dynamic_extents_impl;
 
-	template <size_t R> struct dynamic_extents_impl<R> {
-		using type = basic_fixed_rank_extents<size_t, R>;
+	template <std::size_t R> struct dynamic_extents_impl<R> {
+		using type = basic_fixed_rank_extents<std::size_t, R>;
 	};
 
 	template <> struct dynamic_extents_impl<> {
-		using type = basic_extents<size_t>;
+		using type = basic_extents<std::size_t>;
 	};
 
 } // namespace detail
 
 
-template<size_t... E>
+template<std::size_t... E>
 using dynamic_extents = typename detail::dynamic_extents_impl<E...>::type;
 
 } // namespace ublas

@@ -17,7 +17,7 @@
 namespace boost::numeric::ublas{
   
   template <class ExtentsType, ExtentsType... E> struct basic_static_extents;
-  template <class ExtentsType, size_t Rank> struct basic_fixed_rank_extents;
+  template <class ExtentsType, std::size_t Rank> struct basic_fixed_rank_extents;
   template<class ExtentsType> class basic_extents;
 
 } // namespace boost::numeric::ublas

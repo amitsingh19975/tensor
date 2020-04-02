@@ -56,13 +56,13 @@ namespace boost::numeric::ublas::detail{
     using concat_t = typename concat<L1,L2>::type;
 
     // generates static_stride_list containing ones with specific size
-    template<typename T, size_t N> 
+    template<typename T, std::size_t N> 
     struct make_sequence_of_ones;
 
-    template<typename T, size_t N> 
+    template<typename T, std::size_t N> 
     using make_sequence_of_ones_t = typename make_sequence_of_ones<T, N>::type;
 
-    template<typename T, size_t N>
+    template<typename T, std::size_t N>
     struct make_sequence_of_ones {
       using type = concat_t<make_sequence_of_ones_t<T, N/2>, make_sequence_of_ones_t<T, N - N/2>>;
     };
@@ -206,7 +206,7 @@ template <class Layout, class T, T... Extents>
 struct basic_static_strides<basic_static_extents<T,Extents...>, Layout>
 {
 
-  static constexpr size_t const Rank = sizeof...(Extents);
+  static constexpr std::size_t const Rank = sizeof...(Extents);
 
   using layout_type     = Layout;
   using extents_type    = basic_static_extents<T,Extents...>;
@@ -298,12 +298,7 @@ struct basic_static_strides<basic_static_extents<T,Extents...>, Layout>
     if constexpr( Rank != basic_static_strides<OtherE,layout_type>::Rank ){
       return false;
     }else{
-      for(auto i = size_type(0); i < Rank; ++i){
-        if( m_data[i] != rhs[i] ){
-          return false;
-        }
-      }
-      return true;
+      return std::equal(begin(), end(), rhs.begin());
     }
   }
 

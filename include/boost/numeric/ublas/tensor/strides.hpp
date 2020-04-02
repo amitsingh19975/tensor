@@ -66,7 +66,7 @@ namespace boost::numeric::ublas {
    * @tparam Extents parameter pack of extents
    *
    */
-  template <class Layout, class T, size_t... Extents>
+  template <class Layout, class T, T... Extents>
   struct strides<basic_static_extents<T, Extents...>, Layout>
   {
     using type = basic_static_strides<basic_static_extents<T, Extents...>, Layout>;
@@ -94,7 +94,7 @@ namespace boost::numeric::ublas {
    * @tparam T extents type
    *
    */
-  template <class Layout, size_t N, class T>
+  template <class Layout, std::size_t N, class T>
   struct strides<basic_fixed_rank_extents<T,N>, Layout>
   {
     using type = basic_fixed_rank_strides<T, N, Layout>;

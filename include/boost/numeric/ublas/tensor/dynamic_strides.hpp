@@ -211,7 +211,7 @@ protected:
  * Proxy template class of std::array<int_type,N>.
  *
  */
-template<class __int_type, size_t N, class __layout>
+template<class __int_type, std::size_t N, class __layout>
 class basic_fixed_rank_strides
 {
 public:
@@ -406,7 +406,7 @@ auto access(std::size_t sum, basic_strides<std::size_t, layout_type> const& w, s
  * @param[in] w stride vector of length p
  * @returns relative memory location depending on \c i and \c w
 */
-template<class size_type, size_t N, class layout_type>
+template<class size_type, std::size_t N, class layout_type>
 inline
 auto access(std::vector<size_type> const& i, basic_fixed_rank_strides<size_type, N, layout_type> const& w)
 {
@@ -426,7 +426,7 @@ auto access(std::vector<size_type> const& i, basic_fixed_rank_strides<size_type,
  * @param[in] sum the current relative memory index
  * @returns relative memory location depending on \c i and \c w
 */
-template<std::size_t r, size_t N, class layout_type, class ... size_types>
+template<std::size_t r, std::size_t N, class layout_type, class ... size_types>
 inline
 auto access(std::size_t sum, basic_fixed_rank_strides<std::size_t, N, layout_type> const& w, std::size_t i, size_types ... is)
 {	

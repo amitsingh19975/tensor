@@ -135,9 +135,7 @@ public:
 		, extents_()
 		, strides_()
 	{
-		if constexpr(detail::is_dynamic<extents_type>::value){
-			data_.resize(product(extents_));
-		}
+		resize(extents_);
 	}
 
 
@@ -155,9 +153,7 @@ public:
 		, extents_ (std::move(l))
 		, strides_ (extents_)
 	{
-		if constexpr(detail::is_dynamic<extents_type>::value){
-			data_.resize(product(extents_));
-		}
+		resize(extents_);
 	}
 
 	/** @brief Constructs a tensor with a \c shape
@@ -174,9 +170,7 @@ public:
 		, extents_ (s)
 		, strides_ (extents_)
 	{
-		if constexpr(detail::is_dynamic<extents_type>::value){
-			data_.resize(product(extents_));
-		}
+		resize(extents_);
 	}
 
 
@@ -214,9 +208,7 @@ public:
 		, extents_ (e)
 		, strides_ (extents_)
 	{
-		if constexpr(detail::is_dynamic<extents_type>::value){
-			data_.resize(product(extents_));
-		}
+		resize(extents_);
 		std::fill(begin(),end(),i);
 	}
 
@@ -263,7 +255,6 @@ public:
 		, strides_ (std::move(v.strides_))
 		, data_    (std::move(v.data_   ))
 	{}
-
 
 	/** @brief Constructs a tensor with a matrix
 	 *
@@ -401,6 +392,8 @@ public:
 	}
 
 
+
+
 	/** @brief Constructs a tensor with another tensor with a different layout
 	 *
 	 * @param other tensor with a different layout to be copied.
@@ -411,9 +404,7 @@ public:
 		, extents_ (other.extents())
 		, strides_ (other.extents())
 	{	
-		if constexpr(detail::is_dynamic<extents_type>::value){
-			data_.resize(product(extents_));
-		}
+		resize(extents_);
 		copy(this->rank(), this->extents().data(),
 				this->data(), this->strides().data(),
 				other.data(), other.strides().data());
@@ -437,9 +428,7 @@ public:
 	{
 		static_assert( detail::has_tensor_types<self_type, tensor_expression_type<derived_type>>::value,
 									 "Error in boost::numeric::ublas::tensor: expression does not contain a tensor. cannot retrieve shape.");
-		if constexpr(detail::is_dynamic<extents_type>::value){
-			data_.resize(product(extents_));
-		}
+		resize(extents_);
 		detail::eval( *this, expr );
 	}
 
@@ -689,10 +678,6 @@ public:
 			this->data_.resize (product(extents_), v);
 	}
 
-
-
-
-
 	friend void swap(tensor& lhs, tensor& rhs) {
 		std::swap(lhs.data_   , rhs.data_   );
 		std::swap(lhs.extents_, rhs.extents_);
@@ -772,6 +757,14 @@ public:
 		return data_.rend();
 	}
 
+private:
+
+	inline
+	void resize( extents_type const& e ){
+		if constexpr( detail::is_dynamic_v<extents_type> ){
+			data_.resize(product(e));
+		}
+	}
 
 #if 0
 	// -------------
@@ -789,7 +782,7 @@ public:
 
 
 
-// private:
+private:
 
 	extents_type extents_;
 	strides_type strides_;

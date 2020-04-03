@@ -19,16 +19,18 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       TOOLSET: msvc-14.13
       CXXSTD: 17
+      VSDEVCMD: "True"
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       TOOLSET: msvc-14.0
       CXXSTD: 11
+      VSDEVCMD: "False"
 
 cache:
   - c:\tools\vcpkg\installed\
 
 install:
   # Install OpenCL runtime (driver) for Intel / Xeon package
-  - if %APPVEYOR_BUILD_WORKER_IMAGE% == "Visual Studio 2017" "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
+  - if %VSDEVCMD% == "True" "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
   - appveyor DownloadFile "http://registrationcenter-download.intel.com/akdlm/irc_nas/9022/opencl_runtime_16.1.1_x64_setup.msi"
   - start /wait msiexec /i opencl_runtime_16.1.1_x64_setup.msi /qn  /l*v msiexec2.log
   # FIXME: To be removed https://help.appveyor.com/discussions/problems/13000-cmake_toolchain_filevcpkgcmake-conflicts-with-cmake-native-findboostcmake"

@@ -274,7 +274,7 @@ BOOST_FIXTURE_TEST_CASE(test_static_rank_extents_access, fixture, *boost::unit_t
 {
 	using namespace boost::numeric;
 
-	BOOST_CHECK_EQUAL  (de0.size(), 0);
+	BOOST_CHECK_EQUAL(de0.size(), 0);
 	BOOST_CHECK (de0.empty()  );
 
 	BOOST_REQUIRE_EQUAL(de1.size(), 2);

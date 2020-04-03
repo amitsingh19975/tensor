@@ -23,13 +23,12 @@
 namespace boost::numeric::ublas::detail{
 
   template<typename T, T E, T...N>
-  constexpr auto push_back(basic_static_extents<T, N...>) -> basic_static_extents<T, N..., E>;
+  constexpr auto push_back(basic_static_extents<T, N...>) -> basic_static_extents<T, N..., E>{};
 
   template<typename T, T E, T...N>
-  constexpr auto push_front(basic_static_extents<T, N...>) -> basic_static_extents<T, E, N...>;
+  constexpr auto push_front(basic_static_extents<T, N...>) -> basic_static_extents<T, E, N...>{};
 
   template <typename T, T E0, T... E, T... N>
-  inline
   constexpr auto squeeze_impl_remove_one( basic_static_extents<T, E0, E...>, basic_static_extents<T, N...> num = basic_static_extents<T>{} ){
     // executed when basic_static_extents is size of 1
     // @code basic_static_extents<T, E0> @endcode
@@ -58,7 +57,6 @@ namespace boost::numeric::ublas::detail{
   }
 
   template <class T, T... E>
-  inline
   constexpr auto squeeze_impl( basic_static_extents<T,E...> const& e ){
     
     using extents_type = basic_static_extents<T,E...>;

@@ -66,15 +66,16 @@ install:
       using opencl : : <include>$(vcpkg_i) <search>$(vcpkg_l) ;
       using clblas : : <include>$(vcpkg_i) <search>$(vcpkg_l) ;
       '@ | sc "$env:USERPROFILE/user-config.jam"
-  - cmd /c bootstrap
-  - b2 -j3 headers
+  - more "%USERPROFILE%\user-config.jam"
+  # - cmd /c bootstrap
+  # - b2 -j3 headers
 
 build: off
 
 test_script:
   #- PATH=%ADDPATH%%PATH%
-  - if not "%CXXSTD%" == "" set CXXSTD=cxxstd=%CXXSTD%
-  - set ADDRMD=address-model=64
-  - b2 -j3 libs/numeric/ublas/test toolset=%TOOLSET% %CXXSTD% %ADDRMD%
-  - b2 -j3 libs/numeric/ublas/benchmarks toolset=%TOOLSET% %CXXSTD% %ADDRMD%
-  - b2 -j3 libs/numeric/ublas/examples/tensor toolset=%TOOLSET% %CXXSTD% %ADDRMD%
+  # - if not "%CXXSTD%" == "" set CXXSTD=cxxstd=%CXXSTD%
+  # - set ADDRMD=address-model=64
+  # - b2 -j3 libs/numeric/ublas/test toolset=%TOOLSET% %CXXSTD% %ADDRMD%
+  # - b2 -j3 libs/numeric/ublas/benchmarks toolset=%TOOLSET% %CXXSTD% %ADDRMD%
+  # - b2 -j3 libs/numeric/ublas/examples/tensor toolset=%TOOLSET% %CXXSTD% %ADDRMD%

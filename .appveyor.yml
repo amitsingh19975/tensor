@@ -17,15 +17,13 @@ branches:
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Windows
-      TOOLSET: msvc-14.13
+      TOOLSET: msvc-14.1
       CXXSTD: 17
       VSCLCOMPILER: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.16.27023\bin\HostX64\x64\cl.exe
 
 cache:
   - C:\tools\vcpkg\installed\
 
-init:
-  - set VS150COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\
 
 install:
   # Install OpenCL runtime (driver) for Intel / Xeon package
@@ -65,8 +63,6 @@ install:
       using clblas : : <include>$(vcpkg_i) <search>$(vcpkg_l) ;
       '@ | sc "$env:USERPROFILE/user-config.jam"
   # - cmd /c bootstrap
-  - set VS150COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\
-  - set
   - b2 -j3 headers
 
 build: off
@@ -75,6 +71,6 @@ test_script:
   #- PATH=%ADDPATH%%PATH%
   - if not "%CXXSTD%" == "" set CXXSTD=cxxstd=%CXXSTD%
   - set ADDRMD=address-model=64
-  - b2 -j3 libs/numeric/ublas/test toolset=%TOOLSET% %CXXSTD% %ADDRMD%
+  - b2 -j3 libs/numeric/ublas/test toolset=msvc-14.13 %CXXSTD% %ADDRMD%
   - b2 -j3 libs/numeric/ublas/benchmarks toolset=%TOOLSET% %CXXSTD% %ADDRMD%
   - b2 -j3 libs/numeric/ublas/examples/tensor toolset=%TOOLSET% %CXXSTD% %ADDRMD%

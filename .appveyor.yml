@@ -22,7 +22,7 @@ environment:
       VSCLCOMPILER: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.16.27023\bin\HostX64\x64\cl.exe
 
 cache:
-  - c:\tools\vcpkg\installed\
+  - C:\tools\vcpkg\installed\
 
 install:
   # Install OpenCL runtime (driver) for Intel / Xeon package
@@ -30,12 +30,12 @@ install:
   - start /wait msiexec /i opencl_runtime_16.1.1_x64_setup.msi /qn  /l*v msiexec2.log
   # FIXME: To be removed https://help.appveyor.com/discussions/problems/13000-cmake_toolchain_filevcpkgcmake-conflicts-with-cmake-native-findboostcmake"
   - ps: 'Write-Host "Installing latest vcpkg.cmake module" -ForegroundColor Magenta'
-  - appveyor DownloadFile https://raw.githubusercontent.com/Microsoft/vcpkg/master/scripts/buildsystems/vcpkg.cmake -FileName "c:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake"
+  - appveyor DownloadFile https://raw.githubusercontent.com/Microsoft/vcpkg/master/scripts/buildsystems/vcpkg.cmake -FileName "C:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake"
   - set "TRIPLET=x64-windows"
   - vcpkg --triplet %TRIPLET% install opencl clblas
-  - set PATH=C:\Tools\vcpkg\installed\%TRIPLET%\bin;%PATH%
-  - set VCPKG_I=C:\Tools\vcpkg\installed\%TRIPLET%\include
-  - set VCPKG_L=C:\Tools\vcpkg\installed\%TRIPLET%\lib
+  - set PATH=C:\tools\vcpkg\installed\%TRIPLET%\bin;%PATH%
+  - set VCPKG_I=C:\tools\vcpkg\installed\%TRIPLET%\include
+  - set VCPKG_L=C:\tools\vcpkg\installed\%TRIPLET%\lib
   - set BOOST_BRANCH=develop
   - if "%APPVEYOR_REPO_BRANCH%" == "master" set BOOST_BRANCH=master
   - cd ..

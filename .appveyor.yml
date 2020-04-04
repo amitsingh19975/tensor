@@ -24,6 +24,9 @@ environment:
 cache:
   - C:\tools\vcpkg\installed\
 
+init:
+  - set VS150COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\
+
 install:
   # Install OpenCL runtime (driver) for Intel / Xeon package
   # - appveyor DownloadFile "http://registrationcenter-download.intel.com/akdlm/irc_nas/9022/opencl_runtime_16.1.1_x64_setup.msi"
@@ -61,7 +64,7 @@ install:
       using opencl : : <include>$(vcpkg_i) <search>$(vcpkg_l) ;
       using clblas : : <include>$(vcpkg_i) <search>$(vcpkg_l) ;
       '@ | sc "$env:USERPROFILE/user-config.jam"
-  - cmd /c bootstrap
+  # - cmd /c bootstrap
   - b2 -j3 headers
 
 build: off

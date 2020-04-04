@@ -39,7 +39,8 @@ install:
   - set BOOST_BRANCH=develop
   - if "%APPVEYOR_REPO_BRANCH%" == "master" set BOOST_BRANCH=master
   - cd ..
-  - git clone -b %BOOST_BRANCH% https://github.com/boostorg/boost.git boost-root
+  - cd
+  # - git clone -b %BOOST_BRANCH% https://github.com/boostorg/boost.git boost-root
   - cd boost-root
   - git submodule update --init tools/build
   - git submodule update --init libs/config

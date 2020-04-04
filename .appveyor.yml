@@ -24,9 +24,6 @@ environment:
 cache:
   - c:\tools\vcpkg\installed\
 
-init:
-  - if not "%VSINSTALL%" == "" "%VSINSTALL%"
-
 install:
   # Install OpenCL runtime (driver) for Intel / Xeon package
   - appveyor DownloadFile "http://registrationcenter-download.intel.com/akdlm/irc_nas/9022/opencl_runtime_16.1.1_x64_setup.msi"

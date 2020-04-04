@@ -32,7 +32,7 @@ install:
   - ps: 'Write-Host "Installing latest vcpkg.cmake module" -ForegroundColor Magenta'
   - appveyor DownloadFile https://raw.githubusercontent.com/Microsoft/vcpkg/master/scripts/buildsystems/vcpkg.cmake -FileName "C:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake"
   - set "TRIPLET=x64-windows"
-  - vcpkg --triplet %TRIPLET% install opencl clblas
+  # - vcpkg --triplet %TRIPLET% install opencl clblas
   - set PATH=C:\tools\vcpkg\installed\%TRIPLET%\bin;%PATH%
   - set VCPKG_I=C:\tools\vcpkg\installed\%TRIPLET%\include
   - set VCPKG_L=C:\tools\vcpkg\installed\%TRIPLET%\lib

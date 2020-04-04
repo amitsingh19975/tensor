@@ -19,11 +19,11 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       TOOLSET: msvc-14.13
       CXXSTD: 17
-      VSINSTALL: C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat
+      VSCLCOMPILER: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.16.27023\bin\HostX64\x64\cl.exe
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       TOOLSET: msvc-14.0
       CXXSTD: 11
-      VSINSTALL: 
+      VSCLCOMPILER: 
 
 cache:
   - c:\tools\vcpkg\installed\
@@ -59,14 +59,14 @@ install:
       # Creating %USERPROFILE%/user-config.jam file
       @'
       import os regex toolset ;
+      local tool_path = [ os.environ VSCLCOMPILER ] ;
       local toolset = [ regex.split [ os.environ TOOLSET ] "-" ] ;
       local vcpkg_i = [ os.environ VCPKG_I ] ;
       local vcpkg_l = [ os.environ VCPKG_L ] ;
-      using $(toolset[1]) : $(toolset[2]) ;
+      using $(toolset[1]) : $(toolset[2-]:J="-") : $(tool_path) : ;
       using opencl : : <include>$(vcpkg_i) <search>$(vcpkg_l) ;
       using clblas : : <include>$(vcpkg_i) <search>$(vcpkg_l) ;
       '@ | sc "$env:USERPROFILE/user-config.jam"
-  - more "%USERPROFILE%\user-config.jam"
   - cmd /c bootstrap
   - b2 -j3 headers
 

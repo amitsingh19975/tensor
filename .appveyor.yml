@@ -47,8 +47,8 @@ install:
   # - git submodule update --init tools/boostdep
   # - xcopy /s /e /q %APPVEYOR_BUILD_FOLDER% libs\numeric\ublas /Y
   # - python tools/boostdep/depinst/depinst.py -I benchmarks numeric/ublas
-  - xcopy %APPVEYOR_BUILD_FOLDER%\opencl.jam %USERPROFILE%
-  - xcopy %APPVEYOR_BUILD_FOLDER%\clblas.jam %USERPROFILE%
+  # - xcopy %APPVEYOR_BUILD_FOLDER%\opencl.jam %USERPROFILE% /Y
+  # - xcopy %APPVEYOR_BUILD_FOLDER%\clblas.jam %USERPROFILE% /Y
   - ps: |
       # Creating %USERPROFILE%/user-config.jam file
       @'

@@ -1,13 +1,13 @@
-//  Copyright (c) 2018-2019
-//  Cem Bassoy
+//
+// 	Copyright (c) 2018-2020, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2019-2020, Amit Singh, amitsingh19975@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer and Google in producing this work
-//  which started as a Google Summer of Code project.
+//  Google and Fraunhofer IOSB, Ettlingen, Germany
 //
 
 
@@ -271,7 +271,7 @@ public:
 		auto const sz = v.size1() * v.size2();
 		if(sz){
 			if constexpr (detail::is_static<extents_type>::value){
-				static_assert(extents_.size() == 2
+				static_assert(extents_type::_size == 2
 					, "Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : invalid extents size");
 				if( !( extents_[0] == v.size1() || extents_[1] == v.size2() ) ){
@@ -308,7 +308,7 @@ public:
 		auto const sz = v.size1() * v.size2();
 		if(sz){
 			if constexpr (detail::is_static<extents_type>::value){
-				static_assert(extents_.size() == 2
+				static_assert(extents_type::_size == 2
 					, "Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : invalid extents size");
 				if( !( extents_[0] == v.size1() || extents_[1] == v.size2() ) ){
@@ -347,10 +347,10 @@ public:
 		auto const sz = v.size();
 		if(sz){
 			if constexpr (detail::is_static<extents_type>::value){
-				static_assert(extents_.size() == 2
+				static_assert(extents_type::_size == 2
 					, "Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : invalid extents size");
-				if( !( extents_[0] == v.size1() || extents_[1] == v.size2() ) ){
+				if( !( extents_[0] == v.size() || extents_[1] == 1 ) ){
 					throw std::runtime_error("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : rank of extents not correct, please check!");
 				}
@@ -383,10 +383,10 @@ public:
 		auto const sz = v.size();
 		if(sz){
 			if constexpr (detail::is_static<extents_type>::value){
-				static_assert(extents_.size() == 2
+				static_assert(extents_type::_size == 2
 					, "Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : invalid extents size");
-				if( !( extents_[0] == v.size1() || extents_[1] == v.size2() ) ){
+				if( !( extents_[0] == v.size() || extents_[1] == 1 ) ){
 					throw std::runtime_error("Error in boost::numeric::ublas::tensor(const matrix_type &v)"
 											" : rank of extents not correct, please check!");
 				}
@@ -690,8 +690,9 @@ public:
 		this->extents_ = e;
 		this->strides_ = strides_type(this->extents_);
 
-		if(product(e) != this->size())
-			this->data_.resize (product(extents_), v);
+		auto p = product(extents_);
+		if(p != this->size())
+			this->data_.resize (p, v);
 	}
 
 	friend void swap(tensor& lhs, tensor& rhs) {

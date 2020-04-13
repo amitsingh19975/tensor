@@ -1,12 +1,13 @@
 //
-//  Copyright (c) 2018-2019, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2018-2020, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2019-2020, Amit Singh, amitsingh19975@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer IOSB, Ettlingen, Germany
+//  Google
 //
 
 #ifndef _BOOST_NUMERIC_UBLAS_TENSOR_STATIC_EXTENTS_HPP_
@@ -30,9 +31,9 @@ template <class ExtentsType> class basic_extents;
 template <class ExtentsType, ExtentsType... E>
 struct basic_static_extents{
 
-  static constexpr auto Rank = sizeof...(E);
+  static constexpr auto _size = sizeof...(E);
   
-  using base_type       = std::array<ExtentsType,Rank>;
+  using base_type       = std::array<ExtentsType,_size>;
 	using value_type      = typename base_type::value_type;
 	using const_reference = typename base_type::const_reference;
 	using reference       = typename base_type::reference;
@@ -45,12 +46,8 @@ struct basic_static_extents{
 
   //@returns the rank of basic_static_extents
   [[nodiscard]] inline 
-  constexpr size_type size() const noexcept { return Rank; }
+  constexpr size_type size() const noexcept { return _size; }
   
-  //@returns the rank of basic_static_extents
-  [[nodiscard]] inline 
-  constexpr size_type rank() const noexcept { return Rank; }
-
   /**
    * @param k pos of extent
    * @returns the element at given pos
@@ -71,7 +68,7 @@ struct basic_static_extents{
   /** @brief Returns the std::vector containing extents */
   [[nodiscard]] inline
   auto to_vector() const {
-    std::vector<value_type> temp(Rank);
+    std::vector<value_type> temp(_size);
     std::copy(begin(), end(), temp.begin());
     return temp;
   }
@@ -110,7 +107,7 @@ struct basic_static_extents{
   template <ExtentsType... RE>
   [[nodiscard]] inline
   constexpr bool operator==(basic_static_extents<ExtentsType, RE...> const &rhs) const {
-    if constexpr( Rank != basic_static_extents<ExtentsType, RE...>::Rank ){
+    if constexpr( _size != basic_static_extents<ExtentsType, RE...>::_size ){
       return false;
     }else{
       return std::equal(begin(), end(), rhs.begin());
@@ -143,6 +140,27 @@ private:
 
 template<std::size_t... E>
 using static_extents = basic_static_extents<std::size_t,E...>;
+
+  
+template<typename T> struct static_product;
+
+template<typename T> 
+inline static constexpr auto const static_product_v = static_product<T>::value;
+
+template<typename ExtentsType, ExtentsType E0, ExtentsType... E>
+struct static_product< basic_static_extents<ExtentsType, E0, E...> >{
+  static constexpr auto const value = E0 * static_product_v< basic_static_extents<ExtentsType, E...> >;
+};
+
+template<typename ExtentsType, ExtentsType E0>
+struct static_product< basic_static_extents<ExtentsType, E0> >{
+  static constexpr auto const value = E0 ;
+};
+
+template<typename ExtentsType>
+struct static_product< basic_static_extents<ExtentsType> >{
+  static constexpr auto const value = ExtentsType(0) ;
+};
 
 } // namespace boost::numeric::ublas
 

@@ -1,12 +1,13 @@
 //
-//  Copyright (c) 2018-2019, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2018-2020, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2019-2020, Amit Singh, amitsingh19975@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer IOSB, Ettlingen, Germany
+//  Google and Fraunhofer IOSB, Ettlingen, Germany
 //
 /// \file strides.hpp Definition for the basic_strides template class
 
@@ -354,90 +355,6 @@ protected:
 	base_type _base;
 };
 
-// template<typename Extents>
-
-namespace detail {
-
-
-/** @brief Returns relative memory index with respect to a multi-index
- *
- * @code auto j = access(std::vector{3,4,5}, strides{shape{4,2,3},first_order}); @endcode
- *
- * @param[in] i multi-index of length p
- * @param[in] w stride vector of length p
- * @returns relative memory location depending on \c i and \c w
-*/
-template<class size_type, class layout_type>
-inline
-auto access(std::vector<size_type> const& i, basic_strides<size_type,layout_type> const& w)
-{
-	const auto p = i.size();
-	size_type sum = 0u;
-	for(auto r = 0u; r < p; ++r)
-		sum += i[r]*w[r];
-	return sum;
-}
-
-/** @brief Returns relative memory index with respect to a multi-index
- *
- * @code auto j = access(0, strides{shape{4,2,3},first_order}, 2,3,4); @endcode
- *
- * @param[in] i   first element of the partial multi-index
- * @param[in] is  the following elements of the partial multi-index
- * @param[in] sum the current relative memory index
- * @returns relative memory location depending on \c i and \c w
-*/
-template<std::size_t r, class layout_type, class ... size_types>
-inline
-auto access(std::size_t sum, basic_strides<std::size_t, layout_type> const& w, std::size_t i, size_types ... is)
-{	
-	sum += i*w[r];
-	if constexpr (sizeof...(is) == 0)
-		return sum;
-	else
-		return detail::access<r+1>(sum,w,std::forward<size_types>(is)...);
-}
-
-/** @brief Returns relative memory index with respect to a multi-index
- *
- * @code auto j = access(std::vector{3,4,5}, strides{shape{4,2,3},first_order}); @endcode
- *
- * @param[in] i multi-index of length p
- * @param[in] w stride vector of length p
- * @returns relative memory location depending on \c i and \c w
-*/
-template<class size_type, std::size_t N, class layout_type>
-inline
-auto access(std::vector<size_type> const& i, basic_fixed_rank_strides<size_type, N, layout_type> const& w)
-{
-	const auto p = i.size();
-	size_type sum = 0u;
-	for(auto r = 0u; r < p; ++r)
-		sum += i[r]*w[r];
-	return sum;
-}
-
-/** @brief Returns relative memory index with respect to a multi-index
- *
- * @code auto j = access(0, strides{shape{4,2,3},first_order}, 2,3,4); @endcode
- *
- * @param[in] i   first element of the partial multi-index
- * @param[in] is  the following elements of the partial multi-index
- * @param[in] sum the current relative memory index
- * @returns relative memory location depending on \c i and \c w
-*/
-template<std::size_t r, std::size_t N, class layout_type, class ... size_types>
-inline
-auto access(std::size_t sum, basic_fixed_rank_strides<std::size_t, N, layout_type> const& w, std::size_t i, size_types ... is)
-{	
-	sum += i*w[r];
-	if constexpr (sizeof...(is) == 0)
-		return sum;
-	else
-		return detail::access<r+1>(sum,w,std::forward<size_types>(is)...);
-}
-
-}
 
 }
 }

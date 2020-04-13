@@ -1,12 +1,13 @@
 //
-//  Copyright (c) 2018-2019, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2018-2020, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2019-2020, Amit Singh, amitsingh19975@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer IOSB, Ettlingen, Germany
+//  Google and Fraunhofer IOSB, Ettlingen, Germany
 //
 
 
@@ -33,8 +34,8 @@ namespace boost::numeric::ublas
 
 	namespace detail{
 		// MSVC 14.1 bug
-		// cannot use ::Rank inside constexpr function
-		// basic_extents does not contains Rank member because of which
+		// cannot use ::_size inside constexpr function
+		// basic_extents does not contains _size member because of which
 		// it complains about it
 
 		template<typename E>
@@ -42,7 +43,7 @@ namespace boost::numeric::ublas
 			static_assert(is_static_rank<E>::value, 
 				"boost::numeric::ublas::extents_result_type_tensor_times_vector() : invalid type, type should be an extents");
 			using size_type = typename E::size_type;
-			auto ret = dynamic_extents< std::max( size_type( E::Rank - 1 ), size_type(2) )>();
+			auto ret = dynamic_extents< std::max( size_type( E::_size - 1 ), size_type(2) )>();
 			ret.fill(typename E::value_type(1));
 			return ret;
 		}
@@ -57,7 +58,7 @@ namespace boost::numeric::ublas
 		constexpr auto extents_result_type_tensor_times_matrix( E const& a ){
 			static_assert(is_static_rank<E>::value, 
 				"boost::numeric::ublas::extents_result_type_tensor_times_matrix() : invalid type, type should be an extents");
-			return dynamic_extents<E::Rank>(a);
+			return dynamic_extents<E::_size>(a);
 		}
 
 		template<typename T>
@@ -231,7 +232,6 @@ namespace boost::numeric::ublas
 		using extents_type_1 = E1;
 		using value_type = typename tensor_type::value_type;
 		using size_type = typename extents_type_1::value_type;
-		using result_tensor_type = tensor<V, dynamic_extents<>, F, std::vector<V>>;
 
 		auto const pa = a.rank();
 		auto const pb = b.rank();
@@ -295,7 +295,8 @@ namespace boost::numeric::ublas
 		assert(phia1.size() == pa);
 		assert(phib1.size() == pb);
 
-		auto c = result_tensor_type(dynamic_extents<>(nc), value_type{});
+		auto c = tensor(dynamic_extents<>(nc), value_type{});
+		
 		ttt(pa, pb, q,
 			phia1.data(), phib1.data(),
 			c.data(), c.extents().data(), c.strides().data(),
@@ -599,13 +600,21 @@ namespace boost::numeric::ublas
 
 	namespace detail{
 
+		template<size_t M, size_t I, typename T, T... E, T... R>
+		inline
+		constexpr auto extents_result_type_tensor_times_vector(basic_static_extents<T>, 
+			basic_static_extents<T, E...>, basic_static_extents<T, R...>)
+		{
+			return basic_static_extents<T, R..., E...>{};
+		}
+
 		template<size_t M, size_t I, typename T, T E0, T... E, T O0, T... OtherE, T... R>
 		inline
 		constexpr auto extents_result_type_tensor_times_vector(basic_static_extents<T,E0,E...>, 
-			basic_static_extents<T, O0, OtherE...> ones, basic_static_extents<T, R...> res = basic_static_extents<T>{})
+			basic_static_extents<T, O0, OtherE...>, basic_static_extents<T, R...> = basic_static_extents<T>{})
 		{
 			if constexpr(I != M - 1){
-				return extents_result_type_tensor_times_vector<M,I + 1>
+				return extents_result_type_tensor_times_vector<M,I + 1> 
 					( basic_static_extents<T,E...>{}, basic_static_extents<T,OtherE...>{}, basic_static_extents<T, R..., E0>{} );
 			}else{
 				return extents_result_type_tensor_times_vector<M,I + 1>
@@ -613,39 +622,20 @@ namespace boost::numeric::ublas
 			}
 		}
 
-		template<size_t M, size_t I, typename T, T... E, T... R>
-		inline
-		constexpr auto extents_result_type_tensor_times_vector(basic_static_extents<T>, 
-			basic_static_extents<T, E...> ones, basic_static_extents<T, R...>)
-		{
-			return basic_static_extents<T, R..., E...>{};
-		}
-
-		template<size_t I, typename T, T... OtherE>
-		inline
-		constexpr auto extents_result_set_to_ones(
-			basic_static_extents<T,OtherE...> res = basic_static_extents<T>{})
-		{
-			if constexpr( I == 0 ){
-				return res;
-			}else{
-				return extents_result_set_to_ones< I - 1 >( basic_static_extents<T,OtherE...,1ul> {} );
-			}
-		}
 
 		template<size_t M, typename T, T E0, T... E>
 		inline
 		constexpr auto extents_result_type_tensor_times_vector(basic_static_extents<T,E0,E...> const& e)
 		{
 			using size_type = typename basic_static_extents<T>::size_type;
-			auto ones = extents_result_set_to_ones< std::max( size_type( sizeof...(E) ), size_type(2) ), T >();
+			auto ones = typename impl::make_sequence_of_ones_t< T, std::max( size_type(2), sizeof...(E) ) >::extents_type{};
 			return extents_result_type_tensor_times_vector<M,0>(e, ones);
 		}
 
 		template<size_t I, size_t NE, typename T, T E0, T... E, T... OtherE>
 		inline
 		constexpr auto static_extents_set_at
-			( basic_static_extents<T,E0,E...> const& e, basic_static_extents<T,OtherE...> res = basic_static_extents<T>{}){
+			( basic_static_extents<T,E0,E...> const&, basic_static_extents<T,OtherE...> = basic_static_extents<T>{}){
 			static_assert( I < sizeof...(E) + 1, "boost::numeric::ublas::detail::static_extents_set_at(): out of bound");
 			if constexpr( sizeof...(E) == 0 ){
 				if constexpr( I == 0 ){
@@ -699,11 +689,11 @@ namespace boost::numeric::ublas
 				"error in boost::numeric::ublas::prod(ttv): "
 				"contraction mode must be greater than zero.");
 
-		static_assert( extents_type::Rank >= M,
+		static_assert( extents_type::_size >= M,
 				"error in boost::numeric::ublas::prod(ttv): rank of tensor must be "
 				"greater than or equal to the modus.");
 
-		static_assert(extents_type::Rank != 0,
+		static_assert(extents_type::_size != 0,
 				"error in boost::numeric::ublas::prod(ttv): first "
 				"argument tensor should not be empty.");
 
@@ -718,11 +708,11 @@ namespace boost::numeric::ublas
 		auto c = tensor(nc, value_type{});
 		auto bb = &(b(0));
 
-		auto a_static_extents = a.extents().base();
-		auto c_static_extents = c.extents().base();
+		auto& a_static_extents = a.extents().base();
+		auto& c_static_extents = c.extents().base();
 
-		auto a_static_strides = a.strides().base();
-		auto c_static_strides = c.strides().base();
+		auto& a_static_strides = a.strides().base();
+		auto& c_static_strides = c.strides().base();
 
 		ttv(M, p,
 			c.data(), c_static_extents.data(), c_static_strides.data(),
@@ -759,11 +749,11 @@ namespace boost::numeric::ublas
 				"error in boost::numeric::ublas::prod(ttm): "
 				"contraction mode must be greater than zero.");
 
-		static_assert( E::Rank >= M ,
+		static_assert( E::_size >= M ,
 				"error in boost::numeric::ublas::prod(ttm): rank "
 				"of the tensor must be greater equal the modus.");
 
-		static_assert(E::Rank,
+		static_assert(E::_size,
 				"error in boost::numeric::ublas::prod(ttm): first "
 				"argument tensor should not be empty.");
 
@@ -781,11 +771,11 @@ namespace boost::numeric::ublas
 
 		auto bb = &(b(0, 0));
 
-		auto a_static_extents = a.extents().base();
-		auto c_static_extents = c.extents().base();
+		auto& a_static_extents = a.extents().base();
+		auto& c_static_extents = c.extents().base();
 
-		auto a_static_strides = a.strides().base();
-		auto c_static_strides = c.strides().base();
+		auto& a_static_strides = a.strides().base();
+		auto& c_static_strides = c.strides().base();
 		ttm(M, p,
 			c.data(), c_static_extents.data(), c_static_strides.data(),
 			a.data(), a_static_extents.data(), a_static_strides.data(),
@@ -827,11 +817,11 @@ namespace boost::numeric::ublas
 		
 		auto c = tensor(nc, V{});
 
-		auto a_static_extents = a_extents.base();
-		auto a_static_strides = a.strides().base();
+		auto& a_static_extents = a_extents.base();
+		auto& a_static_strides = a.strides().base();
 		
-		auto b_static_extents = b_extents.base();
-		auto b_static_strides = b.strides().base();
+		auto& b_static_extents = b_extents.base();
+		auto& b_static_strides = b.strides().base();
 		
 		auto c_static_extents = c.extents().base();
 		auto c_static_strides = c.strides().base();

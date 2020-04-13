@@ -1,12 +1,13 @@
 //
-//  Copyright (c) 2018-2019, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2018-2020, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2019-2020, Amit Singh, amitsingh19975@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer IOSB, Ettlingen, Germany
+//  Google and Fraunhofer IOSB, Ettlingen, Germany
 //
 
 #ifndef _BOOST_UBLAS_TENSOR_EXPRESSIONS_EVALUATION_HPP_
@@ -152,14 +153,14 @@ auto retrieve_extents(unary_tensor_expression<T,E,OP> const& expr)
 
 namespace boost::numeric::ublas::detail {
 
-template<class T, class E, class F, class A, class S>
-auto all_extents_equal(tensor<T,E,F,A> const& t, basic_extents<S> const& extents)
+template<class T, class E, class F, class A>
+auto all_extents_equal(tensor<T,E,F,A> const& t, E const& extents)
 {
 	return extents == t.extents();
 }
 
-template<class T, class D, class S>
-auto all_extents_equal(tensor_expression<T,D> const& expr, basic_extents<S> const& extents)
+template<class T, class D>
+auto all_extents_equal(tensor_expression<T,D> const& expr, typename T::extents_type const& extents)
 {
 	static_assert(detail::has_tensor_types<T,tensor_expression<T,D>>::value,
 	              "Error in boost::numeric::ublas::detail::all_extents_equal: Expression to evaluate should contain tensors.");
@@ -178,8 +179,8 @@ auto all_extents_equal(tensor_expression<T,D> const& expr, basic_extents<S> cons
 
 }
 
-template<class T, class EL, class ER, class OP, class S>
-auto all_extents_equal(binary_tensor_expression<T,EL,ER,OP> const& expr, basic_extents<S> const& extents)
+template<class T, class EL, class ER, class OP>
+auto all_extents_equal(binary_tensor_expression<T,EL,ER,OP> const& expr, typename T::extents_type const& extents)
 {
 	static_assert(detail::has_tensor_types<T,binary_tensor_expression<T,EL,ER,OP>>::value,
 	              "Error in boost::numeric::ublas::detail::all_extents_equal: Expression to evaluate should contain tensors.");
@@ -204,10 +205,9 @@ auto all_extents_equal(binary_tensor_expression<T,EL,ER,OP> const& expr, basic_e
 }
 
 
-template<class T, class E, class OP, class S>
-auto all_extents_equal(unary_tensor_expression<T,E,OP> const& expr, basic_extents<S> const& extents)
+template<class T, class E, class OP>
+auto all_extents_equal(unary_tensor_expression<T,E,OP> const& expr, typename T::extents_type const& extents)
 {
-
 	static_assert(detail::has_tensor_types<T,unary_tensor_expression<T,E,OP>>::value,
 	              "Error in boost::numeric::ublas::detail::all_extents_equal: Expression to evaluate should contain tensors.");
 

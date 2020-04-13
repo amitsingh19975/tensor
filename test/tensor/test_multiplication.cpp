@@ -1,12 +1,13 @@
-//  Copyright (c) 2018-2019 Cem Bassoy
+//
+// 	Copyright (c) 2018-2020, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2019-2020, Amit Singh, amitsingh19975@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer and Google in producing this work
-//  which started as a Google Summer of Code project.
+//  Google and Fraunhofer IOSB, Ettlingen, Germany
 //
 
 
@@ -25,7 +26,7 @@
 BOOST_AUTO_TEST_SUITE (test_tensor_contraction)
 
 
-using test_types = zip<int,long,float,double,std::complex<float>>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
+using test_types = zip<int,float,std::complex<float>>::with_t<boost::numeric::ublas::first_order, boost::numeric::ublas::last_order>;
 
 //using test_types = zip<int>::with_t<boost::numeric::ublas::first_order>;
 

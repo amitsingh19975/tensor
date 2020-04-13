@@ -1,12 +1,13 @@
 //
-//  Copyright (c) 2018-2019, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2018-2020, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2019-2020, Amit Singh, amitsingh19975@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer IOSB, Ettlingen, Germany
+//  Google and Fraunhofer IOSB, Ettlingen, Germany
 //
 
 
@@ -240,15 +241,15 @@ private:
  * @tparam E parameter pack of extents
  *
  */
-template <class ExtentsType, std::size_t R>
+template <class ExtentsType, std::size_t N>
 struct basic_fixed_rank_extents
 {
   
 
-	static constexpr std::size_t const Rank = R;
+	static constexpr std::size_t const _size = N;
 
 
-  	using base_type       = std::array<ExtentsType,Rank>;
+  	using base_type       = std::array<ExtentsType,_size>;
 	using value_type      = typename base_type::value_type;
 	using const_reference = typename base_type::const_reference;
 	using reference       = typename base_type::reference;
@@ -261,11 +262,7 @@ struct basic_fixed_rank_extents
 
 	//@returns the rank of basic_static_extents
 	[[nodiscard]] 
-	static constexpr size_type size() noexcept { return Rank; }
-	
-	//@returns the rank of basic_static_extents
-	[[nodiscard]] 
-	static constexpr size_type rank() noexcept { return Rank; }
+	static constexpr size_type size() noexcept { return _size; }
 
 	[[nodiscard]] inline
 	constexpr const_reference at(size_type k) const{ 
@@ -291,8 +288,8 @@ struct basic_fixed_rank_extents
 	constexpr basic_fixed_rank_extents() = default;
 	
 	constexpr basic_fixed_rank_extents(std::initializer_list<value_type> li){
-		if( li.size() > Rank ){
-			throw std::out_of_range("boost::numeric::ublas::basic_fixed_rank_extents(): initializer list size is greater than Rank");
+		if( li.size() > _size ){
+			throw std::out_of_range("boost::numeric::ublas::basic_fixed_rank_extents(): initializer list size is greater than _size");
 		}
 		
 		std::copy(li.begin(), li.end(), _base.begin());
@@ -303,8 +300,8 @@ struct basic_fixed_rank_extents
 	}
 	
 	constexpr basic_fixed_rank_extents(const_iterator begin, const_iterator end){
-		if( std::distance(begin,end) > Rank ){
-			throw std::out_of_range("boost::numeric::ublas::basic_fixed_rank_extents(): initializer list size is greater than Rank");
+		if( std::distance(begin,end) > _size ){
+			throw std::out_of_range("boost::numeric::ublas::basic_fixed_rank_extents(): initializer list size is greater than _size");
 		}
 		
 		std::copy(begin, end, _base.begin());
@@ -376,7 +373,7 @@ struct basic_fixed_rank_extents
 	 *
 	 */
 	[[nodiscard]] inline
-	constexpr bool empty() const noexcept { return Rank == size_type{0}; }
+	constexpr bool empty() const noexcept { return _size == size_type{0}; }
 
 	friend void swap(basic_fixed_rank_extents& lhs, basic_fixed_rank_extents& rhs) {
 		std::swap(lhs._base   , rhs._base   );
@@ -427,11 +424,11 @@ private:
 
 
 namespace detail{
-	template<std::size_t... R>
+	template<std::size_t... N>
 	struct dynamic_extents_impl;
 
-	template <std::size_t R> struct dynamic_extents_impl<R> {
-		using type = basic_fixed_rank_extents<std::size_t, R>;
+	template <std::size_t N> struct dynamic_extents_impl<N> {
+		using type = basic_fixed_rank_extents<std::size_t, N>;
 	};
 
 	template <> struct dynamic_extents_impl<> {

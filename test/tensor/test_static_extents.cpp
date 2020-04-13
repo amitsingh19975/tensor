@@ -1,8 +1,14 @@
-//  Copyright (c) 2018-2019 Cem Bassoy
+//
+// 	Copyright (c) 2018-2020, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2019-2020, Amit Singh, amitsingh19975@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
+//
+//  The authors gratefully acknowledge the support of
+//  Google
+//
 
 #include <boost/numeric/ublas/tensor/static_extents.hpp>
 #include <boost/numeric/ublas/tensor/extents.hpp>
@@ -50,29 +56,19 @@ struct fixture {
 
   std::tuple<
     extents<1>,
-    extents<2>,
-    extents<3>,
-    extents<4>,
-    extents<5>,
-    extents<6>
+    extents<2>
   > rank_1_extents;
 
   std::tuple<
     extents<1,1>,
-    extents<2,2>,
-    extents<3,3>,
-    extents<4,4>,
-    extents<5,5>,
-    extents<6,6>
+    extents<2,2>
   > rank_2_extents;
 
   std::tuple<
     extents<1>,
     extents<1,1>,
     extents<1,1,1>,
-    extents<1,1,1,1>,
-    extents<1,1,1,1,1>,
-    extents<1,1,1,1,1,1>
+    extents<1,1,1,1>
   > scalars;
 
   std::tuple<
@@ -84,34 +80,17 @@ struct fixture {
   > vectors;
 
   std::tuple<
-    extents<2,2>,
-    extents<3,2>,
     extents<2,3>,
-    extents<3,3,1>,
-    extents<2,3,1>,
     extents<3,2,1>,
     extents<4,4,1,1>,
-    extents<3,4,1,1>,
-    extents<4,3,1,1>,
-    extents<5,5,1,1,1>,
     extents<6,6,1,1,1,1>
   > matrices;
 
   std::tuple<
     extents<3,3,3>,
-    extents<2,3,3>,
-    extents<3,2,3>,
-    extents<3,2,2>,
     extents<4,4,4,1>,
-    extents<3,4,4,1>,
-    extents<3,4,1,4>,
-    extents<4,3,5,1>,
-    extents<4,3,3,3>,
     extents<5,5,5,1,1>,
-    extents<5,5,1,5,1>,
     extents<6,6,6,1,1,1>,
-    extents<6,6,1,6,1,1>,
-    extents<6,6,1,1,6,1>,
     extents<6,6,1,1,1,6>
   > tensors;
 };
@@ -129,12 +108,12 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents_product, fixture,
   auto p4   = product( e4);   // {4,2,1,3}
   auto p5   = product( e5);   // {1,4,2,1,3,1}
   
-  auto sp0   = static_traits::product_v< std::decay_t<decltype(e0)> >;   // {}
-  auto sp1   = static_traits::product_v< std::decay_t<decltype(e1)> >;   // {1,2,3,4}
-  auto sp2   = static_traits::product_v< std::decay_t<decltype(e2)> >;   // {1,2,3}
-  auto sp3   = static_traits::product_v< std::decay_t<decltype(e3)> >;   // {4,2,3}
-  auto sp4   = static_traits::product_v< std::decay_t<decltype(e4)> >;   // {4,2,1,3}
-  auto sp5   = static_traits::product_v< std::decay_t<decltype(e5)> >;   // {1,4,2,1,3,1}
+  auto sp0   = static_product_v< std::decay_t<decltype(e0)> >;   // {}
+  auto sp1   = static_product_v< std::decay_t<decltype(e1)> >;   // {1,2,3,4}
+  auto sp2   = static_product_v< std::decay_t<decltype(e2)> >;   // {1,2,3}
+  auto sp3   = static_product_v< std::decay_t<decltype(e3)> >;   // {4,2,3}
+  auto sp4   = static_product_v< std::decay_t<decltype(e4)> >;   // {4,2,1,3}
+  auto sp5   = static_product_v< std::decay_t<decltype(e5)> >;   // {1,4,2,1,3,1}
 
   BOOST_CHECK_EQUAL(p0, 0);
   BOOST_CHECK_EQUAL(p1, 24);
@@ -275,7 +254,7 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
   BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e14)> >);
 
 
-  for_each_tuple(rank_0_extents,[](auto const& I, auto const& e){
+  for_each_tuple(rank_0_extents,[](auto const&, auto& e){
     BOOST_CHECK( !is_scalar(e) );
     BOOST_CHECK( !is_vector(e) );
     BOOST_CHECK( !is_matrix(e) );
@@ -331,7 +310,7 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
     }
   });
 
-  for_each_tuple(scalars,[](auto const& I, auto const& e){
+  for_each_tuple(scalars,[](auto const&, auto& e){
       BOOST_CHECK(  is_scalar(e) );
       BOOST_CHECK( !is_vector(e) );
       BOOST_CHECK( !is_matrix(e) );
@@ -342,7 +321,7 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
       BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e)> >);
   });
 
-  for_each_tuple(vectors,[](auto const& I, auto const& e){
+  for_each_tuple(vectors,[](auto const&, auto& e){
       BOOST_CHECK( !is_scalar(e) );
       BOOST_CHECK(  is_vector(e) );
       BOOST_CHECK( !is_matrix(e) );
@@ -353,7 +332,7 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
       BOOST_CHECK( !static_traits::is_tensor_v< std::decay_t<decltype(e)> >);
   });
 
-  for_each_tuple(matrices,[](auto const& I, auto const& e){
+  for_each_tuple(matrices,[](auto const&, auto& e){
       BOOST_CHECK( !is_scalar(e) );
       BOOST_CHECK( !is_vector(e) );
       BOOST_CHECK(  is_matrix(e) );
@@ -365,7 +344,7 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
       
   });
 
-  for_each_tuple(tensors,[](auto const& I, auto const& e){
+  for_each_tuple(tensors,[](auto const&, auto& e){
       BOOST_CHECK( !is_scalar(e) );
       BOOST_CHECK( !is_vector(e) );
       BOOST_CHECK( !is_matrix(e) );
@@ -381,25 +360,25 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
 BOOST_FIXTURE_TEST_CASE(test_static_extents_to_functions, fixture, *boost::unit_test::label("static_extents") *boost::unit_test::label("to_functions"))
 {
 
-  for_each_tuple(scalars,[](auto const& I, auto const& e){
+  for_each_tuple(scalars,[](auto const&, auto& e){
     if (e.size() > 1){
       auto d = e.to_dynamic_extents();
       BOOST_CHECK(d == e);
     }
   });
 
-  for_each_tuple(vectors,[](auto const& I, auto const& e){
+  for_each_tuple(vectors,[](auto const&, auto& e){
     auto d = e.to_dynamic_extents();
     BOOST_CHECK(d == e);
   });
 
 
-  for_each_tuple(matrices,[](auto const& I, auto const& e){
+  for_each_tuple(matrices,[](auto const&, auto& e){
     auto d = e.to_dynamic_extents();
     BOOST_CHECK(d == e);
   });
 
-  for_each_tuple(tensors,[](auto const& I, auto const& e){
+  for_each_tuple(tensors,[](auto const&, auto& e){
     auto d = e.to_dynamic_extents();
     BOOST_CHECK(d == e);
   });
@@ -409,13 +388,13 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents_to_functions, fixture, *boost::unit_
 BOOST_FIXTURE_TEST_CASE(test_static_extents_valid, fixture, *boost::unit_test::label("static_extents") *boost::unit_test::label("valid"))
 {
   using namespace boost::numeric::ublas;
-  for_each_tuple(rank_0_extents,[](auto const& I, auto const& e){
+  for_each_tuple(rank_0_extents,[](auto const&, auto& e){
     BOOST_CHECK(!valid(e));
     BOOST_CHECK(!static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
 
   for_each_tuple(rank_1_extents,[](auto const& I, auto const& e){
-    if( I == 0 ){
+    if( I== 0 ){
       BOOST_CHECK(valid(e));
       BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
     }else{
@@ -424,27 +403,27 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents_valid, fixture, *boost::unit_test::l
     }
   });
 
-  for_each_tuple(rank_2_extents,[](auto const& I, auto const& e){
+  for_each_tuple(rank_2_extents,[](auto const&, auto& e){
       BOOST_CHECK(valid(e));
       BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
   
-  for_each_tuple(scalars,[](auto const& I, auto const& e){
+  for_each_tuple(scalars,[](auto const&, auto& e){
       BOOST_CHECK(valid(e));
       BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
   
-  for_each_tuple(vectors,[](auto const& I, auto const& e){
+  for_each_tuple(vectors,[](auto const&, auto& e){
       BOOST_CHECK(valid(e));
       BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
   
-  for_each_tuple(matrices,[](auto const& I, auto const& e){
+  for_each_tuple(matrices,[](auto const&, auto& e){
       BOOST_CHECK(valid(e));
       BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
   
-  for_each_tuple(tensors,[](auto const& I, auto const& e){
+  for_each_tuple(tensors,[](auto const&, auto& e){
       BOOST_CHECK(valid(e));
       BOOST_CHECK(static_traits::is_valid_v< std::decay_t<decltype(e)> >);
   });
@@ -463,44 +442,44 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents_comparsion_operator, fixture, *boost
     return true;
   };
 
-  for_each_tuple(rank_0_extents,[&](auto const& I, auto const& e1){
-    for_each_tuple(rank_1_extents,[&](auto const& J, auto const& e2){
+  for_each_tuple(rank_0_extents,[&](auto const&, auto const& e1){
+    for_each_tuple(rank_1_extents,[&](auto const&, auto const& e2){
       BOOST_CHECK(compare_extents(e1,e2) == (e1 == e2));
     });
   });
 
-  for_each_tuple(rank_1_extents,[&](auto const& I, auto const& e1){
-    for_each_tuple(rank_1_extents,[&](auto const& J, auto const& e2){
+  for_each_tuple(rank_1_extents,[&](auto const&, auto const& e1){
+    for_each_tuple(rank_1_extents,[&](auto const&, auto const& e2){
       BOOST_CHECK(compare_extents(e1,e2) == (e1 == e2));
     });
   });
 
-  for_each_tuple(rank_1_extents,[&](auto const& I, auto const& e1){
-    for_each_tuple(rank_2_extents,[&](auto const& J, auto const& e2){
+  for_each_tuple(rank_1_extents,[&](auto const&, auto const& e1){
+    for_each_tuple(rank_2_extents,[&](auto const&, auto const& e2){
       BOOST_CHECK(compare_extents(e1,e2) == (e1 == e2));
     });
   });
 
-  for_each_tuple(scalars,[&](auto const& I, auto const& e1){
-    for_each_tuple(scalars,[&](auto const& J, auto const& e2){
+  for_each_tuple(scalars,[&](auto const&, auto const& e1){
+    for_each_tuple(scalars,[&](auto const&, auto const& e2){
       BOOST_CHECK(compare_extents(e1,e2) == (e1 == e2));
     });
   });
 
-  for_each_tuple(scalars,[&](auto const& I, auto const& e1){
-    for_each_tuple(vectors,[&](auto const& J, auto const& e2){
+  for_each_tuple(scalars,[&](auto const&, auto const& e1){
+    for_each_tuple(vectors,[&](auto const&, auto const& e2){
       BOOST_CHECK(compare_extents(e1,e2) == (e1 == e2));
     });
   });
 
-  for_each_tuple(scalars,[&](auto const& I, auto const& e1){
-    for_each_tuple(matrices,[&](auto const& J, auto const& e2){
+  for_each_tuple(scalars,[&](auto const&, auto const& e1){
+    for_each_tuple(matrices,[&](auto const&, auto const& e2){
       BOOST_CHECK(compare_extents(e1,e2) == (e1 == e2));
     });
   });
 
-  for_each_tuple(scalars,[&](auto const& I, auto const& e1){
-    for_each_tuple(tensors,[&](auto const& J, auto const& e2){
+  for_each_tuple(scalars,[&](auto const&, auto const& e1){
+    for_each_tuple(tensors,[&](auto const&, auto const& e2){
       BOOST_CHECK(compare_extents(e1,e2) == (e1 == e2));
     });
   });

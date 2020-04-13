@@ -1,12 +1,13 @@
 //
-//  Copyright (c) 2018-2019, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2018-2020, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2019-2020, Amit Singh, amitsingh19975@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer IOSB, Ettlingen, Germany
+//  Google
 //
 
 #ifndef _BOOST_NUMERIC_UBLAS_TENSOR_STATIC_TRAITS_HPP_
@@ -17,32 +18,12 @@
 namespace boost::numeric::ublas{
   
   template <class ExtentsType, ExtentsType... E> struct basic_static_extents;
-  template <class ExtentsType, std::size_t Rank> struct basic_fixed_rank_extents;
+  template <class ExtentsType, std::size_t N> struct basic_fixed_rank_extents;
   template<class ExtentsType> class basic_extents;
 
 } // namespace boost::numeric::ublas
 
 namespace boost::numeric::ublas::static_traits{
-  
-  template<typename T> struct product;
-  
-  template<typename T> 
-  inline static constexpr auto const product_v = product<T>::value;
-
-  template<typename ExtentsType, ExtentsType E0, ExtentsType... E>
-  struct product< basic_static_extents<ExtentsType, E0, E...> >{
-    static constexpr auto const value = E0 * product_v< basic_static_extents<ExtentsType, E...> >;
-  };
-  
-  template<typename ExtentsType, ExtentsType E0>
-  struct product< basic_static_extents<ExtentsType, E0> >{
-    static constexpr auto const value = E0 ;
-  };
-  
-  template<typename ExtentsType>
-  struct product< basic_static_extents<ExtentsType> >{
-    static constexpr auto const value = ExtentsType(0) ;
-  };
 
   template<typename T> 
   struct is_valid : std::integral_constant<bool, false>{};

@@ -1,12 +1,13 @@
 //
-//  Copyright (c) 2018-2019, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2018-2020, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2019-2020, Amit Singh, amitsingh19975@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer IOSB, Ettlingen, Germany
+//  Google
 //
 
 #ifndef _BOOST_NUMERIC_UBLAS_TENSOR_EXTENTS_FUNCTIONS_HPP_
@@ -23,10 +24,10 @@
 namespace boost::numeric::ublas::detail{
 
   template<typename T, T E, T...N>
-  constexpr auto push_back(basic_static_extents<T, N...>) -> basic_static_extents<T, N..., E>{};
+  constexpr auto push_back(basic_static_extents<T, N...>) -> basic_static_extents<T, N..., E>;
 
   template<typename T, T E, T...N>
-  constexpr auto push_front(basic_static_extents<T, N...>) -> basic_static_extents<T, E, N...>{};
+  constexpr auto push_front(basic_static_extents<T, N...>) -> basic_static_extents<T, E, N...>;
 
   template <typename T, T E0, T... E, T... N>
   constexpr auto squeeze_impl_remove_one( basic_static_extents<T, E0, E...>, basic_static_extents<T, N...> num = basic_static_extents<T>{} ){
@@ -61,7 +62,7 @@ namespace boost::numeric::ublas::detail{
     
     using extents_type = basic_static_extents<T,E...>;
 
-    if constexpr( extents_type::Rank <= typename extents_type::size_type(2) ){
+    if constexpr( extents_type::_size <= typename extents_type::size_type(2) ){
       return e;
     }
 
@@ -73,15 +74,15 @@ namespace boost::numeric::ublas::detail{
     // check after removing 1s from the list are they same
     // if same that means 1s does not exist and no need to
     // squeeze
-    if constexpr( decltype(one_free_static_extents)::Rank != extents_type::Rank ){
+    if constexpr( decltype(one_free_static_extents)::_size != extents_type::_size ){
       
       // after squeezing, all the extents are 1s we need to
       // return extents of (1, 1)
-      if constexpr( decltype(one_free_static_extents)::Rank == size_type(0) ){
+      if constexpr( decltype(one_free_static_extents)::_size == size_type(0) ){
 
         return basic_static_extents<T, value_type(1),value_type(1)>{};
 
-      }else if constexpr( decltype(one_free_static_extents)::Rank == (1) ){
+      }else if constexpr( decltype(one_free_static_extents)::_size == (1) ){
         // to comply with GNU Octave this check is made
         // if position 2 contains 1 we push at back
         // else we push at front

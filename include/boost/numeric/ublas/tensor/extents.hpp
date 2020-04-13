@@ -1,12 +1,13 @@
 //
-//  Copyright (c) 2018-2019, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2018-2020, Cem Bassoy, cem.bassoy@gmail.com
+// 	Copyright (c) 2019-2020, Amit Singh, amitsingh19975@gmail.com
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 //
 //  The authors gratefully acknowledge the support of
-//  Fraunhofer IOSB, Ettlingen, Germany
+//  Google
 //
 
 #ifndef _BOOST_NUMERIC_UBLAS_TENSOR_EXTENTS_HPP_
@@ -20,10 +21,10 @@
 namespace boost::numeric::ublas {
 
     template <class LExtents, class RExtents,
-        std::enable_if_t<detail::is_extents<LExtents>::value && detail::is_extents<RExtents>::value, int> = 0
+        std::enable_if_t<detail::is_extents_v<LExtents> && detail::is_extents_v<RExtents>, int> = 0
     >
     constexpr bool operator==(LExtents const& lhs, RExtents const& rhs){
-        static_assert(detail::is_extents<RExtents>::value && detail::is_extents<LExtents>::value,
+        static_assert(detail::is_extents_v<RExtents> && detail::is_extents_v<LExtents>,
             "boost::numeric::ublas::operator==() : invalid type, type should be an extents");
         if( lhs.size() != rhs.size() ){
             return false;
@@ -33,19 +34,19 @@ namespace boost::numeric::ublas {
     }
 
     template <class LExtents, class RExtents,
-        std::enable_if_t<detail::is_extents<LExtents>::value && detail::is_extents<RExtents>::value, int> = 0
+        std::enable_if_t<detail::is_extents_v<LExtents> && detail::is_extents_v<RExtents>, int> = 0
     >
     constexpr bool operator!=(LExtents const& lhs, RExtents const& rhs){
-        static_assert(detail::is_extents<RExtents>::value && detail::is_extents<LExtents>::value,
+        static_assert(detail::is_extents_v<RExtents> && detail::is_extents_v<LExtents>,
             "boost::numeric::ublas::operator!=() : invalid type, type should be an extents");
         return !(lhs == rhs);
     }
 
     template <class Extents,
-        std::enable_if_t<detail::is_extents<Extents>::value, int> = 0
+        std::enable_if_t<detail::is_extents_v<Extents>, int> = 0
     >
     std::ostream& operator<<(std::ostream& os, Extents const& e){
-        static_assert(detail::is_extents<Extents>::value,
+        static_assert(detail::is_extents_v<Extents>,
             "boost::numeric::ublas::operator<<() : invalid type, type should be an extents");
         return os<<to_string(e);
     }

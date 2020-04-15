@@ -95,7 +95,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(test_tensor_mtv, value,  test_types, fixture )
 
 
 			for(auto i = 0u; i < c.size(); ++i)
-				BOOST_CHECK_EQUAL( c[i] , value_type(na[m]) * a[i] );
+				BOOST_CHECK_EQUAL( c[i] , value_type( static_cast< inner_type_t<value_type> >(na[m]) ) * a[i] );
 
 		}
 	}
@@ -137,7 +137,7 @@ ublas::detail::recursive::mtm(
 
 
 for(auto i = 0u; i < c.size(); ++i)
-BOOST_CHECK_EQUAL( c[i] , value_type(na[1]) * a[0] );
+BOOST_CHECK_EQUAL( c[i] , value_type( static_cast< inner_type_t<value_type> >(na[1]) ) * a[0] );
 
 
 }
@@ -220,7 +220,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttm, value,  test_types, fixture )
 			           b.data(), nb.data(), wb.data());
 
 			for(auto i = 0u; i < c.size(); ++i)
-				BOOST_CHECK_EQUAL( c[i] , value_type(na[m]) * a[i] );
+				BOOST_CHECK_EQUAL( c[i] , value_type( static_cast< inner_type_t<value_type> >(na[m]) ) * a[i] );
 
 		}
 	}
@@ -302,11 +302,11 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttt_permutation, value,  test_type
 
 				auto nc_base = std::vector<size_type>( pc , 1 );
 
-				for(auto i = 0u; i < r; ++i)
-					nc_base[ i ] = na[ pia[i]-1 ];
+				for(auto j = 0u; j < r; ++j)
+					nc_base[ j ] = na[ pia[j]-1 ];
 
-				for(auto i = 0u; i < s; ++i)
-					nc_base[ r + i ] = nb[ pib_inv[i]-1 ];
+				for(auto j = 0u; j < s; ++j)
+					nc_base[ r + j ] = nb[ pib_inv[j]-1 ];
 
 				auto nc = extents_type ( nc_base );
 				auto wc = strides_type ( nc );
@@ -320,11 +320,11 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttt_permutation, value,  test_type
 
 
 				auto acc = value_type(1);
-				for(auto i = r; i < pa; ++i)
-					acc *= value_type(na[pia[i]-1]);
+				for(auto j = r; j < pa; ++j)
+					acc *= value_type( static_cast< inner_type_t<value_type> >(na[pia[j]-1]) );
 
-				for(auto i = 0ul; i < c.size(); ++i)
-					BOOST_CHECK_EQUAL( c[i] , acc * a[0] * b[0] );
+				for(auto j = 0ul; j < c.size(); ++j)
+					BOOST_CHECK_EQUAL( c[j] , acc * a[0] * b[0] );
 
 			}
 
@@ -405,7 +405,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ttt, value,  test_types, fixture )
 
 			auto acc = value_type(1);
 			for(auto i = r; i < pa; ++i)
-				acc *= value_type(na[i]);
+				acc *= value_type( static_cast< inner_type_t<value_type> >(na[i]) );
 
 			for(auto i = 0u; i < c.size(); ++i)
 				BOOST_CHECK_EQUAL( c[i] , acc * a[0] * b[0] );

@@ -106,7 +106,7 @@ struct basic_static_extents{
   /** @brief Returns true if both extents are equal else false */
   template <ExtentsType... RE>
   [[nodiscard]] inline
-  constexpr bool operator==(basic_static_extents<ExtentsType, RE...> const &rhs) const {
+  constexpr bool operator==([[maybe_unused]] basic_static_extents<ExtentsType, RE...> const &rhs) const {
     if constexpr( _size != basic_static_extents<ExtentsType, RE...>::_size ){
       return false;
     }else{

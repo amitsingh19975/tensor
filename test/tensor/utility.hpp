@@ -92,6 +92,23 @@ auto for_each_list(list<Ts...> l, CallBack call_back){
     f(l,call_back);
 }
 
+#include <complex>
+
+// To counter msvc warninig C4244
+template<typename T>
+struct inner_type{
+    using type = T;
+};
+
+template<typename T>
+struct inner_type< std::complex<T> >{
+    using type = T;
+};
+
+template<typename T>
+using inner_type_t = typename inner_type<T>::type;
+
+
 
 // creates e.g.
 // using test_types = zip<long,float>::with_t<first_order,last_order>; // equals

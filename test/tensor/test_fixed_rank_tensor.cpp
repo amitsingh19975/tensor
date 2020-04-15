@@ -229,7 +229,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ctor_extents_init, value,  test_ty
 		using extents_type = std::decay_t<decltype(e)>;
 		using tensor_type = ublas::tensor<value_type, extents_type, layout_type>;
 		
-		auto r = static_cast<value_type>(distribution(generator));
+		auto r = value_type( static_cast< inner_type_t<value_type> >(distribution(generator)) );
 		auto t = tensor_type{e,r};
 		for(auto i = 0ul; i < t.size(); ++i)
 			BOOST_CHECK_EQUAL( t[i], r );
@@ -388,12 +388,14 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_reshape, value,  test_types, fixtu
 	using layout_type = typename value::second_type;
 
 	for_each_tuple(extents,[&](auto const&, auto& efrom){
+		
+		using extents_type = std::decay_t<decltype(efrom)>;
+		using tensor_type = ublas::tensor<value_type, extents_type, layout_type>;
+		
 		for_each_tuple(extents,[&](auto const&, auto& eto){
-			if constexpr( std::decay_t<decltype(efrom)>::_size == std::decay_t<decltype(eto)>::_size ){
-
-				using extents_type = std::decay_t<decltype(efrom)>;
-				using tensor_type = ublas::tensor<value_type, extents_type, layout_type>;
-
+			
+			if ( efrom.size() == eto.size() ){
+				
 				auto v = value_type {};
 				v+=value_type{1};
 				auto t = tensor_type{efrom, v};
@@ -427,11 +429,13 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_swap, value,  test_types, fixture)
 	using layout_type = typename value::second_type;
 	
 	for_each_tuple(extents,[&](auto const&, auto& e_t){
+		
+		using extents_type = std::decay_t<decltype(e_t)>;
+		using tensor_type = ublas::tensor<value_type, extents_type, layout_type>;
+		
 		for_each_tuple(extents,[&](auto const&, auto& e_r){
-			if constexpr( std::decay_t<decltype(efrom)>::_size == std::decay_t<decltype(eto)>::_size ){
 				
-				using extents_type = std::decay_t<decltype(e_t)>;
-				using tensor_type = ublas::tensor<value_type, extents_type, layout_type>;
+			if ( e_t.size() == e_r.size() ){
 				
 				auto v = value_type {} + value_type{1};
 				auto w = value_type {} + value_type{2};
@@ -453,7 +457,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_swap, value,  test_types, fixture)
 				BOOST_CHECK_EQUAL (  r.size() , product(e_t) );
 				BOOST_CHECK_EQUAL (  r.rank() , e_t.size() );
 				BOOST_CHECK ( r.extents() == e_t );
-				
+
 			}
 		});
 	});

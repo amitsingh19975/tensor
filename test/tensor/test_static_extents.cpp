@@ -434,7 +434,7 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents_comparsion_operator, fixture, *boost
 
   auto const compare_extents = [](auto const& e1, auto const& e2){
     if(e1.size() != e2.size()) return false;
-    for(auto i = 0; i <e1.size(); i++){
+    for(auto i = 0ul ; i < e1.size(); i++){
       if(e1[i] != e2[i]){
         return false;
       }

@@ -101,6 +101,11 @@ auto retrieve_extents(tensor_expression<T,D> const& expr)
 	return retrieve_extents(cast_expr);
 }
 
+// Disable warning for unreachable code for MSVC compiler
+#ifdef _MSC_VER
+	#pragma warning( push )
+	#pragma warning( disable : 4702 )
+#endif
 /** @brief Retrieves extents of the binary tensor expression
  *
  * @note tensor expression must be a binary tree with at least one tensor type
@@ -125,6 +130,10 @@ auto retrieve_extents(binary_tensor_expression<T,EL,ER,OP> const& expr)
 	else if constexpr ( detail::has_tensor_types<T,ER>::value  )
 	    return retrieve_extents(expr.er);
 }
+
+#ifdef _MSC_VER
+	#pragma warning( pop )
+#endif
 
 /** @brief Retrieves extents of the binary tensor expression
  *

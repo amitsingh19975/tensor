@@ -233,7 +233,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ctor_extents_init, value,  test_ty
 	auto distribution = distribution_type(1,6);
 
 	for(auto const& e : extents){
-		auto r = static_cast<value_type>(distribution(generator));
+		auto r = value_type( static_cast< inner_type_t<value_type> >(distribution(generator)) );
 		auto t = tensor_type{e,r};
 		for(auto i = 0ul; i < t.size(); ++i)
 			BOOST_CHECK_EQUAL( t[i], r );

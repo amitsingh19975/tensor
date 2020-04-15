@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_einstein_multiplication, value,  test_types 
 	using extents_type  = dynamic_extents<>;
 	using tensor_type  = tensor<value_type,extents_type,layout_type>;
 	using namespace boost::numeric::ublas::index;
-
+	
 	{
 		auto A = tensor_type{5,3};
 		auto B = tensor_type{3,4};
@@ -43,11 +43,11 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_einstein_multiplication, value,  test_types 
 
 		for(auto j = 0u; j < A.extents().at(1); ++j)
 			for(auto i = 0u; i < A.extents().at(0); ++i)
-				A.at( i,j ) = value_type(i+1);
+				A.at( i,j ) = value_type( static_cast< inner_type_t<value_type> >(i+1) );
 
 		for(auto j = 0u; j < B.extents().at(1); ++j)
 			for(auto i = 0u; i < B.extents().at(0); ++i)
-				B.at( i,j ) = value_type(i+1);
+				B.at( i,j ) = value_type( static_cast< inner_type_t<value_type> >(i+1) );
 
 
 
@@ -72,12 +72,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_einstein_multiplication, value,  test_types 
 		for(auto k = 0u; k < A.extents().at(2); ++k)
 			for(auto j = 0u; j < A.extents().at(1); ++j)
 				for(auto i = 0u; i < A.extents().at(0); ++i)
-					A.at( i,j,k ) = value_type(i+1);
+					A.at( i,j,k ) = value_type( static_cast< inner_type_t<value_type> >(i+1) );
 
 		for(auto k = 0u; k < B.extents().at(2); ++k)
 			for(auto j = 0u; j < B.extents().at(1); ++j)
 				for(auto i = 0u; i < B.extents().at(0); ++i)
-					B.at( i,j,k ) = value_type(i+1);
+					B.at( i,j,k ) = value_type( static_cast< inner_type_t<value_type> >(i+1) );
 
 		auto AB = A(_d,_,_f) * B(_f,_d,_);
 
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_einstein_multiplication, value,  test_types 
 
 		for(auto j = 0u; j < AB.extents().at(1); ++j)
 			for(auto i = 0u; i < AB.extents().at(0); ++i)
-				BOOST_CHECK_EQUAL( AB.at( i,j ) ,  value_type(nf * nd) );
+				BOOST_CHECK_EQUAL( AB.at( i,j ) ,  value_type( static_cast< inner_type_t<value_type> >(nf * nd) ) );
 
 	}
 
@@ -101,12 +101,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_einstein_multiplication, value,  test_types 
 
 		for(auto j = 0u; j < A.extents().at(1); ++j)
 			for(auto i = 0u; i < A.extents().at(0); ++i)
-				A.at( i,j ) = value_type(i+1);
+				A.at( i,j ) = value_type( static_cast< inner_type_t<value_type> >(i+1) );
 
 		for(auto k = 0u; k < B.extents().at(2); ++k)
 			for(auto j = 0u; j < B.extents().at(1); ++j)
 				for(auto i = 0u; i < B.extents().at(0); ++i)
-					B.at( i,j,k ) = value_type(i+1);
+					B.at( i,j,k ) = value_type( static_cast< inner_type_t<value_type> >(i+1) );
 
 		auto AB = A(_d,_f) * B(_f,_d,_);
 
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_einstein_multiplication, value,  test_types 
 		auto const nd = ( A.extents().at(0) * (A.extents().at(0)+1) / 2 );
 
 		for(auto i = 0u; i < AB.extents().at(0); ++i)
-			BOOST_CHECK_EQUAL ( AB.at( i  ) ,  value_type(nf * nd) );
+			BOOST_CHECK_EQUAL ( AB.at( i  ) ,  value_type( static_cast< inner_type_t<value_type> >(nf * nd) ) );
 
 	}
 }

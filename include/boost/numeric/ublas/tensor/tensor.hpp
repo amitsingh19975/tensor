@@ -777,14 +777,14 @@ public:
 private:
 
 	inline
-	void resize( extents_type const& e ){
+	void resize( [[maybe_unused]] extents_type const& e ){
 		if constexpr( detail::is_resizable_v<array_type>){
 			data_.resize(product(e));
 		}
 	}
 
 	inline
-	void resize( size_type sz ){
+	void resize( [[maybe_unused]] size_type sz ){
 		if constexpr( detail::is_resizable_v<array_type>){
 			data_.resize(sz);
 		}

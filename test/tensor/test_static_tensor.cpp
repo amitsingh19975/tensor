@@ -115,7 +115,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_copy_ctor, value,  test_types, fix
 
 	for_each_tuple(extents, [](auto const&, auto& e){
 		using extents_type = std::decay_t<decltype(e)>;
-		auto r = ublas::tensor<value_type, extents_type, layout_type>{e};
+		auto r = ublas::tensor<value_type, extents_type, layout_type>{e,0};
 
 		auto t = r;
 		BOOST_CHECK_EQUAL (  t.size() , r.size() );
@@ -131,7 +131,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_copy_ctor, value,  test_types, fix
 		}
 
 		for(auto i = 0ul; i < t.size(); ++i)
-			BOOST_CHECK_EQUAL( t[i], r[i]  );
+			BOOST_TEST( t[i] == r[i]);
 
 	});
 }
@@ -148,7 +148,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_copy_ctor_layout, value,  test_typ
 	for_each_tuple(extents, [](auto const&, auto& e){
 		using extents_type = std::decay_t<decltype(e)>;
 		using tensor_type = ublas::tensor<value_type, extents_type, layout_type>;
-		auto r = tensor_type{e};
+		auto r = tensor_type{e,0};
 		ublas::tensor<value_type, extents_type, other_layout_type> t = r;
 		tensor_type q = t;
 
@@ -162,7 +162,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_copy_ctor_layout, value,  test_typ
 		BOOST_CHECK ( q.extents() == r.extents() );
 
 		for(auto i = 0ul; i < t.size(); ++i)
-			BOOST_CHECK_EQUAL( q[i], r[i]  );
+			BOOST_TEST( q[i] == r[i]);
 
 	});
 }
@@ -212,7 +212,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_ctor_extents_init, value,  test_ty
 		using extents_type = std::decay_t<decltype(e)>;
 		using tensor_type = ublas::tensor<value_type, extents_type, layout_type>;
 		
-		auto r = static_cast<value_type>(distribution(generator));
+		auto r = value_type( static_cast< inner_type_t<value_type> >(distribution(generator)) );
 		auto t = tensor_type{e,r};
 		for(auto i = 0ul; i < t.size(); ++i)
 			BOOST_CHECK_EQUAL( t[i], r );

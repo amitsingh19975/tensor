@@ -38,7 +38,6 @@ test-suite boost-ublas-tensor-test
           test_multiplication.cpp
           test_multi_index_utility.cpp
           test_multi_index.cpp
-          test_functions.cpp
           test_extents.cpp
           test_expression_evaluation.cpp
           test_einstein_notation.cpp
@@ -61,5 +60,8 @@ test-suite boost-ublas-tensor-test
           test_fixed_rank_expression_evaluation.cpp
           test_fixed_rank_tensor_matrix_vector.cpp
           unit_test_framework 
+    ]
+    [ run test_functions.cpp
+          unit_test_framework
     ]
     ;

@@ -355,7 +355,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_accumulate, value,  tes
 
 		auto acc = ublas::accumulate( n.size(), n.data(), a.data(), wa.data(), v);
 
-		BOOST_CHECK_EQUAL( acc, value_type( s*(s+1) / 2 )  );
+		BOOST_CHECK_EQUAL( acc, value_type( static_cast< inner_type_t<value_type> >( s*(s+1) / 2 ) )  );
 
                 using size_type = typename ublas::strides_t<ublas::dynamic_extents<>,ublas::first_order>::value_type;
                 size_type zero = 0;
@@ -372,7 +372,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_algorithms_accumulate, value,  tes
                 auto acc2 = ublas::accumulate( n.size(), n.data(), a.data(), wa.data(), v,
 		                               [](auto const& l, auto const& r){return l + r; });
 
-                BOOST_CHECK_EQUAL( acc2, value_type( s*(s+1) / 2 )  );
+                BOOST_CHECK_EQUAL( acc2, value_type( static_cast< inner_type_t<value_type> >( s*(s+1) / 2 ) )  );
 
                 ublas::accumulate(zero, n.data(), a.data(), wa.data(), v, [](auto const& l, auto const& r){return l + r; });
 

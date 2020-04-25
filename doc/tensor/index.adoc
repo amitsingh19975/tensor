@@ -1,0 +1,19 @@
+
+= Tensor Manual
+
+== Content Table
+
+.Extents
+. <<extents/static_extents.adoc#,Static Extents>>
+. Dynamic Extents
+. Fixed Rank Extents
+
+.Strides
+. Static Strides
+. Dynamic Strides
+. Fixed Rank Strides
+
+.Tensor
+. Static Tensor
+. Dynamic Tensor
+. Fixed Rank Tensor

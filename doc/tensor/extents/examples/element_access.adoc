@@ -1,0 +1,191 @@
+:source-highlighter: pygments
+= Examples
+
+== Element Access 
+
+[#at]
+=== *at*
+.Prototype
+[source,cpp]
+----
+[[nodiscard]] inline static constexpr const_reference at(size_type); // basic_static_extents
+
+[[nodiscard]] inline constexpr const_reference at(size_type) const; // basic_fixed_rank_extents
+[[nodiscard]] inline constexpr reference at(size_type); // basic_fixed_rank_extents
+
+[[nodiscard]] inline constexpr const_reference at (size_type) const; // basic_extents
+[[nodiscard]] inline constexpr reference at (size_type); // basic_extents
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+for(auto i = 0ul; i < fixed_rank_extents.size(); ++i){
+    std::cout<<fixed_rank_extents.at(i)<<' '; // 1 2 3 4 5
+}
+std::cout<<std::endl;
+
+for(auto i = 0ul; i < static_extents.size(); ++i){
+    std::cout<<static_extents.at(i)<<' '; // 1 2 3 34
+}
+std::cout<<std::endl;
+
+for(auto i = 0ul; i < dynamic_extents.size(); ++i){
+    std::cout<<dynamic_extents.at(i)<<' '; // 1 2 3 4 56 7 8 8
+}
+std::cout<<std::endl;
+
+----
+
+[#operator[]]
+=== *operator[]*
+.Prototype
+[source,cpp]
+----
+[[nodiscard]] inline constexpr const_reference operator[](size_type) const noexcept; // basic_static_extents
+
+[[nodiscard]] inline constexpr const_reference operator[](size_type) const noexcept; // basic_fixed_rank_extents
+[[nodiscard]] inline constexpr reference operator[](size_type); // basic_fixed_rank_extents
+
+[[nodiscard]] inline constexpr const_reference operator[] (size_type) const noexcept; // basic_extents
+[[nodiscard]] inline constexpr reference operator[] (size_type); // basic_extents
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+for(auto i = 0ul; i < fixed_rank_extents.size(); ++i){
+    std::cout<<fixed_rank_extents[i]<<' '; // 1 2 3 4 5
+}
+std::cout<<std::endl;
+
+for(auto i = 0ul; i < static_extents.size(); ++i){
+    std::cout<<static_extents[i]<<' '; // 1 2 3 34
+}
+std::cout<<std::endl;
+
+for(auto i = 0ul; i < dynamic_extents.size(); ++i){
+    std::cout<<dynamic_extents[i]<<' '; // 1 2 3 4 56 7 8 8
+}
+std::cout<<std::endl;
+
+----
+
+[#base]
+=== *base*
+.Prototype
+[source,cpp]
+----
+[[nodiscard]] inline constexpr base_type const& base() const noexcept; // basic_static_extents
+
+[[nodiscard]] inline constexpr base_type const& base() const; // basic_fixed_rank_extents
+
+[[nodiscard]] inline constexpr base_type const& base() const; // basic_extents
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+auto& fixed_rank_extents_base = fixed_rank_extents.base(); 
+auto& static_extents_base = static_extents.base(); 
+auto& dynamic_extents_base = dynamic_extents.base(); 
+
+size_t s = 0;
+for(auto const& el : fixed_rank_extents_base){
+    s += el;
+}
+std::cout<<s<<std::endl; // 15 
+
+s = 0;
+for(auto const& el : static_extents_base){
+    s += el;
+}
+std::cout<<s<<std::endl; // 40 
+
+s = 0;
+for(auto const& el : dynamic_extents_base){
+    s += el;
+}
+std::cout<<s<<std::endl; // 89
+
+----
+
+[#data]
+=== *data*
+.Prototype
+[source,cpp]
+----
+[[nodiscard]] inline constexpr const_pointer data() const noexcept; // basic_static_extents
+
+[[nodiscard]] inline constexpr const_pointer data() const; // basic_fixed_rank_extents
+
+[[nodiscard]] inline constexpr const_pointer data() const; // basic_extents
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+auto& fixed_rank_extents_data = fixed_rank_extents.data(); 
+auto& static_extents_data = static_extents.data(); 
+auto& dynamic_extents_data = dynamic_extents.data(); 
+
+size_t s = 0;
+for(auto i = 0ul; i < fixed_rank_extents.size(); ++i){
+    s += *(fixed_rank_extents_data + i );
+}
+std::cout<<s<<std::endl; // 15 
+
+s = 0;
+for(auto i = 0ul; i < static_extents.size(); ++i){
+    s += *(static_extents_data + i );
+}
+std::cout<<s<<std::endl; // 40 
+
+s = 0;
+for(auto i = 0ul; i < dynamic_extents.size(); ++i){
+    s += *(dynamic_extents_data + i );
+}
+std::cout<<s<<std::endl; // 89
+
+----
+
+[#back]
+=== *back*
+.Prototype
+[source,cpp]
+----
+[[nodiscard]] inline constexpr const_reference back() const noexcept; // basic_static_extents
+
+[[nodiscard]] inline constexpr const_reference back() const; // basic_fixed_rank_extents
+
+[[nodiscard]] inline constexpr const_reference back() const; // basic_extents
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+std::cout<<fixed_rank_extents.back()<<std::endl; // 5;
+std::cout<<static_extents.back()<<std::endl; // 34;
+std::cout<<dynamic_extents.back()<<std::endl; // 8;
+
+----

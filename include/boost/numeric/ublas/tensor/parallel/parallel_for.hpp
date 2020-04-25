@@ -6,7 +6,6 @@
 #include "detail/noexcept_function.hpp"
 #include "execution.hpp"
 #include "detail/query_or.hpp"
-#include "loop_param.hpp"
 
 
 namespace boost::numeric::ublas::parallel{

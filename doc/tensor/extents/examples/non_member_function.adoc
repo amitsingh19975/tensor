@@ -1,0 +1,62 @@
+:source-highlighter: pygments
+= Examples
+
+== Capacity 
+
+[#operator==]
+=== *operator==*
+.Prototype
+[source,cpp]
+----
+[[nodiscard]] inline constexpr bool operator== (basic_extents const&) const;
+[[nodiscard]] inline constexpr bool operator== (basic_fixed_rank_extents const &) const;
+[[nodiscard]] inline constexpr bool operator== (basic_static_extents const &) const;
+
+template <class LExtents, class RExtents>
+constexpr bool operator==(LExtents const& lhs, RExtents const& rhs); // It is in header file extents.hpp
+
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+std::cout<<( fixed_rank_extents == static_extents )<<std::endl; // false
+std::cout<<( fixed_rank_extents == dynamic_extents )<<std::endl; // false
+
+std::cout<<( static_extents == fixed_rank_extents )<<std::endl; // false
+std::cout<<( static_extents == dynamic_extents )<<std::endl; // false
+
+----
+
+[#operator!=]
+=== *operator!=*
+.Prototype
+[source,cpp]
+----
+[[nodiscard]] inline constexpr bool operator!= (basic_extents const&) const;
+[[nodiscard]] inline constexpr bool operator!= (basic_fixed_rank_extents const &) const;
+[[nodiscard]] inline constexpr bool operator!= (basic_static_extents const &) const;
+
+template <class LExtents, class RExtents>
+constexpr bool operator!=(LExtents const& lhs, RExtents const& rhs); // It is in header file extents.hpp
+
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+std::cout<<( fixed_rank_extents != static_extents )<<std::endl; // true
+std::cout<<( fixed_rank_extents != dynamic_extents )<<std::endl; // true
+
+std::cout<<( static_extents != fixed_rank_extents )<<std::endl; // true
+std::cout<<( static_extents != dynamic_extents )<<std::endl; // true
+
+----

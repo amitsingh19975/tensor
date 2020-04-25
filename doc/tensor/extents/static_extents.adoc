@@ -1,0 +1,152 @@
+:source-highlighter: pygments
+
+= Static Extents
+
+== Introduction
+
+Extents are a collection of dimensions in a data structure and use for a tensor to specify dimensions.
+
+The static extents is extents which helps you to create this data structure at compile-time rather than runtime which
+reduces the runtime cost.
+
+[NOTE]
+=====================
+Once created you can not change or resize
+extents.
+=====================
+
+[WARNING]
+=====================
+The static extents use `std::array` which is
+stack constraint and can easily cause StackOverflow,
+if the user is not cautious.
+=====================
+
+== Class
+
+=== basic_static_extents
+[source,cpp]
+----
+namespace boost::numeric::boost{
+    template <class ExtentsType, ExtentsType... E>
+    struct basic_static_extents;
+}
+----
+
+.Template Arguments
+[options="header"]
+|=========================
+|Template | Information | Examples
+|ExtentsType | It is an unsigned integer type. | `std::size_t`, `unsigned int`, etc.
+|E | It is extents of type ExtentsType. |  0 < E +++&#8804+++ Max Size of ExtentsType.
+|=========================
+
+.Member types
+[options="header"]
+|=========================
+|Member types | Definition
+| _size       | sizeof...(E)
+| base_type       | std::array<ExtentsType,_size>
+| value_type      | typename base_type::value_type
+| const_reference | typename base_type::const_reference
+| reference       | typename base_type::reference
+| const_pointer   | typename base_type::const_pointer
+| const_iterator  | typename base_type::const_iterator
+| size_type       | typename base_type::size_type
+|=========================
+
+.Constructors
+[options="header"]
+|=========================
+|Prototype | Information
+|<<examples/constructors.adoc#static_extents,basic_static_extents()>> | Default initilization
+|<<examples/constructors.adoc#static_extents,basic_static_extents(basic_static_extents const&)>> | Copy constructor
+|<<examples/constructors.adoc#static_extents,basic_static_extents(basic_static_extents &&)>> | Move constructor
+|=========================
+
+.Element Access
+[options="header"]
+|=========================
+|Function | Information
+|<<examples/element_access.adoc#at,at>> | Returns the element at a position.
+|<<examples/element_access.adoc#operator[],operator[]>> | Returns the element at a position.
+|<<examples/element_access.adoc#base,base()>> | Returns the reference to the std::array containing the extents.
+|<<examples/element_access.adoc#data,data()>> | Returns the pointer to the std::array containing the extents.
+|<<examples/element_access.adoc#back,back()>> | Returns the element at the last position.
+|=========================
+
+.Capacity
+[options="header"]
+|=========================
+|Function | Information
+|<<examples/capacity.adoc#size,size()>> | Returns the size of extents.
+|<<examples/capacity.adoc#empty,empty()>> | Returns true if extents is empty else false.
+|=========================
+
+.Iterator
+[options="header"]
+|=========================
+|Function | Information
+|<<examples/iterator.adoc#begin,begin()>> | Returns the begin const iterator.
+|<<examples/iterator.adoc#end,end()>> | Returns the end const iterator.
+|=========================
+
+.Non-Member Functions
+[options="header"]
+|=========================
+|Function | Information
+|<<examples/non_member_function.adoc#operaror==,operaror== >> | Returns true if both extents are equal else false.
+|<<examples/non_member_function.adoc#operaror!=,operaror!= >> | Returns true if both extents are not equal else false.
+|=========================
+
+[NOTE]
+=====================
+If you want to compare the static extents with another type of extents
+such as fixed rank extents or dynamic extents there is an operator overloaded
+in header file `extents.hpp`
+=====================
+
+.Helper Struct
+[options="header"]
+|=========================
+|Name | Information
+|<<examples/helper.adoc#static_product,static_product>> | Obtains the product of extents.
+|<<examples/helper.adoc#is_dynamic,is_dynamic>> | Checks if extents is dynamic or not.
+|<<examples/helper.adoc#is_static,is_static>> | Checks if extents is static or not.
+|<<examples/helper.adoc#is_dynamic_rank,is_dynamic_rank>> | Checks if extents has dynamic rank or not.
+|<<examples/helper.adoc#is_static_rank,is_static_rank>> | Checks if extents has static rank or not.
+|=========================
+
+.Type Alias
+[source,cpp]
+----
+namespace boost::numeric::ublas{
+    template<std::size_t... E>
+    using static_extents = basic_static_extents<std::size_t, E...>;
+}
+----
+=== Example
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto e1 = ub::basic_static_extents<std::size_t,1,2,3>{};
+auto e2 = ub::static_extents<1,2,3>{}; // e1 and e2 are equivalent;
+
+std::size_t p = ub::static_product_v< decltype(e1) >; // p = 6
+
+std::cout<<e1.size()<<std::endl; // 3;
+std::cout<<std::boolalpha<<e1.empty()<<std::endl; // false
+std::cout<<std::boolalpha<<( e1 == e2 )<<std::endl; // true
+std::cout<<std::boolalpha<<( e1 != e2 )<<std::endl; // false
+std::cout<<e1<<std::endl; // [1,2,3], operator<< defined in extents.hpp
+
+auto s = 0ul;
+for(auto const& el : e2){
+    s += el;
+}
+std::cout<<s<<std::endl;    // 6;
+
+std::cout<<std::accumulate(e2.begin(),e2.end(),0ul)<<std::endl; // 6;
+
+----

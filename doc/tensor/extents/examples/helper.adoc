@@ -1,0 +1,130 @@
+:source-highlighter: pygments
+= Examples
+
+== Heper Struct / Class  
+
+[#static_product]
+=== *static_product*
+.Prototype
+[source,cpp]
+----
+
+template<typename T> struct static_product;
+
+template<typename T> 
+inline static constexpr auto const static_product_v = static_product<T>::value;
+
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+
+std::cout<<( ub::static_product_v< decltype(fixed_rank_extents) > )<<std::endl; // 120
+
+----
+
+[#is_dynamic]
+=== *is_dynamic*
+.Prototype
+[source,cpp]
+----
+
+template <class E> struct is_dynamic;
+
+template <class E> 
+inline static constexpr bool const is_dynamic_v = is_dynamic<E>::value;
+
+
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+std::cout<< (ub::is_dynamic_v<decltype(fixed_rank_extents)>) <<std::endl; // true;
+std::cout<< (ub::is_dynamic_v<decltype(static_extents)>) <<std::endl; // false;
+std::cout<< (ub::is_dynamic_v<decltype(dynamic_extents)>) <<std::endl; // true;
+
+----
+
+[#is_static]
+=== *is_static*
+.Prototype
+[source,cpp]
+----
+
+template <class E> struct is_static;
+
+template <class E> 
+inline static constexpr bool const is_static_v = is_static<E>::value;
+
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+
+std::cout<< (ub::is_static_v<decltype(fixed_rank_extents)>) <<std::endl; // false;
+std::cout<< (ub::is_static_v<decltype(static_extents)>) <<std::endl; // true;
+std::cout<< (ub::is_static_v<decltype(dynamic_extents)>) <<std::endl; // false;
+
+----
+
+[#is_dynamic_rank]
+=== *is_dynamic_rank*
+.Prototype
+[source,cpp]
+----
+
+template <class E> struct is_dynamic_rank;
+
+template <class E> 
+inline static constexpr bool const is_dynamic_rank_v = is_dynamic_rank<E>::value;
+
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+std::cout<< (ub::is_dynamic_rank_v<decltype(fixed_rank_extents)>) <<std::endl; // false;
+std::cout<< (ub::is_dynamic_rank_v<decltype(static_extents)>) <<std::endl; // false;
+std::cout<< (ub::is_dynamic_rank_v<decltype(dynamic_extents)>) <<std::endl; // true;
+
+----
+
+[#is_static_rank]
+=== *is_static_rank*
+.Prototype
+[source,cpp]
+----
+template <class E> struct is_static_rank;
+
+template <class E> 
+inline static constexpr bool const is_static_rank_v = is_static_rank<E>::value;
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+std::cout<< (ub::is_static_rank_v<decltype(fixed_rank_extents)>) <<std::endl; // true;
+std::cout<< (ub::is_static_rank_v<decltype(static_extents)>) <<std::endl; // true;
+std::cout<< (ub::is_static_rank_v<decltype(dynamic_extents)>) <<std::endl; // false;
+
+----

@@ -1,0 +1,53 @@
+:source-highlighter: pygments
+= Examples
+
+[#static_extents]
+== Static Extents
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto e1 = ub::static_extents<1,2,3>{}; // default contructor
+
+ub::static_extents<1,2,3> e2(e1); // copy constructor
+
+ub::static_extents<1,2,3> e3(std::move(e1)); // move constructor
+----
+
+[#dynamic_extents]
+== Dynamic Extents
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto e1 = ub::dynamic_extents<>{1,2,3}; // default contructor
+
+ub::dynamic_extents<> e2(e1); // copy constructor
+
+ub::dynamic_extents<> e3(std::move(e1)); // move constructor
+
+auto s1 = ub::static_extents<1,2,3>{};
+auto f1 = ub::dynamic_extents<3>{1,2,3};
+
+auto e4 = ub::dynamic_extents<>(s1); // dynamic extents from static extents;
+auto e5 = ub::dynamic_extents<>(f1); // dynamic extents from fixed rank extents;
+----
+
+[#fixed_rank_extents]
+== Fixed Rank Extents
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto e1 = ub::dynamic_extents<3>{1,2,3}; // default contructor
+
+ub::dynamic_extents<3> e2(e1); // copy constructor
+
+ub::dynamic_extents<3> e3(std::move(e1)); // move constructor
+
+auto s1 = ub::static_extents<1,2,3>{};
+auto f1 = ub::dynamic_extents<>{1,2,3};
+
+auto e4 = ub::dynamic_extents<3>(s1); // fixed rank extents from static extents;
+auto e5 = ub::dynamic_extents<3>(f1); // fixed rank extents from dynamic extents  ;
+----

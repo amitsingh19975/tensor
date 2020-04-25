@@ -1,0 +1,68 @@
+:source-highlighter: pygments
+= Examples
+
+== Capacity 
+
+[#begin]
+=== *begin*
+.Prototype
+[source,cpp]
+----
+[[nodiscard]] inline constexpr const_iterator begin() const;
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+for(auto i = fixed_rank_extents.begin(); i != fixed_rank_extents.end(); ++i){
+    std::cout<<*i<<' '; // 1 2 3 4 5
+}
+std::cout<<std::endl;
+
+for(auto i = static_extents.begin(); i != static_extents.end(); ++i){
+    std::cout<<*i<<' '; // 1 2 3 34
+}
+std::cout<<std::endl;
+
+for(auto i = dynamic_extents.begin(); i != dynamic_extents.end(); ++i){
+    std::cout<<*i<<' '; // 1 2 3 4 56 7 8 8
+}
+std::cout<<std::endl;
+
+----
+
+[#end]
+=== *end*
+.Prototype
+[source,cpp]
+----
+[[nodiscard]] inline constexpr const_iterator end() const;
+----
+[source,cpp]
+----
+namespace ub = boost::numeric::ublas;
+
+auto fixed_rank_extents = ub::dynamic_extents<5>{1,2,3,4,5};
+auto static_extents = ub::static_extents<1,2,3,34>;
+auto dynamic_extents = ub::dynamic_extents<>{1,2,3,4,56,7,8,8};
+
+for(auto i = fixed_rank_extents.begin(); i != fixed_rank_extents.end(); ++i){
+    std::cout<<*i<<' '; // 1 2 3 4 5
+}
+std::cout<<std::endl;
+
+for(auto i = static_extents.begin(); i != static_extents.end(); ++i){
+    std::cout<<*i<<' '; // 1 2 3 34
+}
+std::cout<<std::endl;
+
+for(auto i = dynamic_extents.begin(); i != dynamic_extents.end(); ++i){
+    std::cout<<*i<<' '; // 1 2 3 4 56 7 8 8
+}
+std::cout<<std::endl;
+
+----

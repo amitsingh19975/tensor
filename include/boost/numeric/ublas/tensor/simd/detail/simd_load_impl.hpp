@@ -42,16 +42,34 @@ namespace boost::numeric::ublas::simd::detail{
         using m256 = simd_type_t<256,float>;
         using m256d = simd_type_t<256,double>;
 
-        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( T const* p ) const noexcept{
-            return *reinterpret_cast<m256i const*>(p);
-        }
-
         BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( m256i const* p ) const noexcept{
             return _mm256_loadu_si256(p);
         }
 
         BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( float const* p ) const noexcept{
             return _mm256_loadu_ps(p);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( float const* p, size_t k, size_t w = 1 ) const noexcept{
+            if( k == 1 ){
+                return assignment<256,T>{}( *(p + w * 0), 0, 0, 0, 0, 0, 0, 0);
+            }else if( k == 2 ){
+                return assignment<256,T>{}( *(p + w * 0), *(p + w * 1), 0, 0, 0, 0, 0, 0);
+            }else if( k == 3 ){
+                return assignment<256,T>{}( *(p + w * 0), *(p + w * 1), *(p + w * 2), 0, 0, 0, 0, 0);
+            }else if( k == 4 ){
+                return assignment<256,T>{}( *(p + w * 0), *(p + w * 1), *(p + w * 2), *(p + w * 3), 0, 0, 0, 0);
+            }else if( k == 5 ){
+                return assignment<256,T>{}( *(p + w * 0), *(p + w * 1), *(p + w * 2), *(p + w * 3), *(p + w * 4), 0, 0, 0);
+            }else if( k == 6 ){
+                return assignment<256,T>{}( *(p + w * 0), *(p + w * 1), *(p + w * 2), *(p + w * 3), *(p + w * 4), *(p + w * 5), 0, 0);
+            }else if( k == 7 ){
+                return assignment<256,T>{}( *(p + w * 0), *(p + w * 1), *(p + w * 2), *(p + w * 3), *(p + w * 4), *(p + w * 5), *(p + w * 6), 0);
+            }else if( k == 8 ){
+                return assignment<256,T>{}( *(p + w * 0), *(p + w * 1), *(p + w * 2), *(p + w * 3), *(p + w * 4), *(p + w * 5), *(p + w * 6), *(p + w * 7));
+            }else{
+                return assignment<256,T>{}(0);
+            }
         }
 
         BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( double const* p ) const noexcept{

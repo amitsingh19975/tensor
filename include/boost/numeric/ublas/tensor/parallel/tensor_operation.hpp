@@ -413,12 +413,12 @@ BOOST_UBLAS_TENSOR_ALWAYS_INLINE void mtm(PointerOut c, SizeType const*const nc,
 
 	// C(i,j) = A(i,k) * B(k,j)
 
-	assert(nc[0] == na[0]);
-	assert(nc[1] == nb[1]);
-	assert(na[1] == nb[0]);
+	// assert(nc[0] == na[0]);
+	// assert(nc[1] == nb[1]);
+	// assert(na[1] == nb[0]);
 
-    auto sa = simd::mat_storage<N,remove_cp_t<PointerIn1>>(a, na[0], na[1], wa[0], wa[1] );
-    auto sb = simd::mat_storage<N,remove_cp_t<PointerIn2>,simd::op::transpose>(b, nb[0], nb[1], wb[0], wb[1] );
+    // auto sa = simd::mat_storage<remove_cp_t<PointerIn1>,N>(a, na[0], na[1], wa[0], wa[1] );
+    // auto sb = simd::mat_storage<remove_cp_t<PointerIn2>,N,simd::op::transpose>(b, nb[0], nb[1], wb[0], wb[1] );
 
 
     auto policy = par.on(impl::system_thread_pool.executor());
@@ -431,7 +431,7 @@ BOOST_UBLAS_TENSOR_ALWAYS_INLINE void mtm(PointerOut c, SizeType const*const nc,
         
     auto nex = ex.get_chunk_state();
 
-    mtm_helper(c,nc,wc,sa,sb, na[0], na[1],nex);
+    mtm_helper(c,nc,wc,a,b, na[0], na[1],nex);
 
 }
 

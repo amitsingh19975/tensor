@@ -101,6 +101,18 @@ namespace boost::numeric::ublas::simd{
             return *reinterpret_cast< simd_type const* >(m_data);
         }
 
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto load(const_pointer p, size_type w){
+            get_simd() = detail::load<N,T>{}(p,w);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto load(const_pointer p, size_type k, size_type w){
+            get_simd() = detail::load<N,T>{}(p,k,w);
+        }
+
+        // BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto load2(const_pointer p, size_type k, size_type w){
+        //     get_simd() = _mm256_i32gather_ps(p,k,w);
+        // }
+
         BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr basic_simd_type operator*( basic_simd_type const& rhs ) const noexcept {
             basic_simd_type ret{};
             auto& na = get_simd();

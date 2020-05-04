@@ -14,8 +14,7 @@
 #define BOOST_UBLAS_TENSOR_PARALLEL_MULTIPLICATION
 
 #include <cassert>
-#include "parallel_for.hpp"
-#include "par.hpp"
+#include "thread_pool.hpp"
 #include <boost/numeric/ublas/tensor/simd/mat_storage.hpp>
 #include <boost/numeric/ublas/tensor/simd/vector_storage.hpp>
 #include <boost/numeric/ublas/tensor/simd/matrix_mult/mult.hpp>
@@ -399,39 +398,44 @@ BOOST_UBLAS_TENSOR_ALWAYS_INLINE void mtm_helper(PointerOut c, SizeType const*co
     SizeType row, SizeType col, Executor& ex)
 {
 
-	constexpr auto bsz = simd::detail::block_size_v<256,float>;
-	simd::basic_simd_type<256,float> sa, sb;
-	SizeType const cchunk = col / bsz;
-	SizeType const rchunk = row / bsz;
+	// constexpr auto bsz = simd::detail::block_size_v<256,float>;
+	// simd::basic_simd_type<256,float> sa, sb;
+	// SizeType const cchunk = col / bsz;
+	// SizeType const rchunk = row / bsz;
 
-	auto aii = a;
-	auto bii = b;
-	auto cii = c;
-	for( SizeType ii = 0; ii < col; ii++, aii += wc[0], cii += wc[0] ){
-			auto ai = aii;
-			auto bi = bii;
-			ex([=]() mutable {
-				for( SizeType i = 0; i < rchunk; ++i, ai += wc[1] * bsz, bi += wc[0] * bsz ){
-					auto aj = ai;
-					auto bj = bi;
-					auto cj = cii;
+	// auto aii = a;
+	// auto bii = b;
+	// auto cii = c;
+	// for( SizeType ii = 0; ii < col; ii++, aii += wc[0], cii += wc[0] ){
+	// 		auto ai = aii;
+	// 		auto bi = bii;
+	// 		ex([=]() mutable {
+	// 			for( SizeType i = 0; i < rchunk; ++i, ai += wc[1] * bsz, bi += wc[0] * bsz ){
+	// 				auto aj = ai;
+	// 				auto bj = bi;
+	// 				auto cj = cii;
 					
-					sa.load(aj,wc[1]);
-					float sum = 0;
-					for( SizeType jj = 0; jj < cchunk; ++jj, bj += wc[1] * bsz ){
-						auto bjj = bj;
-						for( SizeType j = 0; j < bsz; ++j, bjj += wc[1], cj += wc[1] ){
-							sb.get_simd() = _mm256_load_ps(bjj);
-							*cj += simd::dot_prod(sa,sb); 
-						}
-					}
+	// 				sa.load(aj,wc[1]);
+	// 				float sum = 0;
+	// 				for( SizeType jj = 0; jj < cchunk; ++jj, bj += wc[1] * bsz ){
+	// 					auto bjj = bj;
+	// 					for( SizeType j = 0; j < bsz; ++j, bjj += wc[1], cj += wc[1] ){
+	// 						sb.get_simd() = _mm256_load_ps(bjj);
+	// 						*cj += simd::dot_prod(sa,sb); 
+	// 					}
+	// 				}
 
-				}
-			});
-	}
+	// 			}
+	// 		});
+	// }
 
-    ex.wait();
+    // ex.wait();
     
+}
+
+BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+void pmult_add_8x8(parallel_v2::Args& args) noexcept{
+	simd::mult_add_8x8(args.c, args.nc, args.wc, args.a, args.na, args.wa, args.b, args.nb, args.wb);
 }
 
 template <class SizeType, class Executor>
@@ -442,44 +446,38 @@ void mult_8nx8n(float* c, SizeType const* nc, SizeType const* wc,
     Executor& ex) noexcept
 {
 
-	constexpr auto block_size = 8;
+        constexpr auto block_size = 8;
 
-	if( na[1] == 8 && na[0] == 8 ){
-		simd::mult_8x8(c, nc, wc, a, na, wa, b, nb, wb);
-		return;
-	}
+        if( na[1] == block_size && nb[0] == block_size ){
+            simd::mult_8x8(c, nc, wc, a, na, wa, b, nb, wb);
+            return;
+        }
 
-	std::array<float, block_size * block_size> temp;
-	constexpr static_extents<block_size,block_size> const nt;
-	std::array<SizeType, 2> wt = {1,8};
+        constexpr std::array<SizeType, 2> const nt = {8, 8};
+        constexpr std::array<SizeType, 2> const wt = {1,8};
 
-	auto ptemp = temp.data();
-	auto pnt = nt.data();
-	SizeType const* pwt = wt.data();
-
-	auto ai = a;
-	auto bi = b;
-	auto ci = c;
-
-	for( auto i = 0ul; i < na[1]; i += block_size, ai += wa[1] * block_size, ci += wc[1] * block_size ){
-		auto bj = bi;
-		auto cj = ci;
-			for( auto j = 0ul; j < nc[0]; j += block_size, bj += wb[0] * block_size, cj += wc[0] * block_size ){
-				auto ak = ai;
-				auto bk = bj;
-		ex([=]() mutable {
-				for( auto k = 0ul; k < nc[0]; k += block_size, ak += wa[0] * block_size, bk += wc[1] * block_size ){
-					auto pa = ak;
-					auto pb = bk;
-					simd::mult_8x8(ptemp, pnt, pwt, a, na, wa, b, nb, wb);
-					simd::add_8x8(cj, nc, wc, cj, nc, wc, ptemp, pnt, pwt );
-				}
-		});
-			}
-	}
-
+        auto pnt = nt.data();
+        auto pwt = wt.data();
+        
+        auto ai = a;
+        auto bi = b;
+        auto ci = c;
+        for( auto i = 0ul; i < na[1]; i += block_size, ai += wa[1] * block_size, ci += wc[1] * block_size ){
+            auto bj = bi;
+            auto cj = ci;
+            for( auto j = 0ul; j < nb[0]; j += block_size, bj += wb[0] * block_size, cj += wc[0] * block_size ){
+                auto ak = ai;
+                auto bk = bj;
+                for( auto k = 0ul; k < nb[0]; k += block_size, ak += wb[0] * block_size, bk += wb[1] * block_size ){
+                    auto pa = ak;
+                    auto pb = bk;
+                    parallel_v2::Args arg(cj, pnt, wc, ak, pnt, wa, bk, pnt, wb);
+					parallel_v2::task t( &pmult_add_8x8, arg );
+					ex( t );
+                }
+            }
+        }
 	ex.wait();
-
 }
 
 template<typename T>
@@ -516,17 +514,8 @@ BOOST_UBLAS_TENSOR_ALWAYS_INLINE void mtm(PointerOut c, SizeType const*const nc,
 
     // auto sa = simd::mat_storage<remove_cp_t<PointerIn1>,N>(a, na[0], na[1], wa[0], wa[1] );
     // auto sb = simd::mat_storage<remove_cp_t<PointerIn2>,N,simd::op::transpose>(b, nb[0], nb[1], wb[0], wb[1] );
-
-
-    auto policy = par.on(impl::system_thread_pool.executor());
-	// std::cout<<boost::core::demangle(typeid(policy.executor()).name())<<'\n';
-    auto ex = require(
-        require_concept(policy.executor(),execution::bulk_oneway),
-        policy.execution_requirement,
-        execution::blocking.always
-    );
         
-    auto nex = ex.get_chunk_state();
+    auto& nex = parallel_v2::pool.get_chunk_handler();
 	//ret,a.data(),b.data(),e[1],e[0],1,s[1]
     mult_8nx8n(c,nc,wc,a,na,wa,b,nb,wb,nex);
 

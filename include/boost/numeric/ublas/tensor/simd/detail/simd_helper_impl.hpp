@@ -27,7 +27,7 @@ namespace boost::numeric::ublas::simd::detail{
 
 
 namespace boost::numeric::ublas::simd::detail{
-    
+
     template<size_t N, typename T> 
     struct is_valid_vector_size{
         constexpr static auto const value = ( N == 64 ) || ( N == 128 ) || ( N == 256 ) || ( N == 512 );
@@ -138,5 +138,38 @@ namespace boost::numeric::ublas::simd::tool{
 
 } // namespace boost::numeric::ublas::simd::tool
 
+
+namespace boost::numeric::ublas::simd{
+    template<int hint = _MM_HINT_T0>
+    BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+    void prefetch(float const* p, size_t offset) noexcept{
+        _mm_prefetch(p, hint);
+        p += offset;
+        _mm_prefetch(p, hint);
+        p += offset;
+        _mm_prefetch(p, hint);
+        p += offset;
+        _mm_prefetch(p, hint);
+        p += offset;
+        _mm_prefetch(p, hint);
+        p += offset;
+        _mm_prefetch(p, hint);
+        p += offset;
+        _mm_prefetch(p, hint);
+        p += offset;
+        _mm_prefetch(p, hint);
+    }
+    template<int hint = _MM_HINT_T0>
+    BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+    void prefetch_4(float const* p, size_t offset) noexcept{
+        _mm_prefetch(p, hint);
+        p += offset;
+        _mm_prefetch(p, hint);
+        p += offset;
+        _mm_prefetch(p, hint);
+        p += offset;
+        _mm_prefetch(p, hint);
+    }
+}
 
 #endif 

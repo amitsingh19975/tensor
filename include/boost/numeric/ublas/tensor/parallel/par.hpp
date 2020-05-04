@@ -102,7 +102,7 @@ constexpr bool satisfies_on_requirements_v =
   BOOST_UBLAS_TENSOR_ALWAYS_INLINE void parallel_for(parallel_policy const& policy, Range first, Size1 n, Function f, Size2 stride)
   {
       using size_type = std::common_type_t<Size1,Size2>;
-      detail::parallel_for(par.on(impl::system_thread_pool.executor()), first, static_cast<size_type>(n), std::move(f), static_cast<size_type>(stride));
+      impl::parallel_for(par.on(impl::system_thread_pool.executor()), first, static_cast<size_type>(n), std::move(f), static_cast<size_type>(stride));
   }
 
 } // namespace boost::numeric::ublas::parallel

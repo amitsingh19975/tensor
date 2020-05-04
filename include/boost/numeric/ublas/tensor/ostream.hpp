@@ -15,6 +15,7 @@
 #include <ostream>
 #include <complex>
 #include <boost/numeric/ublas/tensor/detail/extents_functions.hpp>
+#include <iomanip>
 
 namespace boost {
 namespace numeric {
@@ -24,7 +25,7 @@ namespace detail {
 template <class value_type>
 void print(std::ostream& out, value_type const& p)
 {
-    out << p << " ";
+    out << std::setw(3)<< p << " ";
 }
 
 template <class value_type>

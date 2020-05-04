@@ -10,7 +10,7 @@
 
 namespace boost::numeric::ublas::parallel{
     
-    namespace detail
+    namespace impl
     {
         template<typename ExecutionPolicy, typename Range, typename Size, typename Function>
         void parallel_for(ExecutionPolicy&& policy, Range first, Size n, Function f, Size stride){
@@ -57,7 +57,7 @@ namespace boost::numeric::ublas::parallel{
             }
 
         }
-    } // namespace detail
+    } // namespace impl
     
 
 
@@ -65,7 +65,7 @@ namespace boost::numeric::ublas::parallel{
     BOOST_UBLAS_TENSOR_ALWAYS_INLINE void parallel_for(ExecutionPolicy&& policy, Range first, Size1 n, Function f, Size2 stride)
     {
         using size_type = std::common_type_t<Size1,Size2>;
-        detail::parallel_for(std::forward<ExecutionPolicy>(policy), first, static_cast<size_type>(n), std::move(f), static_cast<size_type>(stride));
+        impl::parallel_for(std::forward<ExecutionPolicy>(policy), first, static_cast<size_type>(n), std::move(f), static_cast<size_type>(stride));
     }
 
     template<typename ExecutionPolicy, typename Range, typename Size, typename Function>

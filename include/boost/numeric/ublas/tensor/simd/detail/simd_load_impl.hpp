@@ -23,6 +23,24 @@ namespace boost::numeric::ublas::simd::detail{
             }
         }
 
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( float const* p, size_t k, size_t w ) const noexcept{
+            if( k == 1 ){
+                return assignment<128,T>{}( *(p + w * 0), 0, 0, 0);
+            }else if( k == 2 ){
+                return assignment<128,T>{}( *(p + w * 0), *(p + w * 1), 0, 0);
+            }else if( k == 3 ){
+                return assignment<128,T>{}( *(p + w * 0), *(p + w * 1), *(p + w * 2), 0);
+            }else if( k == 4 ){
+                return assignment<128,T>{}( *(p + w * 0), *(p + w * 1), *(p + w * 2), *(p + w * 3));
+            }else{
+                return assignment<128,T>{}(0);
+            }
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( float const* p, size_t w ) const noexcept{
+            return assignment<128,T>{}( *(p + w * 0), *(p + w * 1), *(p + w * 2), *(p + w * 3) );
+        }
+
         BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( m128i const* p ) const noexcept{
             return _mm_loadu_si128(p);
         }
@@ -50,7 +68,7 @@ namespace boost::numeric::ublas::simd::detail{
             return _mm256_loadu_ps(p);
         }
 
-        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( float const* p, size_t k, size_t w = 1 ) const noexcept{
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( float const* p, size_t k, size_t w ) const noexcept{
             if( k == 1 ){
                 return assignment<256,T>{}( *(p + w * 0), 0, 0, 0, 0, 0, 0, 0);
             }else if( k == 2 ){
@@ -70,6 +88,10 @@ namespace boost::numeric::ublas::simd::detail{
             }else{
                 return assignment<256,T>{}(0);
             }
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( float const* p, size_t w ) const noexcept{
+            return assignment<256,T>{}( *(p + w * 0), *(p + w * 1), *(p + w * 2), *(p + w * 3), *(p + w * 4), *(p + w * 5), *(p + w * 6), *(p + w * 7));
         }
 
         BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr auto operator()( double const* p ) const noexcept{

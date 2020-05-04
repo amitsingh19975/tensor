@@ -14,7 +14,7 @@
 #include <unordered_set>
 
 namespace boost::numeric::ublas::parallel::execution{
-    
+
     template<typename Task>
     struct chunk_thread_pool;
 
@@ -214,9 +214,15 @@ namespace boost::numeric::ublas::parallel::execution{
         fn_type     m_fun;
     };
 
+    template<typename T>
+    struct MyTraits : public moodycamel::ConcurrentQueueDefaultTraits
+    {
+        static const size_t BLOCK_SIZE = 256;
+    };
+
     template<typename Task>
     struct chunk_thread_pool{
-        using queue_type = moodycamel::ConcurrentQueue<typename Task::pointer>;
+        using queue_type = moodycamel::ConcurrentQueue<typename Task::pointer, MyTraits<Task> >;
     private:
 
         template<typename, typename T, typename U> struct dependent_is_same : std::is_same<T,U>{};
@@ -298,7 +304,7 @@ namespace boost::numeric::ublas::parallel::execution{
                 >::type* = nullptr>
             void bulk_execute(Function f, size_t n, SharedFactory sf) const
             {
-             m_pool->bulk_execute(Blocking{}, Continuation{}, m_allocator, std::move(f), n, std::move(sf));
+             m_pool->bulk_execute(Blocking{}, Continuation{}, std::allocator<void>{}, std::move(f), n, std::move(sf));
             }
 
         private:
@@ -352,10 +358,7 @@ namespace boost::numeric::ublas::parallel::execution{
             return executor_type{ this, typename Task::allocator{} };
         }
 
-        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr void try_steel( queue_type& curr_q ) noexcept{
-            using ptr = typename Task::pointer;
-            ptr fn;
-            
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr void try_steel( typename Task::pointer& fn, queue_type& curr_q ) noexcept{
             for(auto& q : m_queues){
                 if( std::addressof(q) != std::addressof(curr_q) ){
                     if( q.size_approx() && q.try_dequeue(fn) ){
@@ -366,7 +369,7 @@ namespace boost::numeric::ublas::parallel::execution{
             }
         }
 
-        void attach( queue_type& queue ){
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE void attach( queue_type& queue ){
             using ptr = typename Task::pointer;
             thread_private_state prt(this);
             
@@ -374,7 +377,7 @@ namespace boost::numeric::ublas::parallel::execution{
             while( true ){
                 
                 while( !(m_token.load(std::memory_order_acquire) || m_work.load(std::memory_order_acquire) == 0 || queue.size_approx() ) ) {
-                    try_steel(queue);
+                    try_steel(fn,queue);
                     YieldProcessor();
                     MemoryBarrier();
                 }
@@ -399,11 +402,11 @@ namespace boost::numeric::ublas::parallel::execution{
             }
         }
 
-        void stop(){
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE void stop(){
             m_token.store(true);
         }
 
-        void wait()
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE void wait()
         {
             std::list<std::thread> threads(std::move(m_threads));
             if (BOOST_UBLAS_TENSOR_LIKLY ( !threads.empty(), true ) )
@@ -443,12 +446,12 @@ namespace boost::numeric::ublas::parallel::execution{
 
         };
     
-        static void invoke(Task* t) noexcept
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr void invoke(Task* t) noexcept
         {
             t->call();
         }
 
-        static void invoke(task<void>& t) noexcept
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE constexpr void invoke(task<void>& t) noexcept
         {
             t.call();
         }

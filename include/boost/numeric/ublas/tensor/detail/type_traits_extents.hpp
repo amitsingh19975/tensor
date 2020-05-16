@@ -34,5 +34,8 @@ using dynamic_extents = typename detail::dynamic_extents_impl<E...>::type;
 
 } // namespace boost::numeric::ublas::detail
 
+#include <boost/numeric/ublas/tensor/detail/type_traits_dynamic_extents.hpp>
+#include <boost/numeric/ublas/tensor/detail/type_traits_static_extents.hpp>
+#include <boost/numeric/ublas/tensor/detail/type_traits_fixed_rank_extents.hpp>
 
 #endif

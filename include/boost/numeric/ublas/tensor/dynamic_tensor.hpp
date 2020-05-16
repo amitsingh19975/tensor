@@ -15,6 +15,7 @@
 #define BOOST_UBLAS_DYNAMIC_TENSOR_IMPL_HPP
 
 #include <boost/numeric/ublas/tensor/tensor.hpp>
+#include <boost/numeric/ublas/tensor/simd/detail/simd_helper.hpp>
 
 namespace boost::numeric::ublas {
 
@@ -117,6 +118,7 @@ namespace boost::numeric::ublas {
         {}
 
         template<class derived_type>
+        inline
         constexpr dynamic_tensor& operator= (const tensor_expression_type<derived_type> &expr)
         {
             dynamic_tensor temp( expr );
@@ -166,7 +168,8 @@ namespace boost::numeric::ublas {
 
         }
 
-        inline constexpr dynamic_tensor& operator=(const_reference v) noexcept{
+        inline 
+        constexpr dynamic_tensor& operator=(const_reference v) noexcept{
             std::fill(super_type::begin(), super_type::end(), v);
             return *this;
         }
@@ -186,49 +189,16 @@ namespace boost::numeric::ublas {
 
 } // boost::numeric::ublas
 
-
 namespace boost::numeric::ublas{
 
     template<typename T, typename F>
     struct tensor_traits< dynamic_tensor<T,F> > {
-        using container_type= std::vector< T >;
+        using container_type= std::vector< T, simd::align_allocator<float> >;
         using extents_type  = dynamic_extents<>;
         using layout_type   = F;
         using container_tag = dynamic_tensor_tag;
     };
-
-    template<typename T, typename F>
-    struct is_valid_tensor< dynamic_tensor<T,F> > : std::true_type{};
-
-    template<typename T, typename F, typename NewValue>
-    struct tensor_rebind< dynamic_tensor<T, F>, NewValue > {
-        using type = dynamic_tensor< NewValue, F >;
-    };
-
-    template<typename T, typename F, typename NewValue, typename NewLayout>
-    struct tensor_rebind< dynamic_tensor<T, F>, NewValue, NewLayout > {
-        using type = dynamic_tensor< NewValue, NewLayout >;
-    };
-
-    template<typename T, typename F>
-    struct is_static< dynamic_tensor<T, F> > : std::false_type{};
-
-    template<typename T, typename F>
-    struct is_static_rank< dynamic_tensor<T, F> > : std::false_type{};
-
-    template<typename T, typename F>
-    struct is_dynamic< dynamic_tensor<T, F> > : std::true_type{};
-
-    template<typename T, typename F>
-    struct is_dynamic_rank< dynamic_tensor<T, F> > : std::true_type{};
-
-    template<typename V, typename F>
-    struct result_tensor< V, dynamic_extents<>, F >{
-        using type = dynamic_tensor< V, F >;
-    };
-
-} // namespace boost::numeric::ublas::detail
-
-
+    
+} // boost::numeric::ublas
 
 #endif

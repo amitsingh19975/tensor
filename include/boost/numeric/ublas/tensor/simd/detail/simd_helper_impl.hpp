@@ -159,6 +159,19 @@ namespace boost::numeric::ublas::simd{
         p += offset;
         _mm_prefetch(p, hint);
     }
+
+    template<int N, int hint = _MM_HINT_T0>
+    BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+    void prefetchN(float const* p, size_t offset) noexcept{
+        auto pi = p;
+        for( auto i = N - 1; i >= 0; --i, pi += offset ){
+            auto pj = pi;
+            for( auto j = N; j >= 0; j -= 16, pj += 16){
+                _mm_prefetch(pj, hint);
+            }
+        }
+    }
+    
     template<int hint = _MM_HINT_T0>
     BOOST_UBLAS_TENSOR_ALWAYS_INLINE
     void prefetch_4(float const* p, size_t offset) noexcept{
@@ -170,6 +183,139 @@ namespace boost::numeric::ublas::simd{
         p += offset;
         _mm_prefetch(p, hint);
     }
+
+    BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+    void dot_prod(__m256& res, __m256 const& a, __m256 const& b) noexcept{
+        // res = _mm256_mul_ps(a,b);
+        // res = _mm256_hadd_ps(res,res);
+        // res = _mm256_hadd_ps(res,res);
+        res = _mm256_dp_ps(a,b,0xff);
+    }
+
+    union FReg{
+        __m256 y;
+        __m128 x[2];
+    };
+
+    struct VFloat{
+
+        VFloat() 
+        {
+            reg.y = _mm256_setzero_ps();
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void load128(float const* p, int idx, size_t w = 0) noexcept{
+            reg.x[idx] = _mm_load_ps(p + w);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void loadu128(float const* p, int idx, size_t w = 0) noexcept{
+            reg.x[idx] = _mm_loadu_ps(p + w);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void load256(float const* p, size_t w = 0) noexcept{
+            reg.y = _mm256_load_ps(p + w);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void loadu256(float const* p, size_t w = 0) noexcept{
+            reg.y = _mm256_loadu_ps(p + w);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void store128(float* p, int idx, size_t w = 0) const noexcept{
+            _mm_store_ps(p + w, reg.x[idx]);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void storeu128(float* p, int idx, size_t w = 0) const noexcept{
+            _mm_storeu_ps(p + w, reg.x[idx]);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void store256(float* p, size_t w = 0) const noexcept{
+            _mm256_store_ps(p + w, reg.y);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void storeu256(float* p, size_t w = 0) const noexcept{
+            _mm256_storeu_ps(p + w,reg.y);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void broadcast256(float const* p, size_t w = 0) noexcept{
+            reg.y = _mm256_broadcast_ss(p + w);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void broadcast128(float const* p, int idx) noexcept{
+            reg.x[idx] = _mm_broadcast_ss(p);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void fmadd256(VFloat const& p1, VFloat const& p2) noexcept{
+            reg.y = _mm256_fmadd_ps(p1.reg.y, p2.reg.y, reg.y);
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        void fmadd128(VFloat const& p1, VFloat const& p2, int idx1, int idx2, int curr_idx) noexcept{
+            reg.x[curr_idx] = _mm_fmadd_ps(p1.x(idx1), p2.x(idx2), x(curr_idx));
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        constexpr __m256 const& y() const noexcept{
+            return reg.y;
+        }
+
+        BOOST_UBLAS_TENSOR_ALWAYS_INLINE
+        constexpr __m128 const& x(int idx) const noexcept{
+            return reg.x[idx];
+        }
+
+        FReg reg;
+    };
+
+    template<typename T, size_t Alignment = 64>
+    struct align_allocator{
+
+        using size_type = size_t;
+        using difference_type = ptrdiff_t;
+        using pointer = T*;
+        using const_pointer = T const*;
+        using reference = T&;
+        using const_reference = T const&;
+        using value_type = T;
+
+        constexpr align_allocator() = default;
+
+        constexpr pointer address(reference x) const noexcept{
+            return std::addressof(x);
+        }
+
+        constexpr const_pointer address(const_reference x) const noexcept{
+            return std::addressof(x);
+        }
+
+        inline pointer allocate(size_type n, std::allocator<void>::const_pointer = 0){
+            if( n > max_size() ){
+                throw std::length_error("align_allocator: 'n' exceeds maximum supported size");
+            }
+            auto mem = _mm_malloc(n * sizeof(float),Alignment);
+            return new(mem) T();
+        }
+
+        inline void deallocate(pointer p, size_type){
+            _mm_free(p);
+        }
+
+        inline constexpr size_type max_size() const noexcept{
+            return size_type(~0) / sizeof(T);
+        }
+
+    };
+    
 }
 
 #endif 

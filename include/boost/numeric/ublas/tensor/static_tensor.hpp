@@ -180,6 +180,7 @@ namespace boost::numeric::ublas {
         {}
 
         template<typename derived_type>
+        inline
         constexpr static_tensor& operator= (const tensor_expression_type<derived_type> &expr)
         {
             static_tensor temp( expr );
@@ -197,7 +198,8 @@ namespace boost::numeric::ublas {
             : static_tensor( vector_type(expr) )
         {}
 
-        inline constexpr static_tensor& operator=(const_reference v) noexcept{
+        inline 
+        constexpr static_tensor& operator=(const_reference v) noexcept{
             std::fill(super_type::begin(), super_type::end(), v);
             return *this;
         }
@@ -206,56 +208,5 @@ namespace boost::numeric::ublas {
     };
 
 } // boost::numeric::ublas
-
-
-namespace boost::numeric::ublas{
-    
-    template<typename T, typename E, typename F>
-    struct tensor_traits< static_tensor<T,E,F> > {
-        using container_type= std::array< T, static_product_v<E> >;
-        using extents_type 	= E;
-        using layout_type 	= F;
-        using container_tag	= static_tensor_tag;
-    };
-
-    template<typename T, typename E, typename F>
-    struct is_valid_tensor< static_tensor<T,E,F> > : std::true_type{};
-
-    template<typename T, typename E, typename F, typename NewValue>
-    struct tensor_rebind< static_tensor<T, E, F>, NewValue > {
-        using type = static_tensor< NewValue, E, F >;
-    };
-
-    template<typename T, typename E, typename F, typename NewValue, typename NewExtents>
-    struct tensor_rebind< static_tensor<T, E, F>, NewValue, NewExtents > {
-        using type = static_tensor< NewValue, NewExtents, F >;
-    };
-
-    template<typename T, typename E, typename F, typename NewValue, typename NewExtents, typename NewLayout>
-    struct tensor_rebind< static_tensor<T, E, F>, NewValue, NewExtents, NewLayout > {
-        using type = static_tensor< NewValue, NewExtents, NewLayout >;
-    };
-
-
-    template<typename T, typename E, typename F>
-    struct is_static< static_tensor<T, E, F> > : std::true_type{};
-    
-    template<typename T, typename E, typename F>
-    struct is_static_rank< static_tensor<T, E, F> > : std::true_type{};
-    
-    template<typename T, typename E, typename F>
-    struct is_dynamic< static_tensor<T, E, F> > : std::false_type{};
-    
-    template<typename T, typename E, typename F>
-    struct is_dynamic_rank< static_tensor<T, E, F> > : std::false_type{};
-
-    template<typename V, typename F, typename T, T... Es>
-    struct result_tensor< V, basic_static_extents<T,Es...>, F >{
-        using type = static_tensor< V, basic_static_extents<T,Es...>, F >;
-    };
-
-} // namespace boost::numeric::ublas::detail
-
-
 
 #endif

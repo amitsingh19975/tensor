@@ -2,6 +2,7 @@
 #define BOOST_NUMERIC_UBLAS_SIMD_MULT_8nX8n_HPP
 
 #include <boost/numeric/ublas/tensor/simd/matrix_mult/mult_8x8.hpp>
+#include <boost/numeric/ublas/tensor/simd/matrix_mult/mult_add_8x8.hpp>
 #include <boost/numeric/ublas/tensor/simd/matrix_mult/mult_16x16.hpp>
 #include <boost/numeric/ublas/tensor/simd/matrix_add/add.hpp>
 #include <boost/numeric/ublas/tensor/simd/matrix_sub/sub.hpp>
@@ -11,165 +12,207 @@
 namespace boost::numeric::ublas::simd{
 
        
-//    BOOST_UBLAS_TENSOR_ALWAYS_INLINE 
-//    void prefetch(float const* p, size_t offset) noexcept{
-//        _mm_prefetch(p, _MM_HINT_T0);
-//        p += offset;
-//        _mm_prefetch(p, _MM_HINT_T0);
-//        p += offset;
-//        _mm_prefetch(p, _MM_HINT_T0);
-//        p += offset;
-//        _mm_prefetch(p, _MM_HINT_T0);
-//        p += offset;
-//        _mm_prefetch(p, _MM_HINT_T0);
-//        p += offset;
-//        _mm_prefetch(p, _MM_HINT_T0);
-//        p += offset;
-//        _mm_prefetch(p, _MM_HINT_T0);
-//        p += offset;
-//        _mm_prefetch(p, _MM_HINT_T0);
-//    }
-
     template <class SizeType>
     BOOST_UBLAS_TENSOR_ALWAYS_INLINE 
-    void mult_8nx8n(float* c, SizeType const* nc, SizeType const* wc,
+    void mult_8nx8n_helper_2(float* c, SizeType const* nc, SizeType const* wc,
         float const* a, SizeType const* na, SizeType const* wa,
         float const* b, SizeType const* nb, SizeType const* wb
         ) noexcept
     {
 
-        constexpr auto block_size = 8;
+        constexpr SizeType const kernel_size = 8;
 
-        if( na[1] == block_size && nb[0] == block_size ){
-            mult_8x8(c, nc, wc, a, na, wa, b, nb, wb);
+        auto aii = a;
+        auto bii = b;
+        auto cii = c;
+
+        SizeType const wa_0 = wa[0] * kernel_size;
+        SizeType const wa_1 = wa[1] * kernel_size;
+        SizeType const wb_0 = wb[0] * kernel_size;
+        SizeType const wb_1 = wb[1] * kernel_size;
+        SizeType const wc_0 = wc[0] * kernel_size;
+        SizeType const wc_1 = wc[1] * kernel_size;
+
+        for( auto ii = 0ul; ii < na[1]; ii += kernel_size ){
+            auto ak = aii;
+            auto bk = bii;
+            auto ck = cii;
+            for(auto k = 0ul; k < nc[0]; k += kernel_size){
+                auto ajj = ak;
+                auto bjj = bk;
+                auto cjj = ck;
+                for(auto jj = 0ul; jj < nb[0]; jj += kernel_size ){
+                    auto pa = ajj;
+                    auto pb = bjj;
+                    auto pc = cjj;
+                    kernel_8x8(pc,nc,wc,pa,na,wa,pb,nb,wb);
+                    bjj += wb_1;
+                    cjj += wc_1;
+                }
+                ak += wa_1;
+                bk += wb_0;
+            }
+            aii += wa_0;
+            cii += wc_0;
+        }
+    }
+
+
+
+    template <class SizeType>
+    BOOST_UBLAS_TENSOR_ALWAYS_INLINE 
+    void mult_8nx8n(float*  c, SizeType const*  nc, SizeType const*  wc,
+        float const*  a, SizeType const*  na, SizeType const*  wa,
+        float const*  b, SizeType const*  nb, SizeType const*  wb
+        ) noexcept 
+    {
+        // asm(".align 5");
+        assert(na[1] == nb[0]);
+        assert(na[0] == nc[0]);
+        assert(nb[1] == nc[1]);
+
+        if( na[0] == nb[1] && na[0] == 8 ){
+            mult_8nx8n_helper_2(c,nc,wc,a,na,wa,b,nb,wb);
             return;
         }
 
-        constexpr std::array<SizeType, 2> const nt = {8, 8};
-        constexpr std::array<SizeType, 2> const wt = {1,8};
+        constexpr SizeType const block_size = 16;
+        constexpr SizeType const nt[2] = {block_size, block_size};
+        constexpr SizeType const wt[2] = {1,block_size};
 
-        auto pnt = nt.data();
-        auto pwt = wt.data();
-        
+        SizeType wa_0 = wa[0] * block_size;
+        SizeType wa_1 = wa[1] * block_size;
+        SizeType wb_0 = wb[0] * block_size;
+        SizeType wb_1 = wb[1] * block_size;
+        SizeType wc_0 = wc[0] * block_size;
+        SizeType wc_1 = wc[1] * block_size;
+
+        auto const irem = na[1] / block_size;
+        auto const jrem = nb[0] / block_size;
+        auto const krem = nb[0] / block_size;
         auto ai = a;
         auto bi = b;
         auto ci = c;
-        
-        #pragma omp parallel for nowait
-        for( auto i = 0ul; i < na[1]; i += block_size, ai += wa[1] * block_size, ci += wc[1] * block_size ){
-            auto bj = bi;
-            auto cj = ci;
-            for( auto j = 0ul; j < nb[0]; j += block_size, bj += wb[0] * block_size, cj += wc[0] * block_size ){
-                auto ak = ai;
-                auto bk = bj;
-                for( auto k = 0; k < nb[0]; k += block_size, ak += wa[0] * block_size, bk += wb[1] * block_size ){
-                    auto pa = ak;
-                    auto pb = bk;
-                    mult_add_8x8(cj, pnt, wc, ak, pnt, wa, bk, pnt, wb);
+
+        for(auto i = 0ul; i < na[1] ; i += block_size){
+            auto ak = ai;
+            auto bk = bi;
+            auto ck = ci;
+            for(auto k = 0ul; k < nc[0] ; k += block_size){
+                auto aj = ak;
+                auto bj = bk;
+                auto cj = ck;
+                for(auto j = 0ul; j < nb[0] ; j += block_size){
+                    auto ppa = aj;
+                    auto ppb = bj;
+                    mult_8nx8n_helper_2(cj, nt, wc, ppa, nt, wa, ppb, nt, wb);
+                    bj += wb_1;
+                    cj += wc_1;
                 }
+                ak += wa_1;
+                bk += wb_0;
             }
+            ci += wc_0;
+            ai += wc_0;
         }
-
-    }
-
-} // namespace boost::numeric::ublas::simd
-
-
-namespace boost::numeric::ublas::simd{
-
-    template<typename SizeType>
-    void print(float const* p, SizeType const* np, SizeType const* wp){
-        auto pi = p;
-        std::cout<<std::endl;
-        for(auto i = 0; i < np[0]; ++i, pi += wp[0]){
-            auto pj = pi;
-            for(auto j = 0; j < np[1]; ++j, pj += wp[1]){
-                std::cout<<*pj<<' ';
-            }
-            std::cout<<std::endl;
-        }
-        std::cout<<std::endl;
     }
 
     template <class SizeType>
     BOOST_UBLAS_TENSOR_ALWAYS_INLINE 
-    void copy_mat(float* c, SizeType const* nc, SizeType const* wc,
-        float const* a, SizeType const* na, SizeType const* wa
+    void mult_8nx8n_helper(float* c, SizeType const* nc, SizeType const* wc,
+        float const* a, SizeType const* na, SizeType const* wa,
+        float const* b, SizeType const* nb, SizeType const* wb
         ) noexcept
     {
-        auto ci = c;
-        auto ai = a;
-        for( SizeType i = 0; i < nc[0]; ++i, ci += wc[1], ai += wc[1] ){
-            auto cj = ci;
-            auto aj = ai;
-            for( SizeType j = 0; j < nc[1]; ++j, cj += wc[0], aj += wc[0] ){
-                *cj = *aj;
+
+        constexpr SizeType const kernel_size = 8;
+
+        for( auto ii = 0; (ii < na[1]); ii += kernel_size ){
+            auto ajj = a + ii * wa[0];
+            auto bjj = b;
+            auto cjj = c + ii * wc[0];
+            for(auto jj = 0; (jj < nb[0]); jj += kernel_size ){
+                auto ak = ajj;
+                auto bk = bjj + jj * wb[1];
+                auto ck = cjj + jj * wc[1];
+                for(auto k = 0; k < nb[0]; k += kernel_size){
+                    auto pa = ak + k * wa[1];
+                    auto pb = bk + k * wb[0];
+                    auto pc = ck;
+                    kernel_8x8(pc,nc,wc,pa,na,wa,pb,nb,wb);
+                }
             }
         }
     }
 
+    
+
     // template <class SizeType>
     // BOOST_UBLAS_TENSOR_ALWAYS_INLINE 
-    // void mult_8nx8n_2(float* c, SizeType const* nc, SizeType const* wc,
+    // void mult_8nx8n(float* c, SizeType const* nc, SizeType const* wc,
     //     float const* a, SizeType const* na, SizeType const* wa,
     //     float const* b, SizeType const* nb, SizeType const* wb
     //     ) noexcept
     // {
 
-    //     if( na[1] == 8 && nb[0] == 8 ){
-    //         mult_8x8(c, nc, wc, a, na, wa, b, nb, wb);
-    //         return;
+    //     asm volatile(R"(.align 5)");
+    //     constexpr SizeType const block_size = 16;
+
+    //     // if( na[1] == 8 && nb[0] == 8 ){
+    //     //     mult_8x8(c, nc, wc, a, na, wa, b, nb, wb);
+    //     //     return;
+    //     // }
+
+    //     constexpr SizeType const nt[2] = {block_size, block_size};
+    //     constexpr SizeType const nw[2] = {1, block_size};
+
+    //     SizeType const wa_0 = wa[0] * block_size;
+    //     SizeType const wa_1 = wa[1] * block_size;
+    //     SizeType const wb_0 = wb[0] * block_size;
+    //     SizeType const wb_1 = wb[1] * block_size;
+    //     SizeType const wc_0 = wc[0] * block_size;
+    //     SizeType const wc_1 = wc[1] * block_size;
+
+    //     auto ai = a;
+    //     auto bi = b;
+    //     auto ci = c;
+
+    //     auto const irem = na[1] / block_size;
+    //     auto const jrem = nb[0] / block_size;
+    //     auto const krem = nb[0] / block_size;
+        
+    //    {
+    //         for( auto i = 0ul; i < irem; ++i){
+    //             auto aj = ai;
+    //             auto bj = bi;
+    //             auto cj = ci;
+    //             for( auto j = 0ul; j < jrem; ++j ){
+    //                 auto ak = aj;
+    //                 auto bk = bj;
+    //                 auto ck = cj;
+    //                 prefetchN<block_size,_MM_HINT_T1>(ck,wc[1]);
+    //                 for( auto k = 0; k < krem; ++k ){
+    //                     auto pa = ak;
+    //                     auto pb = bk;
+    //                     auto pc = ck;
+    //                     // prefetchN<block_size,_MM_HINT_T0>(ak,wa[1]);
+    //                     // prefetchN<block_size,_MM_HINT_T0>(bk,wb[1]);
+    //                     mult_8nx8n_helper_2(pc,nt,wc,pa,nt,wa,pb,nt,wb);
+    //                     ak += wa_1;
+    //                     bk += wb_0;
+    //                 }
+
+    //                 bj += wb_1;
+    //                 cj += wc_0;
+
+    //             }
+    //             ai += wa_0;
+    //             ci += wc_0;
+    //         }
     //     }
-
-    //     //------------- Mat A ------------------ //
-    //     // +----------------+
-    //     // |        |       |
-    //     // |   A    |   B   |
-    //     // |--------|-------|
-    //     // |   C    |   D   |
-    //     // |        |       |
-    //     // +----------------+
-
-    //     float const* A = a;
-    //     float const* B = a + wa[1] * nt[0];
-    //     float const* C = a + wa[0] * nt[0];
-    //     float const* D = a + wa[0] * nt[1] + wa[1] * nt[0];
-        
-    //     //------------- Mat B ------------------ //
-    //     // +----------------+
-    //     // |        |       |
-    //     // |   E    |   F   |
-    //     // |--------|-------|
-    //     // |   G    |   H   |
-    //     // |        |       |
-    //     // +----------------+
-
-
-    //     float const* E = b;
-    //     float const* F = b + wb[1] * nt[0];
-    //     float const* G = b + wb[0] * nt[0];
-    //     float const* H = b + wb[0] * nt[1] + wb[1] * nt[0];
-        
-    //     //------------- Mat C ------------------ //
-    //     // +----------------+
-    //     // |        |       |
-    //     // |   C11  |   C12 |
-    //     // |--------|-------|
-    //     // |   C21  |   C22 |
-    //     // |        |       |
-    //     // +----------------+
-
-
-    //     float* C11 = c;
-    //     float* C12 = c + wc[1] * nt[0];
-    //     float* C21 = c + wc[0] * nt[0];
-    //     float* C22 = c + wc[0] * nt[1] + wc[1] * nt[0];
-
-
 
     // }
 
 } // namespace boost::numeric::ublas::simd
-
 
 #endif // BOOST_NUMERIC_UBLAS_SIMD_MULT_8nX8n_HPP

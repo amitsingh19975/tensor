@@ -15,13 +15,11 @@
 
 #include <array>
 #include <initializer_list>
-#include <boost/numeric/ublas/tensor/detail/type_traits.hpp>
 #include <boost/numeric/ublas/tensor/detail/extents_functions.hpp>
 
 namespace boost::numeric::ublas {
 
 template <class ExtentsType, ExtentsType... E> struct basic_static_extents;
-template <class ExtentsType> class basic_extents;
 
 /** @brief Template class for storing tensor extents for compile time.
  *
@@ -91,24 +89,6 @@ struct basic_static_extents{
     return m_data.back();
   }
 
-  template <class Extents, std::enable_if_t<is_extents_v<Extents>, int> = 0 >
-  [[nodiscard]] inline
-  constexpr bool operator==(Extents const& rhs) const noexcept{
-    static_assert(is_extents_v<Extents>,
-        "boost::numeric::ublas::operator==() : invalid type, type should be an extents");
-    if( this->size() != rhs.size() ){
-        return false;
-    }else{
-        return std::equal(this->begin(), this->end(), rhs.begin());
-    }
-  }
-
-  template <class Extents, std::enable_if_t<is_extents_v<Extents>, int> = 0 >
-  [[nodiscard]] inline
-  constexpr bool operator!=(Extents const& rhs) const noexcept{
-    return !( *this == rhs );
-  }
-
   [[nodiscard]] inline
   constexpr const_iterator begin() const noexcept{
     return m_data.begin();
@@ -152,18 +132,17 @@ struct static_product< basic_static_extents<ExtentsType> >{
 
 } // namespace boost::numeric::ublas
 
+
 namespace boost::numeric::ublas{
     
-template <class T, T... E>
-struct is_extents< basic_static_extents<T, E...> > : std::true_type {};
-
-template <class T, T... E>
-struct is_static< basic_static_extents<T, E...> > : std::true_type {};
-
-template <class T, std::size_t... E>
-struct is_static_rank< basic_static_extents<T, E...> > : std::true_type {};
+    template<typename T, typename E, typename F>
+    struct tensor_traits< static_tensor<T,E,F> > {
+        using container_type= std::array< T, static_product_v<E> >;
+        using extents_type 	= E;
+        using layout_type 	= F;
+        using container_tag	= static_tensor_tag;
+    };
 
 } // namespace boost::numeric::ublas
-
 
 #endif

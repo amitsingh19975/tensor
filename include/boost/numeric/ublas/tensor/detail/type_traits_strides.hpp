@@ -38,4 +38,8 @@ namespace boost::numeric::ublas {
 
 } // namespace boost::numeric::ublas::detail
 
+#include <boost/numeric/ublas/tensor/detail/type_traits_static_strides.hpp>
+#include <boost/numeric/ublas/tensor/detail/type_traits_dynamic_strides.hpp>
+#include <boost/numeric/ublas/tensor/detail/type_traits_fixed_rank_strides.hpp>
+
 #endif

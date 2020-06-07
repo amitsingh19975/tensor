@@ -80,9 +80,6 @@ namespace boost {
 namespace numeric {
 namespace ublas {
 
-template<class T, class E, class F, class A>
-class tensor;
-
 template<class T, class F, class A>
 class matrix;
 

@@ -31,7 +31,7 @@ namespace ublas {
  * @tparam E parameter pack of extents
  *
  */
-template <class ExtentsType, std::size_t N>
+template <typename ExtentsType, std::size_t N>
 struct basic_fixed_rank_extents
 {
   
@@ -112,6 +112,11 @@ struct basic_fixed_rank_extents
             ,int > = 0
     >
     constexpr basic_fixed_rank_extents(OtherExtentsType const& e){
+        if ( e.size() != _base.size() ){
+            throw std::length_error("Error in basic_fixed_rank_extents::basic_fixed_rank_extents(OtherExtentsType const&) : "
+                "OtherExtentsType size does not match with the extents size"
+            );
+        }
         std::copy_n(e.begin(),_size, _base.begin());
     }
     

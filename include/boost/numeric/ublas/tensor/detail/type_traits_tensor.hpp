@@ -15,6 +15,7 @@
 
 #include <boost/numeric/ublas/tensor/detail/basic_type_traits.hpp>
 #include <boost/numeric/ublas/tensor/detail/type_traits_extents.hpp>
+#include <boost/numeric/ublas/functional.hpp>
 
 namespace boost::numeric::ublas{
     template<typename T> class basic_tensor;
@@ -24,13 +25,15 @@ namespace boost::numeric::ublas{
     template< typename T, std::size_t R, typename F > struct fixed_rank_tensor;
 
     template< typename T, typename E, typename F > struct static_tensor;
+
+    using first_order = column_major;
+    using last_order = row_major;
+    struct custom_order{};
+    
 } // namespace boost::numeric::ublas
 
 
 namespace boost::numeric::ublas {
-
-    template<typename T>
-    struct tensor_traits;
 
     template<typename T>
     struct is_valid_tensor: std::is_base_of< basic_tensor<T>, T >{};
@@ -49,11 +52,6 @@ namespace boost::numeric::ublas {
 
     template<typename V, typename E, typename F>
     using result_tensor_t = typename result_tensor<V,E,F>::type;
-    
-    struct tensor_tag {};
-
-    struct dynamic_tensor_tag : tensor_tag{};
-    struct static_tensor_tag : tensor_tag{};
 
 } // namespace boost::numeric::ublas
 

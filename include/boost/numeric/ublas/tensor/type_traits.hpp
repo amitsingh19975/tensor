@@ -17,6 +17,7 @@
 #include <boost/numeric/ublas/tensor/detail/type_traits_strides.hpp>
 
 #include <boost/numeric/ublas/tensor/detail/type_traits_tensor.hpp>
+#include <boost/numeric/ublas/tensor/detail/type_traits_tags.hpp>
 #include <boost/numeric/ublas/tensor/detail/storage_traits.hpp>
 
 #endif

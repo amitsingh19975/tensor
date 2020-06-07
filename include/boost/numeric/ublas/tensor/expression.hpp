@@ -13,6 +13,7 @@
 #define BOOST_UBLAS_TENSOR_EXPRESSIONS_HPP
 
 #include <cstddef>
+#include <boost/numeric/ublas/tensor/tags.hpp>
 #include <boost/numeric/ublas/expression_types.hpp>
 #include <boost/numeric/ublas/tensor/detail/type_traits_tensor.hpp>
 
@@ -35,7 +36,7 @@ struct tensor_expression
 {
     //	static const unsigned complexity = 0;
     using expression_type = E;
-    using type_category = tensor_tag;
+    using type_category = tag::tensor;
     using tensor_type = T;
 
     inline

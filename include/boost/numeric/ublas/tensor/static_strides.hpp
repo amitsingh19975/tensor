@@ -19,10 +19,7 @@
 
 namespace boost::numeric::ublas{
 
-  using first_order = column_major;
-  using last_order = row_major;
-
-  template <class E, class L> struct basic_static_strides;
+  template <typename E, typename L> struct basic_static_strides;
 
 } // boost::numeric::ublas
 
@@ -31,7 +28,7 @@ namespace boost::numeric::ublas::detail{
   // list for storing stides as types
   template< typename T, T... P > 
   struct static_stride_list{
-      using extents_type = basic_static_extents<T, P...>;
+      using seq = basic_static_extents<T, P...>;
       using type = std::array<T, sizeof...(P)>;
       static constexpr type const value = {P...};
   };
@@ -119,9 +116,9 @@ namespace boost::numeric::ublas::detail{
   template<typename L, typename T, T E0, T... E>
   constexpr auto make_static_strides( static_stride_list<T, E0, E...> )
   {
-    using extents_type = typename static_stride_list<T, E0, E...>::extents_type;
+    using int_seq = typename static_stride_list<T, E0, E...>::seq;
     // checks if extents are vector or scalar
-    if constexpr( !( static_traits::is_scalar_v<extents_type> || static_traits::is_vector_v<extents_type> ) ){
+    if constexpr( !( static_traits::is_scalar_v<int_seq> || static_traits::is_vector_v<int_seq> ) ){
       // if extent contains only one element return static_stride_list<T,T(1)>
       if constexpr( sizeof...(E) == 0 ){
         
@@ -155,11 +152,20 @@ namespace boost::numeric::ublas::detail{
     return static_stride_list<T>{};
   }
 
+  template<typename Layout, typename T, T... E>
+  struct strides_helper;
+
   // It is use for first order to
   // get std::array containing strides
   template<typename Layout, typename T, T... E>
   struct strides_helper{
     using type = decltype( make_static_strides<Layout>(static_stride_list<T, E...>{}) );
+    static constexpr auto value = type::value;
+  };
+ 
+  template<typename T, T... E>
+  struct strides_helper<custom_order,T,E...>{
+    using type = static_stride_list<T, E...>;
     static constexpr auto value = type::value;
   };
 
@@ -178,14 +184,14 @@ namespace boost::numeric::ublas
  * @tparam Extents paramerter pack of extents
  *
  */
-template <class Layout, class T, T... Extents>
-struct basic_static_strides<basic_static_extents<T,Extents...>, Layout>
+template <typename Layout, typename T, T... Ns>
+struct basic_static_strides<basic_static_extents<T,Ns...>, Layout>
 {
 
-  static constexpr std::size_t const _size = sizeof...(Extents);
+  static constexpr std::size_t const _size = sizeof...(Ns);
 
   using layout_type     = Layout;
-  using extents_type    = basic_static_extents<T,Extents...>;
+  using extents_type    = basic_static_extents<T,Ns...>;
   using base_type       = std::array<T, _size>;
   using value_type      = typename base_type::value_type;
   using reference       = typename base_type::reference;
@@ -235,7 +241,12 @@ struct basic_static_strides<basic_static_extents<T,Extents...>, Layout>
     
   }
 
-  constexpr basic_static_strides(extents_type const&) noexcept{};
+  template<typename ExtentsType>
+  constexpr basic_static_strides(ExtentsType const&) noexcept{
+      static_assert( is_extents_v<ExtentsType>, "boost::numeric::ublas::basic_static_strides(ExtentType const&) : "
+          "ExtentsType should be tensor extents type" 
+      );
+  };
 
   // default copy constructor
   constexpr basic_static_strides(basic_static_strides const &other) noexcept = default;
@@ -271,7 +282,7 @@ struct basic_static_strides<basic_static_extents<T,Extents...>, Layout>
   }
 
 private:
-  static constexpr base_type const m_data{ detail::strides_helper_v<layout_type,T,Extents...> };
+  static constexpr base_type const m_data{ detail::strides_helper_v<Layout,T,Ns...> };
 };
 
 } // namespace boost::numeric::ublas

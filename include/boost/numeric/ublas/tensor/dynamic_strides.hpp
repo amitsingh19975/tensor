@@ -23,13 +23,6 @@ namespace boost {
 namespace numeric { 
 namespace ublas {
 
-using first_order = column_major;
-using last_order = row_major;
-
-template<class T>
-class basic_extents;
-
-
 /** @brief Template class for storing tensor strides for iteration with runtime variable size.
  *
  * Proxy template class of std::vector<int_type>.
@@ -73,33 +66,45 @@ public:
      * @code auto strides = basic_strides<unsigned>( basic_extents<std::size_t>{2,3,4} );
      *
      */
-    template <class T>
-    basic_strides(basic_extents<T> const& s)
+    template <typename ExtentsType>
+    basic_strides(ExtentsType const& s)
             : _base(s.size(),1)
     {
+        
+        static_assert( is_extents_v<ExtentsType>, "boost::numeric::ublas::basic_strides(ExtentsType const&) : "
+            "ExtentsType should be tensor extents type" 
+        );
+
         if( s.empty() )
             return;
 
         if( !valid(s) )
-            throw std::runtime_error("Error in boost::numeric::ublas::basic_strides() : shape is not valid.");        
+            throw std::runtime_error("Error in boost::numeric::ublas::basic_strides(ExtentsType const&) : shape is not valid.");        
 
         if( is_vector(s) || is_scalar(s) )
             return;
 
         if( this->size() < 2 )
-            throw std::runtime_error("Error in boost::numeric::ublas::basic_strides() : size of strides must be greater or equal 2.");
+            throw std::runtime_error("Error in boost::numeric::ublas::basic_strides(ExtentsType const&) : size of strides must be greater or equal 2.");
 
 
-        if constexpr (std::is_same<layout_type,first_order>::value){
+        if constexpr (std::is_same_v<layout_type,first_order>){
+            
             size_type k = 1ul, kend = this->size();
             for(; k < kend; ++k)
                 _base[k] = _base[k-1] * s[k-1];
-        }
-        else {
+
+        } else if constexpr ( std::is_same_v<layout_type,last_order> ) {
+
             size_type k = this->size()-2, kend = 0ul;
             for(; k > kend; --k)
                 _base[k] = _base[k+1] * s[k+1];
             _base[0] = _base[1] * s[1];
+
+        } else{
+
+            std::copy(_base.begin(), _base.end(), s.begin());
+
         }
     }
 

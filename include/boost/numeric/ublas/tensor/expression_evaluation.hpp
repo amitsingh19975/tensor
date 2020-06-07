@@ -237,6 +237,7 @@ constexpr auto all_extents_equal(binary_tensor_expression<T,EL,ER,OP> const& exp
 	if constexpr ( detail::has_tensor_types<T,ER>::value )
 	    if(!all_extents_equal(expr.er, extents))
 	    return false;
+
 	return true;
 }
 
@@ -268,6 +269,7 @@ constexpr auto all_extents_equal(unary_tensor_expression<T,E,OP> const& expr, Ex
 
 namespace boost::numeric::ublas::detail {
 
+
 /** @brief Evaluates expression for a basic_tensor
  *
  * Assigns the results of the expression to the basic_tensor.
@@ -278,9 +280,8 @@ template<class tensor_type, class derived_type>
 void eval(tensor_type& lhs, tensor_expression<tensor_type, derived_type> const& expr)
 {
 	if constexpr (detail::has_tensor_types<tensor_type, tensor_expression<tensor_type,derived_type> >::value )
-	    if(!detail::all_extents_equal(expr, lhs.extents() )){
+	    if(!detail::all_extents_equal(expr, lhs.extents() ))
 	    throw std::runtime_error("Error in boost::numeric::ublas::basic_tensor: expression contains tensors with different shapes.");
-		}
 
 #pragma omp parallel for
 	for(auto i = 0u; i < lhs.size(); ++i)

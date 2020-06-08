@@ -235,7 +235,12 @@ struct basic_static_strides<basic_static_extents<T,Extents...>, Layout>
     
   }
 
-  constexpr basic_static_strides(extents_type const&) noexcept{};
+  template<typename ExtentsType>
+  constexpr basic_static_strides(ExtentsType const&) noexcept{
+      static_assert( is_extents_v<ExtentsType>, "boost::numeric::ublas::basic_fixed_rank_extents(ExtentsType const&) : " 
+          "ExtentsType is not a tensor extents"
+      );
+  };
 
   // default copy constructor
   constexpr basic_static_strides(basic_static_strides const &other) noexcept = default;

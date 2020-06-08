@@ -30,9 +30,6 @@ namespace boost::numeric::ublas{
 namespace boost::numeric::ublas {
 
     template<typename T>
-    struct tensor_traits;
-
-    template<typename T>
     struct is_valid_tensor: std::is_base_of< basic_tensor<T>, T >{};
 
     template<typename T>
@@ -49,11 +46,6 @@ namespace boost::numeric::ublas {
 
     template<typename V, typename E, typename F>
     using result_tensor_t = typename result_tensor<V,E,F>::type;
-    
-    struct tensor_tag {};
-
-    struct dynamic_tensor_tag : tensor_tag{};
-    struct static_tensor_tag : tensor_tag{};
 
 } // namespace boost::numeric::ublas
 

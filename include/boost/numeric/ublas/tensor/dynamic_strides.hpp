@@ -73,10 +73,14 @@ public:
      * @code auto strides = basic_strides<unsigned>( basic_extents<std::size_t>{2,3,4} );
      *
      */
-    template <class T>
-    basic_strides(basic_extents<T> const& s)
+    template <typename ExtentsType>
+    basic_strides(ExtentsType const& s)
             : _base(s.size(),1)
     {
+        static_assert( is_extents_v<ExtentsType>, "boost::numeric::ublas::basic_fixed_rank_extents(ExtentsType const&) : " 
+            "ExtentsType is not a tensor extents"
+        );
+        
         if( s.empty() )
             return;
 

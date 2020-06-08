@@ -106,12 +106,18 @@ struct basic_fixed_rank_extents
         _base.fill(value);
     }
     
-    template<typename OtherExtentsType,
-        std::enable_if_t< 
-            is_extents<OtherExtentsType>::value
-            ,int > = 0
-    >
+    template<typename OtherExtentsType>
     constexpr basic_fixed_rank_extents(OtherExtentsType const& e){
+        static_assert( is_extents_v<OtherExtentsType>, "boost::numeric::ublas::basic_fixed_rank_extents(OtherExtentsType const&) : " 
+            "OtherExtentsType is not a tensor extents"
+        );
+
+        if( e.size() != size() ){
+            throw std::length_error("Error in basic_fixed_rank_extents::basic_fixed_rank_extents(OtherExtentsType const&) : "
+                "Size mismatch"
+            );
+        }
+
         std::copy_n(e.begin(),_size, _base.begin());
     }
     

@@ -126,15 +126,13 @@ public:
     {
     }
 
-
-    template<typename OtherExtentsType,
-        std::enable_if_t< 
-            is_extents<OtherExtentsType>::value
-            ,int > = 0
-    >
+    template<typename OtherExtentsType>
     basic_extents(OtherExtentsType const& e)
         : _base(e.size())
     {
+        static_assert( is_extents_v<OtherExtentsType>, "boost::numeric::ublas::basic_fixed_rank_extents(OtherExtentsType const&) : " 
+            "OtherExtentsType is not a tensor extents"
+        );
         std::copy(e.begin(),e.end(), _base.begin());
     }
 

@@ -68,8 +68,17 @@ public:
      * @code auto strides = basic_fixed_rank_strides<unsigned>( basic_extents<std::size_t>{2,3,4} );
      *
      */
-    basic_fixed_rank_strides(basic_fixed_rank_extents<T,N> const& s)
+    template<typename ExtentsType>
+    basic_fixed_rank_strides(ExtentsType const& s)
     {
+        if ( s.size() != size() ){
+            throw std::length_error("boost::numeric::ublas::basic_fixed_rank_strides(ExtentsType const&) : " 
+                "ExentsType size should be equal to the size of fixed rank stride"
+            );
+        }
+        static_assert( is_extents_v<ExtentsType>, "boost::numeric::ublas::basic_fixed_rank_strides(ExtentsType const&) : " 
+            "ExtentsType is not a tensor extents"
+        );
         _base.fill(value_type(1));
 
         if( s.empty() )

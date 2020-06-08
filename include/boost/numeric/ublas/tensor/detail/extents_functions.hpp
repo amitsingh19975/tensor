@@ -14,7 +14,7 @@
 #define _BOOST_NUMERIC_UBLAS_TENSOR_EXTENTS_FUNCTIONS_HPP_
 
 #include <boost/numeric/ublas/tensor/type_traits.hpp>
-#include <boost/numeric/ublas/tensor/detail/static_extents_traits.hpp>
+#include <boost/numeric/ublas/tensor/traits/static_extents_traits.hpp>
 #include <algorithm>
 #include <sstream>
 #include <iostream>

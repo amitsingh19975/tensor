@@ -51,7 +51,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_retrieve_extents
     for_each_tuple(extents, [&](auto const&, auto& e){
         using extents_type = std::decay_t<decltype(e)>;
         using tensor_type = ublas::static_tensor<value_type,extents_type,layout_type>;
-        using basic_tensor_type = typename tensor_type::super_type;
+        using tensor_core_type = typename tensor_type::super_type;
 
         auto t = tensor_type{};
         auto v = value_type{};
@@ -63,20 +63,20 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_retrieve_extents
 
         // uexpr1 = t+1
         // uexpr2 = 2+t
-        auto uexpr1 = ublas::detail::make_unary_tensor_expression<basic_tensor_type>( t, uplus1 );
-        auto uexpr2 = ublas::detail::make_unary_tensor_expression<basic_tensor_type>( t, uplus2 );
+        auto uexpr1 = ublas::detail::make_unary_tensor_expression<tensor_core_type>( t, uplus1 );
+        auto uexpr2 = ublas::detail::make_unary_tensor_expression<tensor_core_type>( t, uplus2 );
 
         BOOST_CHECK( ublas::detail::retrieve_extents( uexpr1 ) == e );
         BOOST_CHECK( ublas::detail::retrieve_extents( uexpr2 ) == e );
 
         // bexpr_uexpr = (t+1) + (2+t)
-        auto bexpr_uexpr = ublas::detail::make_binary_tensor_expression<basic_tensor_type>( uexpr1, uexpr2, bplus );
+        auto bexpr_uexpr = ublas::detail::make_binary_tensor_expression<tensor_core_type>( uexpr1, uexpr2, bplus );
 
         BOOST_CHECK( ublas::detail::retrieve_extents( bexpr_uexpr ) == e );
 
 
         // bexpr_bexpr_uexpr = ((t+1) + (2+t)) - t
-        auto bexpr_bexpr_uexpr = ublas::detail::make_binary_tensor_expression<basic_tensor_type>( bexpr_uexpr, t, bminus );
+        auto bexpr_bexpr_uexpr = ublas::detail::make_binary_tensor_expression<tensor_core_type>( bexpr_uexpr, t, bminus );
 
         BOOST_CHECK( ublas::detail::retrieve_extents( bexpr_bexpr_uexpr ) == e );
 
@@ -90,7 +90,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_retrieve_extents
         
         using extents_type1 = std::decay_t<decltype(e1)>;
         using tensor_type1 = ublas::static_tensor<value_type, extents_type1, layout_type>;
-        using basic_tensor_type1 = typename tensor_type1::super_type;
+        using tensor_core_type1 = typename tensor_type1::super_type;
 
         for_each_tuple(extents, [&](auto const& J, auto& e2){
             if( J != I + 1 ){
@@ -99,7 +99,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_retrieve_extents
             
             using extents_type2 = std::decay_t<decltype(e2)>;
             using tensor_type2 = ublas::static_tensor<value_type, extents_type2, layout_type>;
-            using basic_tensor_type2 = typename tensor_type2::super_type;
+            using tensor_core_type2 = typename tensor_type2::super_type;
 
             auto v = value_type{};
 
@@ -113,8 +113,8 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_retrieve_extents
 
             // uexpr1 = t1+1
             // uexpr2 = 2+t2
-            auto uexpr1 = ublas::detail::make_unary_tensor_expression<basic_tensor_type1>( t1, uplus1 );
-            auto uexpr2 = ublas::detail::make_unary_tensor_expression<basic_tensor_type2>( t2, uplus2 );
+            auto uexpr1 = ublas::detail::make_unary_tensor_expression<tensor_core_type1>( t1, uplus1 );
+            auto uexpr2 = ublas::detail::make_unary_tensor_expression<tensor_core_type2>( t2, uplus2 );
 
             BOOST_CHECK( ublas::detail::retrieve_extents( t1 )     == ublas::detail::retrieve_extents( uexpr1 ) );
             BOOST_CHECK( ublas::detail::retrieve_extents( t2 )     == ublas::detail::retrieve_extents( uexpr2 ) );
@@ -144,7 +144,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_all_extents_equa
     for_each_tuple(extents, [&](auto const&, auto& e){
         using extents_type = std::decay_t<decltype(e)>;
         using tensor_type = ublas::static_tensor<value_type,extents_type,layout_type>;
-        using basic_tensor_type = typename tensor_type::super_type;
+        using tensor_core_type = typename tensor_type::super_type;
 
         auto t = tensor_type{};
         auto v = value_type{};
@@ -156,20 +156,20 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_all_extents_equa
 
         // uexpr1 = t+1
         // uexpr2 = 2+t
-        auto uexpr1 = ublas::detail::make_unary_tensor_expression<basic_tensor_type>( t, uplus1 );
-        auto uexpr2 = ublas::detail::make_unary_tensor_expression<basic_tensor_type>( t, uplus2 );
+        auto uexpr1 = ublas::detail::make_unary_tensor_expression<tensor_core_type>( t, uplus1 );
+        auto uexpr2 = ublas::detail::make_unary_tensor_expression<tensor_core_type>( t, uplus2 );
 
         BOOST_CHECK( ublas::detail::all_extents_equal( uexpr1, e ) );
         BOOST_CHECK( ublas::detail::all_extents_equal( uexpr2, e ) );
 
         // bexpr_uexpr = (t+1) + (2+t)
-        auto bexpr_uexpr = ublas::detail::make_binary_tensor_expression<basic_tensor_type>( uexpr1, uexpr2, bplus );
+        auto bexpr_uexpr = ublas::detail::make_binary_tensor_expression<tensor_core_type>( uexpr1, uexpr2, bplus );
 
         BOOST_CHECK( ublas::detail::all_extents_equal( bexpr_uexpr, e ) );
 
 
         // bexpr_bexpr_uexpr = ((t+1) + (2+t)) - t
-        auto bexpr_bexpr_uexpr = ublas::detail::make_binary_tensor_expression<basic_tensor_type>( bexpr_uexpr, t, bminus );
+        auto bexpr_bexpr_uexpr = ublas::detail::make_binary_tensor_expression<tensor_core_type>( bexpr_uexpr, t, bminus );
 
         BOOST_CHECK( ublas::detail::all_extents_equal( bexpr_bexpr_uexpr , e ) );
 
@@ -184,7 +184,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_all_extents_equa
         
         using extents_type1 = std::decay_t<decltype(e1)>;
         using tensor_type1 = ublas::static_tensor<value_type, extents_type1, layout_type>;
-        using basic_tensor_type1 = typename tensor_type1::super_type;
+        using tensor_core_type1 = typename tensor_type1::super_type;
 
         for_each_tuple(extents, [&](auto const& J, auto& e2){
             if( J != I + 1 ){
@@ -193,7 +193,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_all_extents_equa
 
             using extents_type2 = std::decay_t<decltype(e2)>;
             using tensor_type2 = ublas::static_tensor<value_type, extents_type2, layout_type>;
-            using basic_tensor_type2 = typename tensor_type2::super_type;
+            using tensor_core_type2 = typename tensor_type2::super_type;
 
             auto v = value_type{};
 
@@ -208,8 +208,8 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_all_extents_equa
 
             // uexpr1 = t1+1
             // uexpr2 = 2+t2
-            auto uexpr1 = ublas::detail::make_unary_tensor_expression<basic_tensor_type1>( t1, uplus1 );
-            auto uexpr2 = ublas::detail::make_unary_tensor_expression<basic_tensor_type2>( t2, uplus2 );
+            auto uexpr1 = ublas::detail::make_unary_tensor_expression<tensor_core_type1>( t1, uplus1 );
+            auto uexpr2 = ublas::detail::make_unary_tensor_expression<tensor_core_type2>( t2, uplus2 );
 
             BOOST_CHECK( ublas::detail::all_extents_equal( uexpr1, ublas::detail::retrieve_extents(uexpr1) ) );
             BOOST_CHECK( ublas::detail::all_extents_equal( uexpr2, ublas::detail::retrieve_extents(uexpr2) ) );

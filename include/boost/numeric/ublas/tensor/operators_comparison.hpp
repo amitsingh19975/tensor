@@ -22,14 +22,14 @@
 
 namespace boost::numeric::ublas {
 template<class T>
-class basic_tensor;
+class tensor_core;
 }
 
 namespace boost::numeric::ublas::detail {
 
 template<class T1, class T2, class BinaryPred>
 [[nodiscard]] inline 
-constexpr bool compare(basic_tensor<T1> const& lhs, basic_tensor<T2> const& rhs, BinaryPred pred)
+constexpr bool compare(tensor_core<T1> const& lhs, tensor_core<T2> const& rhs, BinaryPred pred)
 {
     static_assert( is_valid_tensor_v<T1> && is_valid_tensor_v<T2>,
         "boost::numeric::ublas::detail::compare() : LHS and RHS both should the tensor"
@@ -58,7 +58,7 @@ constexpr bool compare(basic_tensor<T1> const& lhs, basic_tensor<T2> const& rhs,
 
 template<class T, class UnaryPred>
 [[nodiscard]] inline 
-constexpr bool compare(basic_tensor<T> const& rhs, UnaryPred pred)
+constexpr bool compare(tensor_core<T> const& rhs, UnaryPred pred)
 {
     static_assert( is_valid_tensor_v<T>,
         "boost::numeric::ublas::detail::compare() : Template typename T should the tensor type"

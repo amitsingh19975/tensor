@@ -15,7 +15,7 @@
 #define BOOST_UBLAS_TENSOR_STATIC_STRIDES_HPP
 
 #include <boost/numeric/ublas/tensor/static_extents.hpp>
-#include <boost/numeric/ublas/tensor/detail/static_extents_traits.hpp>
+#include <boost/numeric/ublas/tensor/traits/static_extents_traits.hpp>
 
 namespace boost::numeric::ublas{
 

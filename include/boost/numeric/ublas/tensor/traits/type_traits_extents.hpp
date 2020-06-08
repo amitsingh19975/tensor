@@ -25,17 +25,17 @@ inline static constexpr bool const is_extents_v = is_extents<E>::value;
 namespace detail{
 
     template<std::size_t... N>
-    struct dynamic_extents_impl;
+    struct extents_impl;
 
 } // detail
 
 template<std::size_t... E>
-using dynamic_extents = typename detail::dynamic_extents_impl<E...>::type;
+using extents = typename detail::extents_impl<E...>::type;
 
-} // namespace boost::numeric::ublas::detail
+} // namespace boost::numeric::ublas
 
-#include <boost/numeric/ublas/tensor/detail/type_traits_dynamic_extents.hpp>
-#include <boost/numeric/ublas/tensor/detail/type_traits_static_extents.hpp>
-#include <boost/numeric/ublas/tensor/detail/type_traits_fixed_rank_extents.hpp>
+#include <boost/numeric/ublas/tensor/traits/type_traits_dynamic_extents.hpp>
+#include <boost/numeric/ublas/tensor/traits/type_traits_static_extents.hpp>
+#include <boost/numeric/ublas/tensor/traits/type_traits_fixed_rank_extents.hpp>
 
 #endif

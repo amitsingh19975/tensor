@@ -13,11 +13,11 @@
 #ifndef BOOST_UBLAS_TENSOR_TYPE_TRAITS_TENSOR_HPP
 #define BOOST_UBLAS_TENSOR_TYPE_TRAITS_TENSOR_HPP
 
-#include <boost/numeric/ublas/tensor/detail/basic_type_traits.hpp>
-#include <boost/numeric/ublas/tensor/detail/type_traits_extents.hpp>
+#include <boost/numeric/ublas/tensor/traits/basic_type_traits.hpp>
+#include <boost/numeric/ublas/tensor/traits/type_traits_extents.hpp>
 
 namespace boost::numeric::ublas{
-    template<typename T> class basic_tensor;
+    template<typename T> class tensor_core;
     
     template< typename T, typename F > struct dynamic_tensor;
 
@@ -30,7 +30,7 @@ namespace boost::numeric::ublas{
 namespace boost::numeric::ublas {
 
     template<typename T>
-    struct is_valid_tensor: std::is_base_of< basic_tensor<T>, T >{};
+    struct is_valid_tensor: std::is_base_of< tensor_core<T>, T >{};
 
     template<typename T>
     inline static constexpr bool is_valid_tensor_v = is_valid_tensor<T>::value;
@@ -74,7 +74,7 @@ namespace boost::numeric::ublas{
     struct is_dynamic_rank< dynamic_tensor<T, F> > : std::true_type{};
 
     template<typename V, typename F>
-    struct result_tensor< V, dynamic_extents<>, F >{
+    struct result_tensor< V, extents<>, F >{
         using type = dynamic_tensor< V, F >;
     };
 

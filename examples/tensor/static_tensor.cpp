@@ -30,7 +30,7 @@ int main() {
      * Layout: first_order by default if not 
      * provided
      * Value Type: float
-     * Extents Type: dynamic_extents<5>{1,2,3,4,5}
+     * Extents Type: extents<5>{1,2,3,4,5}
     **/
     auto t1 = ub::static_tensor<float,ub::static_extents<1,2,3,4,5> >{5.f};
 
@@ -39,7 +39,7 @@ int main() {
      * Layout: first_order by default if not 
      * provided
      * Value Type: float
-     * Extents Type: dynamic_extents<5>{1,2,3,4,5}
+     * Extents Type: extents<5>{1,2,3,4,5}
     **/
     auto t2 = ub::static_tensor<float,ub::static_extents<1,2,3,4,5>, ub::last_order >{5.f};
 
@@ -47,9 +47,9 @@ int main() {
     
     using s_tensor = ub::static_tensor<float, ub::static_extents<1,2,3,4,5> >;
     
-    auto t3 = ub::fixed_rank_tensor( ub::dynamic_extents<5>{1,2,3,4,5}, 5.f );
+    auto t3 = ub::fixed_rank_tensor( ub::extents<5>{1,2,3,4,5}, 5.f );
     auto st1 = s_tensor{ 5.f };
-    auto dt1 = ub::dynamic_tensor( ub::dynamic_extents<>{1,2,3,4,5}, 5.f );
+    auto dt1 = ub::dynamic_tensor( ub::extents<>{1,2,3,4,5}, 5.f );
 
     s_tensor exp1 = st1 + st1 * 2 + st1*st1;
     

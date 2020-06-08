@@ -36,7 +36,7 @@ struct fixture
     template<size_t... E>
     using static_extents_type = boost::numeric::ublas::static_extents<E...>;
     
-    using dynamic_extents_type = boost::numeric::ublas::dynamic_extents<>;
+    using dynamic_extents_type = boost::numeric::ublas::extents<>;
 
     fixture()
       : extents {
@@ -197,7 +197,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_prod_tensor_2, value,  test
     };
 
     auto permute_extents_s_1 = [](auto const& pi, auto const& na){
-        auto nb = ublas::dynamic_extents<>(na);
+        auto nb = ublas::extents<>(na);
         assert(pi.size() == na.size());
         for(auto j = 0u; j < pi.size(); ++j)
             nb[pi[j]-1] = na[j];
@@ -208,7 +208,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_prod_tensor_2, value,  test
         assert(pi.size() == na.size());
         for(auto j = 0u; j < pi.size(); ++j)
             tempn[pi[j]-1] = na[j];
-        return ublas::dynamic_extents<std::decay<decltype(na)>::type::_size>(tempn.begin(),tempn.end());
+        return ublas::extents<std::decay<decltype(na)>::type::_size>(tempn.begin(),tempn.end());
     };
 
 //  static and dynamic

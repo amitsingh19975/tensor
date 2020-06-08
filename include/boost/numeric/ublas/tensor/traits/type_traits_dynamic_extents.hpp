@@ -13,7 +13,7 @@
 #ifndef BOOST_UBLAS_TENSOR_TYPE_TRAITS_DYNAMIC_EXTENTS_HPP
 #define BOOST_UBLAS_TENSOR_TYPE_TRAITS_DYNAMIC_EXTENTS_HPP
 
-#include <boost/numeric/ublas/tensor/detail/basic_type_traits.hpp>
+#include <boost/numeric/ublas/tensor/traits/basic_type_traits.hpp>
 
 namespace boost::numeric::ublas{
     
@@ -35,7 +35,7 @@ namespace boost::numeric::ublas{
 
     namespace detail{
         
-        template <> struct dynamic_extents_impl<> {
+        template <> struct extents_impl<> {
             using type = basic_extents<std::size_t>;
         };
 

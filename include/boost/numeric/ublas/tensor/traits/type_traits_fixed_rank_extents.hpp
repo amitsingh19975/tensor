@@ -13,7 +13,7 @@
 #ifndef BOOST_UBLAS_TENSOR_TYPE_TRAITS_FIXED_RANK_EXTENTS_HPP
 #define BOOST_UBLAS_TENSOR_TYPE_TRAITS_FIXED_RANK_EXTENTS_HPP
 
-#include <boost/numeric/ublas/tensor/detail/basic_type_traits.hpp>
+#include <boost/numeric/ublas/tensor/traits/basic_type_traits.hpp>
 
 namespace boost::numeric::ublas{
     
@@ -34,7 +34,8 @@ namespace boost::numeric::ublas{
 
     namespace detail{
 
-        template <std::size_t N> struct dynamic_extents_impl<N> {
+        template <std::size_t N> 
+        struct extents_impl<N> {
             using type = basic_fixed_rank_extents<std::size_t, N>;
         };
 

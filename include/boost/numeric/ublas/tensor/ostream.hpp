@@ -92,7 +92,7 @@ class vector;
 
 
 template <typename T>
-std::ostream& operator << (std::ostream& out, boost::numeric::ublas::basic_tensor<T> const& t)
+std::ostream& operator << (std::ostream& out, boost::numeric::ublas::tensor_core<T> const& t)
 {
 
     if(is_scalar(t.extents())){

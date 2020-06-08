@@ -21,7 +21,7 @@
 namespace boost::numeric::ublas {
 
 template<class T>
-class basic_tensor;
+class tensor_core;
 
 template<class size_type>
 class basic_extents;
@@ -73,12 +73,12 @@ namespace boost::numeric::ublas::detail {
 
 
 
-/** @brief Retrieves extents of the basic_tensor
+/** @brief Retrieves extents of the tensor_core
  *
 */
 template<class TensorType>
 [[nodiscard]]
-constexpr auto& retrieve_extents(basic_tensor<TensorType> const& t)
+constexpr auto& retrieve_extents(tensor_core<TensorType> const& t)
 {
 	static_assert( is_valid_tensor_v<TensorType>, 
 		"boost::numeric::ublas::detailretrieve_extents() : tensor type should be valid tensor"
@@ -86,11 +86,11 @@ constexpr auto& retrieve_extents(basic_tensor<TensorType> const& t)
 	return t.extents();
 }
 
-/** @brief Retrieves extents of the basic_tensor expression
+/** @brief Retrieves extents of the tensor_core expression
  *
- * @note basic_tensor expression must be a binary tree with at least one basic_tensor type
+ * @note tensor_core expression must be a binary tree with at least one tensor_core type
  *
- * @returns extents of the child expression if it is a basic_tensor or extents of one child of its child.
+ * @returns extents of the child expression if it is a tensor_core or extents of one child of its child.
 */
 template<class T, class D>
 [[nodiscard]]
@@ -112,11 +112,11 @@ constexpr auto& retrieve_extents(tensor_expression<T,D> const& expr)
 	#pragma warning( push )
 	#pragma warning( disable : 4702 )
 #endif
-/** @brief Retrieves extents of the binary basic_tensor expression
+/** @brief Retrieves extents of the binary tensor_core expression
  *
- * @note basic_tensor expression must be a binary tree with at least one basic_tensor type
+ * @note tensor_core expression must be a binary tree with at least one tensor_core type
  *
- * @returns extents of the (left and if necessary then right) child expression if it is a basic_tensor or extents of a child of its (left and if necessary then right) child.
+ * @returns extents of the (left and if necessary then right) child expression if it is a tensor_core or extents of a child of its (left and if necessary then right) child.
 */
 template<class T, class EL, class ER, class OP>
 [[nodiscard]]
@@ -142,11 +142,11 @@ constexpr auto& retrieve_extents(binary_tensor_expression<T,EL,ER,OP> const& exp
 	#pragma warning( pop )
 #endif
 
-/** @brief Retrieves extents of the binary basic_tensor expression
+/** @brief Retrieves extents of the binary tensor_core expression
  *
- * @note basic_tensor expression must be a binary tree with at least one basic_tensor type
+ * @note tensor_core expression must be a binary tree with at least one tensor_core type
  *
- * @returns extents of the child expression if it is a basic_tensor or extents of a child of its child.
+ * @returns extents of the child expression if it is a tensor_core or extents of a child of its child.
 */
 template<class T, class E, class OP>
 [[nodiscard]]
@@ -172,7 +172,7 @@ namespace boost::numeric::ublas::detail {
 
 template<class TensorType, class Extents>
 [[nodiscard]] inline
-constexpr auto all_extents_equal(basic_tensor<TensorType> const& t, Extents const& extents)
+constexpr auto all_extents_equal(tensor_core<TensorType> const& t, Extents const& extents)
 {
 	static_assert(is_extents_v<Extents>,
 		"Error in boost::numeric::ublas::detail::all_extents_equal: extents passed should be of extents type."
@@ -270,30 +270,30 @@ constexpr auto all_extents_equal(unary_tensor_expression<T,E,OP> const& expr, Ex
 namespace boost::numeric::ublas::detail {
 
 
-/** @brief Evaluates expression for a basic_tensor
+/** @brief Evaluates expression for a tensor_core
  *
- * Assigns the results of the expression to the basic_tensor.
+ * Assigns the results of the expression to the tensor_core.
  *
- * \note Checks if shape of the basic_tensor matches those of all tensors within the expression.
+ * \note Checks if shape of the tensor_core matches those of all tensors within the expression.
 */
 template<class tensor_type, class derived_type>
 void eval(tensor_type& lhs, tensor_expression<tensor_type, derived_type> const& expr)
 {
 	if constexpr (detail::has_tensor_types<tensor_type, tensor_expression<tensor_type,derived_type> >::value )
 	    if(!detail::all_extents_equal(expr, lhs.extents() ))
-	    throw std::runtime_error("Error in boost::numeric::ublas::basic_tensor: expression contains tensors with different shapes.");
+	    throw std::runtime_error("Error in boost::numeric::ublas::tensor_core: expression contains tensors with different shapes.");
 
 #pragma omp parallel for
 	for(auto i = 0u; i < lhs.size(); ++i)
 		lhs(i) = expr()(i);
 }
 
-/** @brief Evaluates expression for a basic_tensor
+/** @brief Evaluates expression for a tensor_core
  *
  * Applies a unary function to the results of the expressions before the assignment.
  * Usually applied needed for unary operators such as A += C;
  *
- * \note Checks if shape of the basic_tensor matches those of all tensors within the expression.
+ * \note Checks if shape of the tensor_core matches those of all tensors within the expression.
 */
 template<class tensor_type, class derived_type, class unary_fn>
 void eval(tensor_type& lhs, tensor_expression<tensor_type, derived_type> const& expr, unary_fn const fn)
@@ -301,7 +301,7 @@ void eval(tensor_type& lhs, tensor_expression<tensor_type, derived_type> const& 
 
 	if constexpr (detail::has_tensor_types< tensor_type, tensor_expression<tensor_type,derived_type> >::value )
 	    if(!detail::all_extents_equal( expr, lhs.extents() ))
-	    throw std::runtime_error("Error in boost::numeric::ublas::basic_tensor: expression contains tensors with different shapes.");
+	    throw std::runtime_error("Error in boost::numeric::ublas::tensor_core: expression contains tensors with different shapes.");
 
 #pragma omp parallel for
 	for(auto i = 0u; i < lhs.size(); ++i)
@@ -310,12 +310,12 @@ void eval(tensor_type& lhs, tensor_expression<tensor_type, derived_type> const& 
 
 
 
-/** @brief Evaluates expression for a basic_tensor
+/** @brief Evaluates expression for a tensor_core
  *
  * Applies a unary function to the results of the expressions before the assignment.
  * Usually applied needed for unary operators such as A += C;
  *
- * \note Checks if shape of the basic_tensor matches those of all tensors within the expression.
+ * \note Checks if shape of the tensor_core matches those of all tensors within the expression.
 */
 template<class tensor_type, class unary_fn>
 void eval(tensor_type& lhs, unary_fn const fn)

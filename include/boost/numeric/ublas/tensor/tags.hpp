@@ -13,15 +13,29 @@
 #ifndef BOOST_UBLAS_TENSOR_TAGS_IMPL_HPP
 #define BOOST_UBLAS_TENSOR_TAGS_IMPL_HPP
 
-namespace boost::numeric::ublas::tag{
+namespace boost::numeric::ublas{
     
-    struct tensor{};
+    struct tensor_tag{};
+    
+    struct extents_resizable_dynamic_tag{};
+    
+    struct extents_fixed_dynamic_tag{};
+    
+    struct extents_static_tag{};
+    
+    struct layout_resizable_dynamic_tag{};
+    
+    struct layout_fixed_dynamic_tag{};
+    
+    struct layout_static_tag{};
 
-    struct dynamic_storage{};
-
-    struct static_storage{};
-
-    struct fixed_storage{};
+    struct storage_resizable_container_tag{};
+    
+    struct storage_static_container_tag{};
+    
+    struct storage_seq_container_tag{};
+    
+    struct storage_non_seq_container_tag{};
 
 } // namespace boost::numeric::ublas::tag
 

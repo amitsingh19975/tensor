@@ -11,10 +11,10 @@
 //
 
 
-/// \file basic_tensor.hpp Definition for the tensor template class
+/// \file tensor_core.hpp Definition for the tensor template class
 
-#ifndef BOOST_UBLAS_BASIC_TENSOR_IMPL_HPP
-#define BOOST_UBLAS_BASIC_TENSOR_IMPL_HPP
+#ifndef BOOST_UBLAS_tensor_core_IMPL_HPP
+#define BOOST_UBLAS_tensor_core_IMPL_HPP
 
 #include <initializer_list>
 
@@ -32,11 +32,11 @@
 namespace boost { namespace numeric { namespace ublas {
 
 template< class T >
-class basic_tensor:
-        public detail::tensor_expression< basic_tensor<T>,basic_tensor<T> >
+class tensor_core:
+        public detail::tensor_expression< tensor_core<T>,tensor_core<T> >
 {
 
-    using self_type                 = basic_tensor<T>;
+    using self_type                 = tensor_core<T>;
 
 public:
     using tensor_traits             = T;
@@ -75,6 +75,7 @@ public:
     using tensor_temporary_type     = self_type;
     using storage_category          = dense_tag;
     using container_tag             = typename tensor_traits::container_tag;
+    using resizable_tag             = typename tensor_traits::resizable_tag;
 
     using extents_type              = typename tensor_traits::extents_type;
     using strides_type              = typename tensor_traits::strides_type;
@@ -84,99 +85,105 @@ public:
 
     static_assert( std::is_same<layout_type,first_order>::value || 
                    std::is_same<layout_type,last_order >::value, 
-                   "boost::numeric::basic_tensor template class only supports first- or last-order storage formats.");
+                   "boost::numeric::tensor_core template class only supports first- or last-order storage formats.");
     
-    /** @brief Constructs a basic_tensor.
+    /** @brief Constructs a tensor_core.
      *
-     * @note the basic_tensor is empty.
-     * @note the basic_tensor needs to reshaped for further use.
+     * @note the tensor_core is empty.
+     * @note the tensor_core needs to reshaped for further use.
      *
      */
     inline
-    constexpr basic_tensor ()
-        : basic_tensor(extents_type{},container_tag{})
+    constexpr tensor_core ()
+        : tensor_core(extents_type{},resizable_tag{})
     {}
 
-    constexpr basic_tensor( extents_type const& e, tag::dynamic_storage )
+    constexpr tensor_core( extents_type const& e, storage_resizable_container_tag )
         : tensor_expression_type<self_type>()
         , extents_(e)
         , strides_(extents_)
         , data_( product(extents_) )
     {}
 
-    constexpr basic_tensor( extents_type const& e, tag::static_storage )
+    constexpr tensor_core( extents_type const& e, storage_static_container_tag )
         : tensor_expression_type<self_type>()
         , extents_(e)
         , strides_(extents_)
-    {}
+    {
+        if ( data_.size() < product(extents_) ){
+            throw std::length_error("boost::numeric::ublas::tensor_core(extents_type const&, tag::static_storage): "
+                "size of requested storage exceeds the current buffer size"
+            );
+        }
+    }
 
-    /** @brief Constructs a basic_tensor with an initializer list for dynamic_extents
+    /** @brief Constructs a tensor_core with an initializer list for dynamic_extents
      *
      * By default, its elements are initialized to 0.
      *
-     * @code basic_tensor<float> A{4,2,3}; @endcode
+     * @code tensor_core<float> A{4,2,3}; @endcode
      *
-     * @param l initializer list for setting the dimension extents of the basic_tensor
+     * @param l initializer list for setting the dimension extents of the tensor_core
      */
     explicit inline
-    basic_tensor (std::initializer_list<size_type> l)
-        : basic_tensor( std::move(l), container_tag{} )
+    tensor_core (std::initializer_list<size_type> l)
+        : tensor_core( std::move(l), resizable_tag{} )
     {}
 
-    /** @brief Constructs a basic_tensor with a \c shape
+    /** @brief Constructs a tensor_core with a \c shape
      *
      * By default, its elements are initialized to 0.
      *
-     * @code basic_tensor<float> A{extents{4,2,3}}; @endcode
+     * @code tensor_core<float> A{extents{4,2,3}}; @endcode
      *
-     * @param s initial basic_tensor dimension extents
+     * @param s initial tensor_core dimension extents
      */
     explicit inline
-    basic_tensor (extents_type const& s)
-        : basic_tensor( s, container_tag{} )
+    tensor_core (extents_type const& s)
+        : tensor_core( s, resizable_tag{} )
     {}
 
-    /** @brief Constructs a basic_tensor with a \c shape
+    /** @brief Constructs a tensor_core with a \c shape
      *
      * By default, its elements are initialized to 0.
      *
-     * @code basic_tensor<float> A{extents{4,2,3}}; @endcode
+     * @code tensor_core<float> A{extents{4,2,3}}; @endcode
      *
-     * @param s initial basic_tensor dimension extents
-     * @param i initial basic_tensor with this value
+     * @param s initial tensor_core dimension extents
+     * @param i initial tensor_core with this value
      */
     explicit inline
-    basic_tensor (extents_type const& s, value_type const& i)
-        : basic_tensor( s, container_tag{} )
+    tensor_core (extents_type const& s, value_type const& i)
+        : tensor_core( s, resizable_tag{} )
     {
         std::fill(begin(),end(),i);
     }
 
-    /** @brief Constructs a basic_tensor with a \c shape and initiates it with one-dimensional data
+    /** @brief Constructs a tensor_core with a \c shape and initiates it with one-dimensional data
      *
-     * @code basic_tensor<float> A{extents{4,2,3}, array }; @endcode
+     * @code tensor_core<float> A{extents{4,2,3}, array }; @endcode
      *
      *
-     *  @param s initial basic_tensor dimension extents
+     *  @param s initial tensor_core dimension extents
      *  @param a container of \c array_type that is copied according to the storage layout
      */
-    basic_tensor (extents_type const& s, const array_type &a)
-        : basic_tensor( s, container_tag{} )
+    tensor_core (extents_type const& s, const array_type &a)
+        : tensor_core( s, resizable_tag{} )
     {
         if( product(extents_) != a.size() ){
-            throw std::runtime_error("boost::numeric::ublas::basic_tensor(extents_type,array_type): array size mismatch with extents");
+            throw std::runtime_error("boost::numeric::ublas::tensor_core(extents_type,array_type): array size mismatch with extents");
         }
         std::copy(a.begin(),a.end(),begin());
     }
 
 
-    /** @brief Constructs a basic_tensor with another basic_tensor with a different layout
+    /** @brief Constructs a tensor_core with another tensor_core with a different layout
      *
-     * @param other basic_tensor with a different layout to be copied.
+     * @param other tensor_core with a different layout to be copied.
      */
     template<typename OtherTensor>
-    basic_tensor (const basic_tensor<OtherTensor> &other)
-        : basic_tensor( other.extents(), container_tag{} )
+    tensor_core (const tensor_core<OtherTensor> &other)
+        : tensor_core( other.extents(), resizable_tag{} )
     { 
         copy(this->rank(), this->extents().data(),
                 this->data(), this->strides().data(),
@@ -185,28 +192,28 @@ public:
     }
 
 
-    /** @brief Constructs a basic_tensor with an basic_tensor expression
+    /** @brief Constructs a tensor_core with an tensor_core expression
      *
-     * @code basic_tensor<float> A = B + 3 * C; @endcode
+     * @code tensor_core<float> A = B + 3 * C; @endcode
      *
-     * @note type must be specified of basic_tensor must be specified.
+     * @note type must be specified of tensor_core must be specified.
      * @note dimension extents are extracted from tensors within the expression.
      *
-     * @param expr basic_tensor expression
-     * @param size basic_tensor expression
+     * @param expr tensor_core expression
+     * @param size tensor_core expression
      */
     template<typename derived_type>
-    basic_tensor (const tensor_expression_type<derived_type> &expr)
-        : basic_tensor( detail::retrieve_extents(expr), container_tag{} )
+    tensor_core (const tensor_expression_type<derived_type> &expr)
+        : tensor_core( detail::retrieve_extents(expr), resizable_tag{} )
     {
         static_assert( detail::has_tensor_types<self_type, tensor_expression_type<derived_type>>::value,
-                                     "Error in boost::numeric::ublas::basic_tensor: expression does not contain a basic_tensor. cannot retrieve shape.");
+                                     "Error in boost::numeric::ublas::tensor_core: expression does not contain a tensor_core. cannot retrieve shape.");
         detail::eval( *this, expr );
     }
 
-    /** @brief Constructs a basic_tensor with a matrix expression
+    /** @brief Constructs a tensor_core with a matrix expression
      *
-     * @code basic_tensor<float> A = B + 3 * C; @endcode
+     * @code tensor_core<float> A = B + 3 * C; @endcode
      *
      * @note matrix expression is evaluated and pushed into a temporary matrix before assignment.
      * @note extents are automatically extracted from the temporary matrix
@@ -214,14 +221,14 @@ public:
      * @param expr matrix expression
      */
     template<class derived_type>
-    basic_tensor (const matrix_expression_type<derived_type> &expr)
-        : basic_tensor(  matrix_type ( expr )  )
+    tensor_core (const matrix_expression_type<derived_type> &expr)
+        : tensor_core(  matrix_type ( expr )  )
     {
     }
 
-    /** @brief Constructs a basic_tensor with a vector expression
+    /** @brief Constructs a tensor_core with a vector expression
      *
-     * @code basic_tensor<float> A = b + 3 * b; @endcode
+     * @code tensor_core<float> A = b + 3 * b; @endcode
      *
      * @note matrix expression is evaluated and pushed into a temporary matrix before assignment.
      * @note extents are automatically extracted from the temporary matrix
@@ -229,18 +236,18 @@ public:
      * @param expr vector expression
      */
     template<class derived_type>
-    basic_tensor (const vector_expression_type<derived_type> &expr)
-        : basic_tensor(  vector_type ( expr )  )
+    tensor_core (const vector_expression_type<derived_type> &expr)
+        : tensor_core(  vector_type ( expr )  )
     {
     }
 
 
-    /** @brief Constructs a basic_tensor from another basic_tensor
+    /** @brief Constructs a tensor_core from another tensor_core
      *
-     *  @param v basic_tensor to be copied.
+     *  @param v tensor_core to be copied.
      */
     inline
-    basic_tensor (const basic_tensor &v)
+    tensor_core (const tensor_core &v)
         : tensor_expression_type<self_type>()
         , extents_ (v.extents_)
         , strides_ (v.strides_)
@@ -249,83 +256,83 @@ public:
 
 
 
-    /** @brief Constructs a basic_tensor from another basic_tensor
+    /** @brief Constructs a tensor_core from another tensor_core
      *
-     *  @param v basic_tensor to be moved.
+     *  @param v tensor_core to be moved.
      */
     inline
-    basic_tensor (basic_tensor &&v)
+    tensor_core (tensor_core &&v)
         : tensor_expression_type<self_type>() //tensor_container<self_type> ()
         , extents_ (std::move(v.extents_))
         , strides_ (std::move(v.strides_))
         , data_    (std::move(v.data_   ))
     {}
 
-    /** @brief Evaluates the tensor_expression and assigns the results to the basic_tensor
+    /** @brief Evaluates the tensor_expression and assigns the results to the tensor_core
      *
      * @code A = B + C * 2;  @endcode
      *
-     * @note rank and dimension extents of the tensors in the expressions must conform with this basic_tensor.
+     * @note rank and dimension extents of the tensors in the expressions must conform with this tensor_core.
      *
      * @param expr expression that is evaluated.
      */
     template<class derived_type>
-    basic_tensor &operator = (const tensor_expression_type<derived_type> &expr)
+    tensor_core &operator = (const tensor_expression_type<derived_type> &expr)
     {
         detail::eval(*this, expr);
         return *this;
     }
 
-    basic_tensor& operator=(basic_tensor other)
+    tensor_core& operator=(tensor_core other)
     {
         swap (*this, other);
         return *this;
     }
 
-    basic_tensor& operator=(const_reference v)
+    tensor_core& operator=(const_reference v)
     {
         std::fill(this->begin(), this->end(), v);
         return *this;
     }
 
-    /** @brief Returns true if the basic_tensor is empty (\c size==0) */
+    /** @brief Returns true if the tensor_core is empty (\c size==0) */
     inline
     bool empty () const {
         return this->data_.empty();
     }
 
 
-    /** @brief Returns the size of the basic_tensor */
+    /** @brief Returns the size of the tensor_core */
     inline
     size_type size () const {
         return this->data_.size ();
     }
 
-    /** @brief Returns the size of the basic_tensor */
+    /** @brief Returns the size of the tensor_core */
     inline
     size_type size (size_type r) const {
         return this->extents_.at(r);
     }
 
-    /** @brief Returns the number of dimensions/modes of the basic_tensor */
+    /** @brief Returns the number of dimensions/modes of the tensor_core */
     inline
     size_type rank () const {
         return this->extents_.size();
     }
 
-    /** @brief Returns the number of dimensions/modes of the basic_tensor */
+    /** @brief Returns the number of dimensions/modes of the tensor_core */
     inline
     size_type order () const {
         return this->extents_.size();
     }
 
-    /** @brief Returns the strides of the basic_tensor */
+    /** @brief Returns the strides of the tensor_core */
     inline
     strides_type const& strides () const {
         return this->strides_;
     }
 
-    /** @brief Returns the extents of the basic_tensor */
+    /** @brief Returns the extents of the tensor_core */
     inline
     extents_type const& extents () const {
         return this->extents_;
@@ -428,7 +435,7 @@ public:
         return this->data_[i];
     }
 
-    /** @brief Generates a basic_tensor index for basic_tensor contraction
+    /** @brief Generates a tensor_core index for tensor_core contraction
      *
      *
      *  @code auto Ai = A(_i,_j,k); @endcode
@@ -447,7 +454,7 @@ public:
         return std::make_pair( std::cref(*this),  std::make_tuple( p, std::forward<index_types>(ps)... ) );
     }
 
-    /** @brief Reshapes the basic_tensor
+    /** @brief Reshapes the tensor_core
      *
      *
      * (1) @code A.reshape(extents{m,n,o});     @endcode or
@@ -456,98 +463,108 @@ public:
      * If the size of this smaller than the specified extents than
      * default constructed (1) or specified (2) value is appended.
      *
-     * @note rank of the basic_tensor might also change.
+     * @note rank of the tensor_core might also change.
      *
-     * @param e extents with which the basic_tensor is reshaped.
-     * @param v value which is appended if the basic_tensor is enlarged.
+     * @param e extents with which the tensor_core is reshaped.
+     * @param v value which is appended if the tensor_core is enlarged.
      */
     inline
     void reshape (extents_type const& e, value_type v = value_type{})
     {
         static_assert(is_dynamic_v<extents_type>,
-            "Error in boost::numeric::ublas::basic_tensor: static extents cannot be reshaped");
+            "boost::numeric::ublas::tensor_core::reshape(extents_type const&, value_type): static extents cannot be reshaped");
+
         this->extents_ = e;
         this->strides_ = strides_type(this->extents_);
 
         auto p = product(extents_);
-        if(p != this->size())
-            this->data_.resize (p, v);
+
+        if( p > data_.size() ){
+            throw std::length_error(
+                "boost::numeric::ublas::tensor_core::reshape(extents_type const&, value_type): "
+                "tensor cannot be reshaped because extents required size exceeds the static storage size"
+            );
+        }
+        if constexpr(std::is_same_v<resizable_tag,storage_resizable_container_tag>){
+            if(p != this->size())
+                this->data_.resize (p, v);
+        }
     }
 
-    friend void swap(basic_tensor& lhs, basic_tensor& rhs) {
+    friend void swap(tensor_core& lhs, tensor_core& rhs) {
         std::swap(lhs.data_   , rhs.data_   );
         std::swap(lhs.extents_, rhs.extents_);
         std::swap(lhs.strides_, rhs.strides_);
     }
 
 
-    /// \brief return an iterator on the first element of the basic_tensor
+    /// \brief return an iterator on the first element of the tensor_core
     inline
     const_iterator begin () const {
         return data_.begin ();
     }
 
-    /// \brief return an iterator on the first element of the basic_tensor
+    /// \brief return an iterator on the first element of the tensor_core
     inline
     const_iterator cbegin () const {
         return data_.cbegin ();
     }
 
-    /// \brief return an iterator after the last element of the basic_tensor
+    /// \brief return an iterator after the last element of the tensor_core
     inline
     const_iterator end () const {
         return data_.end();
     }
 
-    /// \brief return an iterator after the last element of the basic_tensor
+    /// \brief return an iterator after the last element of the tensor_core
     inline
     const_iterator cend () const {
         return data_.cend ();
     }
 
-    /// \brief Return an iterator on the first element of the basic_tensor
+    /// \brief Return an iterator on the first element of the tensor_core
     inline
     iterator begin () {
         return data_.begin();
     }
 
-    /// \brief Return an iterator at the end of the basic_tensor
+    /// \brief Return an iterator at the end of the tensor_core
     inline
     iterator end () {
         return data_.end();
     }
 
-    /// \brief Return a const reverse iterator before the first element of the reversed basic_tensor (i.e. end() of normal basic_tensor)
+    /// \brief Return a const reverse iterator before the first element of the reversed tensor_core (i.e. end() of normal tensor_core)
     inline
     const_reverse_iterator rbegin () const {
         return data_.rbegin();
     }
 
-    /// \brief Return a const reverse iterator before the first element of the reversed basic_tensor (i.e. end() of normal basic_tensor)
+    /// \brief Return a const reverse iterator before the first element of the reversed tensor_core (i.e. end() of normal tensor_core)
     inline
     const_reverse_iterator crbegin () const {
         return data_.crbegin();
     }
 
-    /// \brief Return a const reverse iterator on the end of the reverse basic_tensor (i.e. first element of the normal basic_tensor)
+    /// \brief Return a const reverse iterator on the end of the reverse tensor_core (i.e. first element of the normal tensor_core)
     inline
     const_reverse_iterator rend () const {
         return data_.rend();
     }
 
-    /// \brief Return a const reverse iterator on the end of the reverse basic_tensor (i.e. first element of the normal basic_tensor)
+    /// \brief Return a const reverse iterator on the end of the reverse tensor_core (i.e. first element of the normal tensor_core)
     inline
     const_reverse_iterator crend () const {
         return data_.crend();
     }
 
-    /// \brief Return a const reverse iterator before the first element of the reversed basic_tensor (i.e. end() of normal basic_tensor)
+    /// \brief Return a const reverse iterator before the first element of the reversed tensor_core (i.e. end() of normal tensor_core)
     inline
     reverse_iterator rbegin () {
         return data_.rbegin();
     }
 
-    /// \brief Return a const reverse iterator on the end of the reverse basic_tensor (i.e. first element of the normal basic_tensor)
+    /// \brief Return a const reverse iterator on the end of the reverse tensor_core (i.e. first element of the normal tensor_core)
     inline
     reverse_iterator rend () {
         return data_.rend();
@@ -565,7 +582,7 @@ protected:
 
 namespace boost::numeric::ublas{
     template<typename T, typename...Ts>
-    struct tensor_rebind<basic_tensor<T>,Ts...>{
+    struct tensor_rebind<tensor_core<T>,Ts...>{
         using type = tensor_rebind_t<T,Ts...>;
     };
 

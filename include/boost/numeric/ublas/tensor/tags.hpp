@@ -17,18 +17,6 @@ namespace boost::numeric::ublas{
     
     struct tensor_tag{};
     
-    struct extents_resizable_dynamic_tag{};
-    
-    struct extents_fixed_dynamic_tag{};
-    
-    struct extents_static_tag{};
-    
-    struct layout_resizable_dynamic_tag{};
-    
-    struct layout_fixed_dynamic_tag{};
-    
-    struct layout_static_tag{};
-
     struct storage_resizable_container_tag{};
     
     struct storage_static_container_tag{};

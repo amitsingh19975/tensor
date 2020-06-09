@@ -125,6 +125,9 @@ public:
      *
      * @param l initializer list for setting the dimension extents of the tensor_core
      */
+    template<typename U = extents_type, 
+        typename = std::enable_if_t< is_dynamic_v<U> >
+    >
     explicit inline
     tensor_core (std::initializer_list<size_type> l)
         : tensor_core( std::move(l), resizable_tag{} )
@@ -156,7 +159,25 @@ public:
     tensor_core (extents_type const& s, value_type const& i)
         : tensor_core( s, resizable_tag{} )
     {
-        std::fill(begin(),end(),i);
+        std::fill_n(begin(),product(s),i);
+    }
+
+    /** @brief Constructs a tensor_core with a \c shape
+     *
+     * By default, its elements are initialized to 0.
+     *
+     * @code tensor_core<float> A{extents{4,2,3}}; @endcode
+     *
+     * @param i initial tensor_core with this value
+     */
+    explicit inline
+    tensor_core (value_type const& i)
+        : tensor_core( extents_type{}, resizable_tag{} )
+    {
+        static_assert(is_static_v<extents_type>,"boost::numeric::ublas::tensor_core:"
+            "The extents should be a static tensor extents"
+        );
+        std::fill_n(begin(),product(extents_),i);
     }
 
     /** @brief Constructs a tensor_core with a \c shape and initiates it with one-dimensional data
@@ -173,7 +194,7 @@ public:
         if( product(extents_) != a.size() ){
             throw std::runtime_error("boost::numeric::ublas::tensor_core(extents_type,array_type): array size mismatch with extents");
         }
-        std::copy(a.begin(),a.end(),begin());
+        std::copy_n(a.begin(),product(s),begin());
     }
 
 
@@ -209,6 +230,91 @@ public:
         static_assert( detail::has_tensor_types<self_type, tensor_expression_type<derived_type>>::value,
                                      "Error in boost::numeric::ublas::tensor_core: expression does not contain a tensor_core. cannot retrieve shape.");
         detail::eval( *this, expr );
+    }
+
+    constexpr tensor_core( matrix_type const& v )
+        : tensor_core( basic_extents<std::size_t>{v.size1(), v.size2()}, resizable_tag{} )
+    {
+        if( extents_.size() != 2ul ){
+            throw std::runtime_error(
+                "boost::numeric::ublas::tensor_core(const matrix &v)"
+                " : order of extents are not correct, please check!"
+            );
+        }
+
+        if( extents_[0] != v.size1() || extents_[1] != v.size2() ){
+            throw std::runtime_error(
+                "boost::numeric::ublas::tensor_core(const matrix &v)"
+                " : please check the extents it is not set properly, "
+                "if extents is static please set the extents while specifying type"
+            );
+        }
+
+        std::copy(v.data().begin(), v.data().end(), data_.begin());
+    }
+
+    constexpr tensor_core( matrix_type && v )
+        : tensor_core( basic_extents<std::size_t>{v.size1(), v.size2()}, resizable_tag{} )
+    {
+        if( extents_.size() != 2ul ){
+            throw std::runtime_error(
+                "boost::numeric::ublas::tensor_core(matrix &&v)"
+                " : order of extents are not correct, please check!"
+            );
+        }
+        
+        if( extents_[0] != v.size1() || extents_[1] != v.size2() ){
+            throw std::runtime_error(
+                "boost::numeric::ublas::tensor_core(matrix &&v)"
+                " : please check the extents it is not set properly, "
+                "if extents is static please set the extents while specifying type"
+            );
+        }
+
+        std::move(v.data().begin(), v.data().end(),data_.begin());
+    }
+
+    constexpr tensor_core (const vector_type &v)
+        : tensor_core( basic_extents<std::size_t>{ v.size(), typename extents_type::value_type{1} }, resizable_tag{} )
+    {
+        if( extents_.size() != 2ul ){
+            throw std::runtime_error(
+                "boost::numeric::ublas::tensor_core(const vector_type &v)"
+                " : order of extents are not correct, please check!"
+            );
+        }
+        if( extents_[0] != v.size() || extents_[1] != 1ul ){
+            throw std::runtime_error(
+                "boost::numeric::ublas::tensor_core(const vector_type &v)"
+                " : please check the extents it is not set properly, "
+                "if extents is static please set the extents while specifying type"
+            );
+        }
+
+        std::copy(v.data().begin(), v.data().end(), data_.begin());
+        
+    }
+
+    constexpr tensor_core (vector_type &&v)
+        : tensor_core( basic_extents<std::size_t>{ v.size(), typename extents_type::value_type{1} }, resizable_tag{} )
+    {
+        
+        if( extents_.size() != 2ul ){
+            throw std::runtime_error(
+                "boost::numeric::ublas::tensor_core(vector_type &&v)"
+                " : order of extents are not correct, please check!"
+            );
+        }
+        if( extents_[0] != v.size() || extents_[1] != 1ul ){
+            throw std::runtime_error(
+                "boost::numeric::ublas::tensor_core(vector_type &&v)"
+                " : please check the extents it is not set properly, "
+                "if extents is static please set the extents while specifying type"
+            );
+        }
+
+        std::move(v.data().begin(), v.data().end(),data_.begin());
+        
     }
 
     /** @brief Constructs a tensor_core with a matrix expression
@@ -565,16 +671,5 @@ protected:
 };
 
 }}} // namespaces
-
-
-namespace boost::numeric::ublas{
-    template<typename T, typename...Ts>
-    struct tensor_rebind<tensor_core<T>,Ts...>{
-        using type = tensor_rebind_t<T,Ts...>;
-    };
-
-} // namespace boost::numeric::ublas::detail
-
-
 
 #endif

@@ -242,11 +242,15 @@ struct basic_static_strides<basic_static_extents<T,Extents...>, Layout>
       );
   };
 
-  // default copy constructor
-  constexpr basic_static_strides(basic_static_strides const &other) noexcept = default;
-  // default assign constructor
+
+  constexpr basic_static_strides(basic_static_strides const &) noexcept = default;
+  constexpr basic_static_strides(basic_static_strides &&) noexcept = default;
+
   constexpr basic_static_strides &
-  operator=(basic_static_strides const &other) noexcept = default;
+  operator=(basic_static_strides const &) noexcept = default;
+  
+  constexpr basic_static_strides &
+  operator=(basic_static_strides &&) noexcept = default;
 
    /** @brief Returns ref to the std::array containing extents */
   [[nodiscard]] inline

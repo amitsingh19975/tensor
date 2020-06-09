@@ -76,13 +76,10 @@ namespace boost::numeric::ublas::detail {
 /** @brief Retrieves extents of the tensor_core
  *
 */
-template<class TensorType>
+template<class TensorEngine>
 [[nodiscard]]
-constexpr auto& retrieve_extents(tensor_core<TensorType> const& t)
+constexpr auto& retrieve_extents(tensor_core<TensorEngine> const& t)
 {
-	static_assert( is_valid_tensor_v<TensorType>, 
-		"boost::numeric::ublas::detailretrieve_extents() : tensor type should be valid tensor"
-	);
 	return t.extents();
 }
 
@@ -170,18 +167,14 @@ constexpr auto& retrieve_extents(unary_tensor_expression<T,E,OP> const& expr)
 
 namespace boost::numeric::ublas::detail {
 
-template<class TensorType, class Extents>
+template<class TensorEngine, class Extents>
 [[nodiscard]] inline
-constexpr auto all_extents_equal(tensor_core<TensorType> const& t, Extents const& extents)
+constexpr auto all_extents_equal(tensor_core<TensorEngine> const& t, Extents const& extents)
 {
 	static_assert(is_extents_v<Extents>,
 		"Error in boost::numeric::ublas::detail::all_extents_equal: extents passed should be of extents type."
 	);
-
-	static_assert( is_valid_tensor_v<TensorType>, 
-		"boost::numeric::ublas::all_extents_equal() : tensor type should be valid tensor"
-	);
-
+	
 	return extents == t.extents();
 }
 

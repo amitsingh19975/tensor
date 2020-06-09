@@ -74,8 +74,27 @@ struct basic_fixed_rank_extents
         return _base[k];
     }
 
-    // default constructor
     constexpr basic_fixed_rank_extents() = default;
+    
+    constexpr basic_fixed_rank_extents(basic_fixed_rank_extents const& other)
+        : _base(other._base)
+    {}
+    
+    constexpr basic_fixed_rank_extents(basic_fixed_rank_extents && other)
+        : _base( std::move(other._base) )
+    {}
+    
+    constexpr basic_fixed_rank_extents& operator=(basic_fixed_rank_extents other) noexcept
+    {
+        std::swap(*this,other);
+        return *this;
+    }
+    
+    constexpr basic_fixed_rank_extents& operator=(basic_fixed_rank_extents&& other) noexcept
+    {
+        std::swap(*this,other);
+        return *this;
+    }
     
     constexpr basic_fixed_rank_extents(std::initializer_list<value_type> li){
         if( li.size() > _size ){

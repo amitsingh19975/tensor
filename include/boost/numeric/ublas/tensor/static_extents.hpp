@@ -63,6 +63,18 @@ struct basic_static_extents{
 
   // default constructor
   constexpr basic_static_extents() = default;
+  constexpr basic_static_extents(basic_static_extents const&) = default;
+  constexpr basic_static_extents(basic_static_extents &&) = default;
+  
+  constexpr basic_static_extents& operator=(basic_static_extents const&) = default;
+  constexpr basic_static_extents& operator=(basic_static_extents &&) = default;
+  
+  template<typename OtherExtents>
+  constexpr basic_static_extents(OtherExtents const&){
+    static_assert(is_extents_v<OtherExtents>, "boost::numeric::ublas::basic_static_extents(OtherExtents const&)"
+      "Extents is not a valid tensor tensor extents"
+    );
+  };
 
   /** @brief Returns ref to the std::array containing extents */
   [[nodiscard]] inline
@@ -115,19 +127,14 @@ template<typename T> struct static_product;
 template<typename T> 
 inline static constexpr auto const static_product_v = static_product<T>::value;
 
-template<typename ExtentsType, ExtentsType E0, ExtentsType... E>
-struct static_product< basic_static_extents<ExtentsType, E0, E...> >{
-  static constexpr auto const value = E0 * static_product_v< basic_static_extents<ExtentsType, E...> >;
-};
-
-template<typename ExtentsType, ExtentsType E0>
-struct static_product< basic_static_extents<ExtentsType, E0> >{
-  static constexpr auto const value = E0 ;
+template<typename ExtentsType, ExtentsType... Es>
+struct static_product< basic_static_extents<ExtentsType, Es...> >{
+  static constexpr auto const value = (... * Es);
 };
 
 template<typename ExtentsType>
 struct static_product< basic_static_extents<ExtentsType> >{
-  static constexpr auto const value = ExtentsType(0) ;
+  static constexpr auto const value = 0ul;
 };
 
 } // namespace boost::numeric::ublas

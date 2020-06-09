@@ -63,6 +63,10 @@ inline static constexpr bool const is_static_rank_v = is_static_rank<E>::value;
 template<typename>
 struct always_false : std::false_type{};
 
+
+template <typename T> 
+inline static constexpr bool const always_false_v = always_false<T>::value;
+
 } // namespace boost::numeric::ublas
 
 #endif

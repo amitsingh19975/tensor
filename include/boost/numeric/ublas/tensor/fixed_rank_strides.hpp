@@ -58,10 +58,7 @@ public:
      *
      * @code auto ex = basic_fixed_rank_strides<unsigned>{};
      */
-    constexpr explicit basic_fixed_rank_strides()
-        : _base{}
-    {
-    }
+    constexpr basic_fixed_rank_strides() noexcept = default;
 
     /** @brief Constructs basic_fixed_rank_strides from basic_extents for the first- and last-order storage formats
      *
@@ -128,7 +125,7 @@ public:
 
     basic_fixed_rank_strides& operator=(basic_fixed_rank_strides other)
     {
-        swap (*this, other);
+        std::swap (*this, other);
         return *this;
     }
 

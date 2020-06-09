@@ -156,11 +156,11 @@ namespace boost::numeric::ublas::detail{
 namespace boost::numeric::ublas {
 
 /** @brief Returns true if size > 1 and all elements > 0 or size == 1 && e[0] == 1 */
-template <class ExtentsType>
+template <typename ExtentsType>
 [[nodiscard]] inline 
 constexpr bool valid(ExtentsType const &e) {
   
-  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::valid() : invalid type, type should be an extents");
+  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::valid(ExtentsType const&) : invalid type, type should be an extents");
 
   auto greater_than_zero = [](auto const& a){ return a > 0u; };
 
@@ -182,7 +182,7 @@ std::string to_string(T const &e) {
   using value_type = typename T::value_type;
 
   static_assert(is_extents_v<T> ||is_strides_v<T>, 
-    "boost::numeric::ublas::to_string() : invalid type, type should be an extents or a strides");
+    "boost::numeric::ublas::to_string(ExtentsType const&) : invalid type, type should be an extents or a strides");
 
   if ( e.empty() ) return "[]";
 
@@ -201,11 +201,11 @@ std::string to_string(T const &e) {
  *
  * @returns true if (1,1,[1,...,1])
  */
-template <class ExtentsType>
+template <typename ExtentsType>
 [[nodiscard]] inline 
 constexpr bool is_scalar(ExtentsType const &e) {
 
-  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::is_scalar() : invalid type, type should be an extents");
+  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::is_scalar(ExtentsType const&) : invalid type, type should be an extents");
   
   auto equal_one = [](auto const &a) { return a == 1u; };
 
@@ -216,11 +216,11 @@ constexpr bool is_scalar(ExtentsType const &e) {
  *
  * @returns true if (1,n,[1,...,1]) or (n,1,[1,...,1]) with n > 1
  */
-template <class ExtentsType>
+template <typename ExtentsType>
 [[nodiscard]] inline 
 constexpr bool is_vector(ExtentsType const &e) {
   
-  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::is_vector() : invalid type, type should be an extents");
+  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::is_vector(ExtentsType const&) : invalid type, type should be an extents");
 
   auto greater_one = [](auto const &a) { return a > 1u; };
   auto equal_one = [](auto const &a) { return a == 1u; };
@@ -237,11 +237,11 @@ constexpr bool is_vector(ExtentsType const &e) {
  *
  * @returns true if (m,n,[1,...,1]) with m > 1 and n > 1
  */
-template <class ExtentsType>
+template <typename ExtentsType>
 [[nodiscard]] inline 
 constexpr bool is_matrix(ExtentsType const &e) {
   
-  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::is_matrix() : invalid type, type should be an extents");
+  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::is_matrix(ExtentsType const&) : invalid type, type should be an extents");
 
   auto greater_one = [](auto const &a) { return a > 1u; };
   auto equal_one = [](auto const &a) { return a == 1u; };
@@ -254,11 +254,11 @@ constexpr bool is_matrix(ExtentsType const &e) {
  *
  * @returns true if !empty() && !is_scalar() && !is_vector() && !is_matrix()
  */
-template <class ExtentsType>
+template <typename ExtentsType>
 [[nodiscard]] inline 
 constexpr bool is_tensor(ExtentsType const &e) {
 
-  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::is_tensor() : invalid type, type should be an extents");
+  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::is_tensor(ExtentsType const&) : invalid type, type should be an extents");
   
   auto greater_one = [](auto const &a) { return a > 1u;};
   
@@ -277,26 +277,25 @@ constexpr bool is_tensor(ExtentsType const &e) {
  *
  * @returns basic_extents<int_type> with squeezed extents
  */
-template <class ExtentsType>
+template <typename ExtentsType>
 [[nodiscard]] inline
 auto squeeze(ExtentsType const &e) {
   
-  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::squeeze() : invalid type, type should be an extents");
+  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::squeeze(ExtentsType const&) : invalid type, type should be an extents");
 
   return detail::squeeze_impl(e); 
 }
 
 /** @brief Returns the product of extents */
-template <class ExtentsType>
+template <typename ExtentsType>
 [[nodiscard]] inline
 constexpr auto product(ExtentsType const &e) {
 
-  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::product() : invalid type, type should be an extents");
+  static_assert(is_extents_v<ExtentsType>, "boost::numeric::ublas::product(ExtentsType const&) : invalid type, type should be an extents");
   
   if ( e.empty() ) return 0u;
   else return std::accumulate(e.begin(), e.end(), 1u, std::multiplies<>()) ;
 }
-
 
 template <class LExtents, class RExtents, 
   std::enable_if_t<
@@ -307,7 +306,7 @@ template <class LExtents, class RExtents,
 constexpr bool operator==(LExtents const& lhs, RExtents const& rhs) noexcept{
   
   static_assert( std::is_same_v<typename LExtents::value_type, typename RExtents::value_type>, 
-    "boost::numeric::ublas::operator==(LExtents, RExtents) : LHS value type should be same as RHS value type");
+    "boost::numeric::ublas::operator==(LExtents const&, RExtents const&) : LHS value type should be same as RHS value type");
 
   return ( lhs.size() == rhs.size() ) && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
@@ -321,7 +320,7 @@ template <class LExtents, class RExtents,
 constexpr bool operator!=(LExtents const& lhs, RExtents const& rhs) noexcept{
   
   static_assert( std::is_same_v<typename LExtents::value_type, typename RExtents::value_type>, 
-    "boost::numeric::ublas::operator!=(LExtents, RExtents) : LHS value type should be same as RHS value type");
+    "boost::numeric::ublas::operator!=(LExtents const&, RExtents const&) : LHS value type should be same as RHS value type");
 
   return !( lhs == rhs );
 }

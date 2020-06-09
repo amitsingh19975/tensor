@@ -30,7 +30,10 @@ namespace boost::numeric::ublas{
 namespace boost::numeric::ublas {
 
     template<typename T>
-    struct is_valid_tensor: std::is_base_of< tensor_core<T>, T >{};
+    struct is_valid_tensor: std::false_type{};
+    
+    template<typename T>
+    struct is_valid_tensor< tensor_core<T> >: std::true_type{};
 
     template<typename T>
     inline static constexpr bool is_valid_tensor_v = is_valid_tensor<T>::value;

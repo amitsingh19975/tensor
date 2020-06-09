@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <numeric>
 
+#include <boost/numeric/ublas/tensor/detail/tensor_functions.hpp>
 #include <boost/numeric/ublas/tensor/multiplication.hpp>
 #include <boost/numeric/ublas/tensor/algorithms.hpp>
 #include <boost/numeric/ublas/tensor/expression.hpp>

@@ -297,58 +297,82 @@ public:
 
     /** @brief Returns true if the tensor_core is empty (\c size==0) */
     inline
-    bool empty () const {
+    constexpr bool empty () const {
         return this->data_.empty();
     }
 
 
     /** @brief Returns the size of the tensor_core */
     inline
-    size_type size () const {
+    constexpr size_type size () const {
         return this->data_.size ();
     }
 
     /** @brief Returns the size of the tensor_core */
     inline
-    size_type size (size_type r) const {
+    constexpr size_type size (size_type r) const {
         return this->extents_.at(r);
     }
 
     /** @brief Returns the number of dimensions/modes of the tensor_core */
     inline
-    size_type rank () const {
+    constexpr size_type rank () const {
         return this->extents_.size();
     }
 
     /** @brief Returns the number of dimensions/modes of the tensor_core */
     inline
-    size_type order () const {
+    constexpr size_type order () const {
         return this->extents_.size();
     }
 
     /** @brief Returns the strides of the tensor_core */
     inline
-    strides_type const& strides () const {
+    constexpr strides_type const& strides () const {
         return this->strides_;
     }
 
     /** @brief Returns the extents of the tensor_core */
     inline
-    extents_type const& extents () const {
+    constexpr extents_type const& extents () const {
+        return this->extents_;
+    }
+
+    /** @brief Returns the strides of the tensor_core */
+    inline
+    constexpr strides_type& strides () {
+        return this->strides_;
+    }
+
+    /** @brief Returns the extents of the tensor_core */
+    inline
+    constexpr extents_type& extents () {
         return this->extents_;
     }
 
 
     /** @brief Returns a \c const reference to the container. */
     inline
-    const_pointer data () const {
+    constexpr const_pointer data () const {
         return this->data_.data();
     }
 
     /** @brief Returns a \c const reference to the container. */
     inline
-    pointer data () {
+    constexpr pointer data () {
         return this->data_.data();
+    }
+
+    /** @brief Returns a \c const reference to the underlying container. */
+    inline
+    constexpr array_type const& base () const {
+        return data_;
+    }
+
+    /** @brief Returns a reference to the underlying container. */
+    inline
+    constexpr array_type& base () {
+        return data_;
     }
 
     /** @brief Element access using a single index.
@@ -358,7 +382,7 @@ public:
      *  @param i zero-based index where 0 <= i < this->size()
      */
     inline
-    const_reference operator [] (size_type i) const {
+    constexpr const_reference operator [] (size_type i) const {
         return this->data_[i];
     }
 
@@ -369,7 +393,7 @@ public:
      *  @param i zero-based index where 0 <= i < this->size()
      */
     inline
-    reference operator [] (size_type i) {
+    constexpr reference operator [] (size_type i) {
         return this->data_[i];
     }
 
@@ -384,7 +408,7 @@ public:
      */
     template<class ... size_types>
     inline
-    const_reference at (size_type i, size_types ... is) const {
+    constexpr const_reference at (size_type i, size_types ... is) const {
         if constexpr (sizeof...(is) == 0)
             return this->data_[i];
         else
@@ -402,13 +426,13 @@ public:
      */
     template<class ... size_types>
     inline
-    reference at (size_type i, size_types ... is) {
+    constexpr reference at (size_type i, size_types ... is) {
         if constexpr (sizeof...(is) == 0)
             return this->data_[i];
         else{
             auto temp = detail::access<0ul>(size_type(0),this->strides_,i,std::forward<size_types>(is)...);
             return this->data_[temp];
-            }
+        }
     }
 
     /** @brief Element access using a single index.
@@ -419,7 +443,7 @@ public:
      *  @param i zero-based index where 0 <= i < this->size()
      */
     inline
-    const_reference operator()(size_type i) const {
+    constexpr const_reference operator()(size_type i) const {
         return this->data_[i];
     }
 
@@ -431,7 +455,7 @@ public:
      *  @param i zero-based index where 0 <= i < this->size()
      */
     inline
-    reference operator()(size_type i){
+    constexpr reference operator()(size_type i){
         return this->data_[i];
     }
 
@@ -445,50 +469,13 @@ public:
      */
     template<std::size_t I, class ... index_types>
     inline
-    decltype(auto) operator() (index::index_type<I> p, index_types ... ps) const
+    constexpr decltype(auto) operator() (index::index_type<I> p, index_types ... ps) const
     {
         constexpr auto N = sizeof...(ps)+1;
         if( N != this->rank() )
             throw std::runtime_error("Error in boost::numeric::ublas::operator(): size of provided index_types does not match with the rank.");
 
         return std::make_pair( std::cref(*this),  std::make_tuple( p, std::forward<index_types>(ps)... ) );
-    }
-
-    /** @brief Reshapes the tensor_core
-     *
-     *
-     * (1) @code A.reshape(extents{m,n,o});     @endcode or
-     * (2) @code A.reshape(extents{m,n,o},4);   @endcode
-     *
-     * If the size of this smaller than the specified extents than
-     * default constructed (1) or specified (2) value is appended.
-     *
-     * @note rank of the tensor_core might also change.
-     *
-     * @param e extents with which the tensor_core is reshaped.
-     * @param v value which is appended if the tensor_core is enlarged.
-     */
-    inline
-    void reshape (extents_type const& e, value_type v = value_type{})
-    {
-        static_assert(is_dynamic_v<extents_type>,
-            "boost::numeric::ublas::tensor_core::reshape(extents_type const&, value_type): static extents cannot be reshaped");
-
-        this->extents_ = e;
-        this->strides_ = strides_type(this->extents_);
-
-        auto p = product(extents_);
-
-        if( p > data_.size() ){
-            throw std::length_error(
-                "boost::numeric::ublas::tensor_core::reshape(extents_type const&, value_type): "
-                "tensor cannot be reshaped because extents required size exceeds the static storage size"
-            );
-        }
-        if constexpr(std::is_same_v<resizable_tag,storage_resizable_container_tag>){
-            if(p != this->size())
-                this->data_.resize (p, v);
-        }
     }
 
     friend void swap(tensor_core& lhs, tensor_core& rhs) {
@@ -500,73 +487,73 @@ public:
 
     /// \brief return an iterator on the first element of the tensor_core
     inline
-    const_iterator begin () const {
+    constexpr const_iterator begin () const {
         return data_.begin ();
     }
 
     /// \brief return an iterator on the first element of the tensor_core
     inline
-    const_iterator cbegin () const {
+    constexpr const_iterator cbegin () const {
         return data_.cbegin ();
     }
 
     /// \brief return an iterator after the last element of the tensor_core
     inline
-    const_iterator end () const {
+    constexpr const_iterator end () const {
         return data_.end();
     }
 
     /// \brief return an iterator after the last element of the tensor_core
     inline
-    const_iterator cend () const {
+    constexpr const_iterator cend () const {
         return data_.cend ();
     }
 
     /// \brief Return an iterator on the first element of the tensor_core
     inline
-    iterator begin () {
+    constexpr iterator begin () {
         return data_.begin();
     }
 
     /// \brief Return an iterator at the end of the tensor_core
     inline
-    iterator end () {
+    constexpr iterator end () {
         return data_.end();
     }
 
     /// \brief Return a const reverse iterator before the first element of the reversed tensor_core (i.e. end() of normal tensor_core)
     inline
-    const_reverse_iterator rbegin () const {
+    constexpr const_reverse_iterator rbegin () const {
         return data_.rbegin();
     }
 
     /// \brief Return a const reverse iterator before the first element of the reversed tensor_core (i.e. end() of normal tensor_core)
     inline
-    const_reverse_iterator crbegin () const {
+    constexpr const_reverse_iterator crbegin () const {
         return data_.crbegin();
     }
 
     /// \brief Return a const reverse iterator on the end of the reverse tensor_core (i.e. first element of the normal tensor_core)
     inline
-    const_reverse_iterator rend () const {
+    constexpr const_reverse_iterator rend () const {
         return data_.rend();
     }
 
     /// \brief Return a const reverse iterator on the end of the reverse tensor_core (i.e. first element of the normal tensor_core)
     inline
-    const_reverse_iterator crend () const {
+    constexpr const_reverse_iterator crend () const {
         return data_.crend();
     }
 
     /// \brief Return a const reverse iterator before the first element of the reversed tensor_core (i.e. end() of normal tensor_core)
     inline
-    reverse_iterator rbegin () {
+    constexpr reverse_iterator rbegin () {
         return data_.rbegin();
     }
 
     /// \brief Return a const reverse iterator on the end of the reverse tensor_core (i.e. first element of the normal tensor_core)
     inline
-    reverse_iterator rend () {
+    constexpr reverse_iterator rend () {
         return data_.rend();
     }
 

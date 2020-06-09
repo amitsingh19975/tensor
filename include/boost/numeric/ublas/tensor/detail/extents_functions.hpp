@@ -30,7 +30,8 @@ namespace boost::numeric::ublas::detail{
   constexpr auto push_front(basic_static_extents<T, N...>) -> basic_static_extents<T, E, N...>;
 
   template <typename T, T E0, T... E, T... N>
-  constexpr auto squeeze_impl_remove_one( basic_static_extents<T, E0, E...>, basic_static_extents<T, N...> num = basic_static_extents<T>{} ){
+  [[nodiscard]]
+  constexpr auto squeeze_impl_remove_one( basic_static_extents<T, E0, E...>, basic_static_extents<T, N...> num = basic_static_extents<T>{} ) noexcept{
     // executed when basic_static_extents is size of 1
     // @code basic_static_extents<T, E0> @endcode
     if constexpr( sizeof...(E) == 0ul ){
@@ -58,7 +59,8 @@ namespace boost::numeric::ublas::detail{
   }
 
   template <class T, T... E>
-  constexpr auto squeeze_impl( basic_static_extents<T,E...> const& e ){
+  [[nodiscard]]
+  constexpr auto squeeze_impl( basic_static_extents<T,E...> const& e ) noexcept{
     
     using extents_type = basic_static_extents<T,E...>;
 
@@ -103,8 +105,8 @@ namespace boost::numeric::ublas::detail{
   }
 
   template <class T>
-  inline
-  constexpr auto squeeze_impl( basic_extents<T> const& e ){
+  [[nodiscard]] inline
+  constexpr auto squeeze_impl( basic_extents<T> const& e ) noexcept{
     using extents_type  = basic_extents<T>;
     using base_type     = typename extents_type::base_type;
     using value_type    = typename extents_type::value_type;
@@ -140,8 +142,8 @@ namespace boost::numeric::ublas::detail{
   }
 
   template <class T, std::size_t N>
-  inline
-  auto squeeze_impl( basic_fixed_rank_extents<T,N> const& e ){
+  [[nodiscard]] inline
+  auto squeeze_impl( basic_fixed_rank_extents<T,N> const& e ) noexcept{
     if constexpr( N <= 2 ){
       return e;
     }else{
@@ -303,7 +305,7 @@ template <class LExtents, class RExtents,
   , int> = 0 
 >
 [[nodiscard]] inline
-constexpr bool operator==(LExtents const& lhs, RExtents const& rhs) noexcept{
+constexpr bool operator==(LExtents const& lhs, RExtents const& rhs){
   
   static_assert( std::is_same_v<typename LExtents::value_type, typename RExtents::value_type>, 
     "boost::numeric::ublas::operator==(LExtents const&, RExtents const&) : LHS value type should be same as RHS value type");
@@ -317,7 +319,7 @@ template <class LExtents, class RExtents,
   , int> = 0 
 >
 [[nodiscard]] inline
-constexpr bool operator!=(LExtents const& lhs, RExtents const& rhs) noexcept{
+constexpr bool operator!=(LExtents const& lhs, RExtents const& rhs){
   
   static_assert( std::is_same_v<typename LExtents::value_type, typename RExtents::value_type>, 
     "boost::numeric::ublas::operator!=(LExtents const&, RExtents const&) : LHS value type should be same as RHS value type");

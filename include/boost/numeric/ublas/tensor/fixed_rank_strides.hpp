@@ -113,13 +113,13 @@ struct basic_fixed_rank_strides
     ~basic_fixed_rank_strides() = default;
 
 
-    basic_fixed_rank_strides& operator=(basic_fixed_rank_strides other)
+    basic_fixed_rank_strides& operator=(basic_fixed_rank_strides other) noexcept
     {
         std::swap (*this, other);
         return *this;
     }
 
-    friend void swap(basic_fixed_rank_strides& lhs, basic_fixed_rank_strides& rhs) {
+    friend void swap(basic_fixed_rank_strides& lhs, basic_fixed_rank_strides& rhs) noexcept{
         std::swap(lhs._base   , rhs._base);
     }
 
@@ -149,27 +149,27 @@ struct basic_fixed_rank_strides
     }
 
     [[nodiscard]] inline
-    constexpr bool empty() const{
+    constexpr bool empty() const noexcept{
         return _base.empty();
     }
 
     [[nodiscard]] inline
-    constexpr size_type size() const{
+    constexpr size_type size() const noexcept{
         return _base.size();
     }
 
     [[nodiscard]] inline
-    constexpr const_iterator begin() const{
+    constexpr const_iterator begin() const noexcept{
         return _base.begin();
     }
 
     [[nodiscard]] inline
-    constexpr const_iterator end() const{
+    constexpr const_iterator end() const noexcept{
         return _base.end();
     }
     
     [[nodiscard]] inline
-    constexpr base_type const& base() const{
+    constexpr base_type const& base() const noexcept{
         return this->_base;
     }
 

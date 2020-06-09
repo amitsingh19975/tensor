@@ -143,41 +143,41 @@ struct basic_strides
 
     [[nodiscard]] inline
     constexpr const_reference back () const{
-        return _base[_base.size() - 1];
+        return _base.back();
     }
 
     [[nodiscard]] inline
     constexpr reference back (){
-        return _base[_base.size() - 1];
+        return _base.back();
     }
 
     [[nodiscard]] inline
-    constexpr bool empty() const{
+    constexpr bool empty() const noexcept{
         return _base.empty();
     }
 
     [[nodiscard]] inline
-    constexpr size_type size() const{
+    constexpr size_type size() const noexcept{
         return _base.size();
     }
 
     [[nodiscard]] inline
-    constexpr const_iterator begin() const{
+    constexpr const_iterator begin() const noexcept{
         return _base.begin();
     }
 
     [[nodiscard]] inline
-    constexpr const_iterator end() const{
+    constexpr const_iterator end() const noexcept{
         return _base.end();
     }
 
     inline
-    constexpr void clear() {
+    constexpr void clear() noexcept{
         this->_base.clear();
     }
 
     [[nodiscard]] inline
-    constexpr base_type const& base() const{
+    constexpr base_type const& base() const noexcept{
         return this->_base;
     }
     

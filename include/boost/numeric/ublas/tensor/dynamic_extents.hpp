@@ -140,18 +140,18 @@ struct basic_extents
         return *this;
     }
 
-    friend void swap(basic_extents& lhs, basic_extents& rhs) {
+    friend void swap(basic_extents& lhs, basic_extents& rhs) noexcept{
         std::swap(lhs._base   , rhs._base   );
     }
 
     [[nodiscard]] inline
-    constexpr const_pointer data() const
+    constexpr const_pointer data() const noexcept
     {
         return this->_base.data();
     }
 
     [[nodiscard]] inline
-    constexpr const_reference operator[] (size_type p) const noexcept
+    constexpr const_reference operator[] (size_type p) const
     {
         return this->_base[p];
     }
@@ -182,39 +182,39 @@ struct basic_extents
 
 
     [[nodiscard]] inline
-    constexpr bool empty() const
+    constexpr bool empty() const noexcept
     {
         return this->_base.empty();
     }
 
     [[nodiscard]] inline
-    constexpr size_type size() const
+    constexpr size_type size() const noexcept
     {
         return this->_base.size();
     }
 
     inline
-    constexpr void clear()
+    constexpr void clear() noexcept
     {
         this->_base.clear();
     }
 
     [[nodiscard]] inline
     constexpr const_iterator
-    begin() const
+    begin() const noexcept
     {
         return _base.begin();
     }
 
     [[nodiscard]] inline
     constexpr const_iterator
-    end() const
+    end() const noexcept
     {
         return _base.end();
     }
 
     [[nodiscard]] inline
-    constexpr base_type const& base() const { return _base; }
+    constexpr base_type const& base() const noexcept { return _base; }
 
 private:
     base_type _base;

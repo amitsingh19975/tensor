@@ -202,7 +202,7 @@ struct basic_static_strides<basic_static_extents<T,Extents...>, Layout>
   }
 
   [[nodiscard]] inline 
-  constexpr const_reference operator[](size_type k) const noexcept { return m_data[k]; }
+  constexpr const_reference operator[](size_type k) const { return m_data[k]; }
 
   //@returns the rank of basic_static_extents
   [[nodiscard]] inline 

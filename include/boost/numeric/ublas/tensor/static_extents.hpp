@@ -57,7 +57,7 @@ struct basic_static_extents{
   }
 
   [[nodiscard]] inline
-  constexpr const_reference operator[](size_type k) const noexcept{ 
+  constexpr const_reference operator[](size_type k) const{ 
     return m_data[k]; 
   }
 
@@ -97,7 +97,7 @@ struct basic_static_extents{
   constexpr bool empty() const noexcept { return m_data.empty(); }
 
   [[nodiscard]] inline
-  constexpr const_reference back() const noexcept{
+  constexpr const_reference back() const{
     return m_data.back();
   }
 

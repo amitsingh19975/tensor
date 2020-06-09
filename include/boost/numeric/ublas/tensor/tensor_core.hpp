@@ -29,7 +29,7 @@
 #include <boost/numeric/ublas/tensor/type_traits.hpp>
 #include <boost/numeric/ublas/tensor/tags.hpp>
 
-namespace boost { namespace numeric { namespace ublas {
+namespace boost::numeric::ublas {
 
 template< class T >
 class tensor_core:
@@ -402,82 +402,82 @@ public:
     }
 
     /** @brief Returns true if the tensor_core is empty (\c size==0) */
-    inline
-    constexpr bool empty () const {
+    [[nodiscard]] inline
+    constexpr bool empty () const noexcept{
         return this->data_.empty();
     }
 
 
     /** @brief Returns the size of the tensor_core */
-    inline
-    constexpr size_type size () const {
+    [[nodiscard]] inline
+    constexpr size_type size () const noexcept{
         return this->data_.size ();
     }
 
     /** @brief Returns the size of the tensor_core */
-    inline
+    [[nodiscard]] inline
     constexpr size_type size (size_type r) const {
         return this->extents_.at(r);
     }
 
     /** @brief Returns the number of dimensions/modes of the tensor_core */
-    inline
-    constexpr size_type rank () const {
+    [[nodiscard]] inline
+    constexpr size_type rank () const noexcept{
         return this->extents_.size();
     }
 
     /** @brief Returns the number of dimensions/modes of the tensor_core */
-    inline
-    constexpr size_type order () const {
+    [[nodiscard]] inline
+    constexpr size_type order () const noexcept{
         return this->extents_.size();
     }
 
     /** @brief Returns the strides of the tensor_core */
-    inline
-    constexpr strides_type const& strides () const {
+    [[nodiscard]] inline
+    constexpr strides_type const& strides () const noexcept{
         return this->strides_;
     }
 
     /** @brief Returns the extents of the tensor_core */
-    inline
-    constexpr extents_type const& extents () const {
+    [[nodiscard]] inline
+    constexpr extents_type const& extents () const noexcept{
         return this->extents_;
     }
 
     /** @brief Returns the strides of the tensor_core */
-    inline
-    constexpr strides_type& strides () {
+    [[nodiscard]] inline
+    constexpr strides_type& strides () noexcept{
         return this->strides_;
     }
 
     /** @brief Returns the extents of the tensor_core */
-    inline
-    constexpr extents_type& extents () {
+    [[nodiscard]] inline
+    constexpr extents_type& extents () noexcept{
         return this->extents_;
     }
 
 
     /** @brief Returns a \c const reference to the container. */
-    inline
-    constexpr const_pointer data () const {
+    [[nodiscard]] inline
+    constexpr const_pointer data () const noexcept{
         return this->data_.data();
     }
 
     /** @brief Returns a \c const reference to the container. */
-    inline
-    constexpr pointer data () {
+    [[nodiscard]] inline
+    constexpr pointer data () noexcept{
         return this->data_.data();
     }
 
     /** @brief Returns a \c const reference to the underlying container. */
-    inline
-    constexpr array_type const& base () const {
+    [[nodiscard]] inline
+    constexpr array_type const& base () const noexcept{
         return data_;
     }
 
     /** @brief Returns a reference to the underlying container. */
-    inline
-    constexpr array_type& base () {
+    [[nodiscard]] inline
+    constexpr array_type& base () noexcept{
         return data_;
     }
 
@@ -487,7 +487,7 @@ public:
      *
      *  @param i zero-based index where 0 <= i < this->size()
      */
-    inline
+    [[nodiscard]] inline
     constexpr const_reference operator [] (size_type i) const {
         return this->data_[i];
     }
@@ -498,7 +498,7 @@ public:
      *
      *  @param i zero-based index where 0 <= i < this->size()
      */
-    inline
+    [[nodiscard]] inline
     constexpr reference operator [] (size_type i) {
         return this->data_[i];
     }
@@ -513,7 +513,7 @@ public:
      *  @param is zero-based indices where 0 <= is[r] < this->size(r) where  0 < r < this->rank()
      */
     template<class ... size_types>
-    inline
+    [[nodiscard]] inline
     constexpr const_reference at (size_type i, size_types ... is) const {
         if constexpr (sizeof...(is) == 0)
             return this->data_[i];
@@ -531,7 +531,7 @@ public:
      *  @param is zero-based indices where 0 <= is[r] < this->size(r) where  0 < r < this->rank()
      */
     template<class ... size_types>
-    inline
+    [[nodiscard]] inline
     constexpr reference at (size_type i, size_types ... is) {
         if constexpr (sizeof...(is) == 0)
             return this->data_[i];
@@ -548,7 +548,7 @@ public:
      *
      *  @param i zero-based index where 0 <= i < this->size()
      */
-    inline
+    [[nodiscard]] inline
     constexpr const_reference operator()(size_type i) const {
         return this->data_[i];
     }
@@ -560,7 +560,7 @@ public:
      *
      *  @param i zero-based index where 0 <= i < this->size()
      */
-    inline
+    [[nodiscard]] inline
     constexpr reference operator()(size_type i){
         return this->data_[i];
     }
@@ -574,7 +574,7 @@ public:
      *  @param is zero-based indices where 0 <= is[r] < this->size(r) where  0 < r < this->rank()
      */
     template<std::size_t I, class ... index_types>
-    inline
+    [[nodiscard]] inline
     constexpr decltype(auto) operator() (index::index_type<I> p, index_types ... ps) const
     {
         constexpr auto N = sizeof...(ps)+1;
@@ -584,7 +584,7 @@ public:
         return std::make_pair( std::cref(*this),  std::make_tuple( p, std::forward<index_types>(ps)... ) );
     }
 
-    friend void swap(tensor_core& lhs, tensor_core& rhs) {
+    friend void swap(tensor_core& lhs, tensor_core& rhs) noexcept{
         std::swap(lhs.data_   , rhs.data_   );
         std::swap(lhs.extents_, rhs.extents_);
         std::swap(lhs.strides_, rhs.strides_);
@@ -592,84 +592,84 @@ public:
 
 
     /// \brief return an iterator on the first element of the tensor_core
-    inline
-    constexpr const_iterator begin () const {
+    [[nodiscard]] inline
+    constexpr const_iterator begin () const noexcept{
         return data_.begin ();
     }
 
     /// \brief return an iterator on the first element of the tensor_core
-    inline
-    constexpr const_iterator cbegin () const {
+    [[nodiscard]] inline
+    constexpr const_iterator cbegin () const noexcept{
         return data_.cbegin ();
     }
 
     /// \brief return an iterator after the last element of the tensor_core
-    inline
-    constexpr const_iterator end () const {
+    [[nodiscard]] inline
+    constexpr const_iterator end () const noexcept{
         return data_.end();
     }
 
     /// \brief return an iterator after the last element of the tensor_core
-    inline
-    constexpr const_iterator cend () const {
+    [[nodiscard]] inline
+    constexpr const_iterator cend () const noexcept{
         return data_.cend ();
     }
 
     /// \brief Return an iterator on the first element of the tensor_core
-    inline
-    constexpr iterator begin () {
+    [[nodiscard]] inline
+    constexpr iterator begin () noexcept{
         return data_.begin();
     }
 
     /// \brief Return an iterator at the end of the tensor_core
-    inline
-    constexpr iterator end () {
+    [[nodiscard]] inline
+    constexpr iterator end () noexcept{
         return data_.end();
     }
 
     /// \brief Return a const reverse iterator before the first element of the reversed tensor_core (i.e. end() of normal tensor_core)
-    inline
-    constexpr const_reverse_iterator rbegin () const {
+    [[nodiscard]] inline
+    constexpr const_reverse_iterator rbegin () const noexcept{
         return data_.rbegin();
     }
 
     /// \brief Return a const reverse iterator before the first element of the reversed tensor_core (i.e. end() of normal tensor_core)
-    inline
-    constexpr const_reverse_iterator crbegin () const {
+    [[nodiscard]] inline
+    constexpr const_reverse_iterator crbegin () const noexcept{
         return data_.crbegin();
     }
 
     /// \brief Return a const reverse iterator on the end of the reverse tensor_core (i.e. first element of the normal tensor_core)
-    inline
-    constexpr const_reverse_iterator rend () const {
+    [[nodiscard]] inline
+    constexpr const_reverse_iterator rend () const noexcept{
         return data_.rend();
     }
 
     /// \brief Return a const reverse iterator on the end of the reverse tensor_core (i.e. first element of the normal tensor_core)
-    inline
-    constexpr const_reverse_iterator crend () const {
+    [[nodiscard]] inline
+    constexpr const_reverse_iterator crend () const noexcept{
         return data_.crend();
     }
 
     /// \brief Return a const reverse iterator before the first element of the reversed tensor_core (i.e. end() of normal tensor_core)
-    inline
-    constexpr reverse_iterator rbegin () {
+    [[nodiscard]] inline
+    constexpr reverse_iterator rbegin () noexcept{
         return data_.rbegin();
     }
 
     /// \brief Return a const reverse iterator on the end of the reverse tensor_core (i.e. first element of the normal tensor_core)
-    inline
-    constexpr reverse_iterator rend () {
+    [[nodiscard]] inline
+    constexpr reverse_iterator rend () noexcept{
         return data_.rend();
     }
 
-protected:
+private:
 
     extents_type extents_;
     strides_type strides_;
     array_type data_;
 };
 
-}}} // namespaces
+} // namespaces
 
 #endif

@@ -156,7 +156,7 @@ struct basic_fixed_rank_extents
 
     /** @brief Returns the std::vector containing extents */
     [[nodiscard]] inline
-    constexpr base_type const& base() const {
+    constexpr base_type const& base() const noexcept{
         return _base;
     }
 
@@ -168,26 +168,26 @@ struct basic_fixed_rank_extents
     [[nodiscard]] inline
     constexpr bool empty() const noexcept { return _size == size_type{0}; }
 
-    friend void swap(basic_fixed_rank_extents& lhs, basic_fixed_rank_extents& rhs) {
+    friend void swap(basic_fixed_rank_extents& lhs, basic_fixed_rank_extents& rhs) noexcept{
         std::swap(lhs._base   , rhs._base   );
     }
 
     [[nodiscard]] inline
-    constexpr const_pointer data() const
+    constexpr const_pointer data() const noexcept
     {
         return _base.data();
     }
 
     [[nodiscard]] inline
     constexpr const_iterator
-    begin() const
+    begin() const noexcept
     {
         return _base.begin();
     }
 
     [[nodiscard]] inline
     constexpr const_iterator
-    end() const
+    end() const noexcept
     {
         return _base.end();
     }

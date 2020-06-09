@@ -18,7 +18,11 @@
 #include <boost/numeric/ublas/tensor/traits/storage_traits.hpp>
 
 namespace boost::numeric::ublas{
+    using first_order   = column_major;
+    using last_order    = row_major;
+    
     template<typename T> class tensor_core;
+
 } // namespace boost::numeric::ublas
 
 

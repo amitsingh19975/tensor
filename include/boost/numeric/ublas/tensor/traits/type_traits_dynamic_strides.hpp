@@ -17,10 +17,10 @@
 
 namespace boost::numeric::ublas{
     
-template<class int_type> class basic_extents;
+template<class ExtentType> struct basic_extents;
 
 template<class T, class L>
-class basic_strides;
+struct basic_strides;
 
 } // namespace boost::numeric::ublas
 

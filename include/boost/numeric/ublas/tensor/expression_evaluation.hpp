@@ -20,11 +20,11 @@
 
 namespace boost::numeric::ublas {
 
-template<class T>
+template<typename T>
 class tensor_core;
 
-template<class size_type>
-class basic_extents;
+template<typename ExtentType>
+struct basic_extents;
 
 }
 

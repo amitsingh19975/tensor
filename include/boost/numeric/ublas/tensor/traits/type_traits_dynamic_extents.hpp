@@ -17,7 +17,7 @@
 
 namespace boost::numeric::ublas{
     
-template<class int_type> class basic_extents;
+template<typename ExtentType> struct basic_extents;
 
 } // namespace boost::numeric::ublas
 

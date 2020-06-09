@@ -18,10 +18,7 @@
 #include <boost/numeric/ublas/tensor/traits/static_extents_traits.hpp>
 
 namespace boost::numeric::ublas{
-
-  using first_order = column_major;
-  using last_order = row_major;
-
+  
   template <class E, class L> struct basic_static_strides;
 
 } // boost::numeric::ublas

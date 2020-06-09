@@ -21,17 +21,15 @@
 #include <boost/numeric/ublas/tensor/type_traits.hpp>
 #include <boost/numeric/ublas/tensor/detail/extents_functions.hpp>
 
-namespace boost {
-namespace numeric {
-namespace ublas {
+namespace boost::numeric::ublas {
 
-/** @brief Template class for storing tensor extents for compile time.
+/** @brief Template typename for storing tensor extents for compile time.
  *
  * @code basic_static_extents<1,2,3,4> t @endcode
  * @tparam E parameter pack of extents
  *
  */
-template <class ExtentsType, std::size_t N>
+template <typename ExtentsType, std::size_t N>
 struct basic_fixed_rank_extents
 {
   
@@ -206,9 +204,7 @@ private:
     base_type _base{};
 };
 
-} // namespace ublas
-} // namespace numeric
-} // namespace boost
+} // boost::numeric::ublas
 
 
 

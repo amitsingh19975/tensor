@@ -18,12 +18,7 @@
 #include <boost/numeric/ublas/functional.hpp>
 #include <boost/numeric/ublas/tensor/fixed_rank_extents.hpp>
 
-namespace boost { 
-namespace numeric { 
-namespace ublas {
-
-using first_order = column_major;
-using last_order = row_major;
+namespace boost::numeric::ublas {
 
 /** @brief Template class for storing tensor strides for iteration with runtime variable size.
  *
@@ -31,21 +26,10 @@ using last_order = row_major;
  *
  */
 template<class T, std::size_t N, class L>
-class basic_fixed_rank_strides
+struct basic_fixed_rank_strides
 {
-public:
-
-    using base_type = std::array<T, N>;
-
-    static_assert( std::numeric_limits<typename base_type::value_type>::is_integer,
-                                 "Static error in boost::numeric::ublas::basic_fixed_rank_strides: type must be of type integer.");
-    static_assert(!std::numeric_limits<typename base_type::value_type>::is_signed,
-                                "Static error in boost::numeric::ublas::basic_fixed_rank_strides: type must be of type unsigned integer.");
-    static_assert(std::is_same<L,first_order>::value || std::is_same<L,last_order>::value,
-                                "Static error in boost::numeric::ublas::basic_fixed_rank_strides: layout type must either first or last order");
-
-
     using layout_type           = L;
+    using base_type             = std::array<T, N>;
     using value_type            = typename base_type::value_type;
     using reference             = typename base_type::reference;
     using const_reference       = typename base_type::const_reference;
@@ -53,6 +37,12 @@ public:
     using const_pointer         = typename base_type::const_pointer;
     using const_iterator        = typename base_type::const_iterator;
 
+    static_assert( std::numeric_limits<value_type>::is_integer,
+                                 "Static error in boost::numeric::ublas::basic_fixed_rank_strides: type must be of type integer.");
+    static_assert(!std::numeric_limits<value_type>::is_signed,
+                                "Static error in boost::numeric::ublas::basic_fixed_rank_strides: type must be of type unsigned integer.");
+    static_assert(std::is_same<L,first_order>::value || std::is_same<L,last_order>::value,
+                                "Static error in boost::numeric::ublas::basic_fixed_rank_strides: layout type must either first or last order");
 
     /** @brief Default constructs basic_fixed_rank_strides
      *
@@ -183,13 +173,11 @@ public:
         return this->_base;
     }
 
-protected:
+private:
     base_type _base;
 };
 
 
-}
-}
-}
+} // boost::numeric::ublas
 
 #endif

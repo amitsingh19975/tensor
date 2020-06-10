@@ -115,7 +115,7 @@ struct basic_fixed_rank_strides
 
     basic_fixed_rank_strides& operator=(basic_fixed_rank_strides other) noexcept
     {
-        std::swap (*this, other);
+        swap (*this, other);
         return *this;
     }
 

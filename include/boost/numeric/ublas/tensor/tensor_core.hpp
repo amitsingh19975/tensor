@@ -83,6 +83,7 @@ public:
     using matrix_type               = matrix<value_type,layout_type, std::vector<value_type> >;
     using vector_type               = vector<value_type, std::vector<value_type> >;
 
+
     static_assert( std::is_same<layout_type,first_order>::value || 
                    std::is_same<layout_type,last_order >::value, 
                    "boost::numeric::tensor_core template class only supports first- or last-order storage formats.");
@@ -95,24 +96,30 @@ public:
      */
     inline
     constexpr tensor_core ()
-        : tensor_core(extents_type{},resizable_tag{})
-    {}
-
-    constexpr tensor_core( extents_type const& e, storage_resizable_container_tag )
-        : tensor_expression_type<self_type>()
-        , extents_(e)
-        , strides_(extents_)
-        , data_( product(extents_) )
-    {}
-
-    constexpr tensor_core( extents_type const& e, storage_static_container_tag )
-        : tensor_expression_type<self_type>()
-        , extents_(e)
-        , strides_(extents_)
     {
-        if ( data_.size() < product(extents_) ){
+        if constexpr( is_static_v<extents_type> ){
+            auto temp = tensor_core(extents_type{},resizable_tag{});
+            swap(*this,temp);
+        }
+    }
+
+    constexpr tensor_core( extents_type e, storage_resizable_container_tag )
+        : tensor_expression_type<self_type>()
+        , extents_(std::move(e))
+        , strides_(extents_)
+        , size_(product(extents_))
+        , data_( size_ )
+    {}
+
+    constexpr tensor_core( extents_type e, storage_static_container_tag )
+        : tensor_expression_type<self_type>()
+        , extents_(std::move(e))
+        , strides_(extents_)
+        , size_(product(extents_))
+    {
+        if ( data_.size() < size_ ){
             throw std::length_error("boost::numeric::ublas::tensor_core(extents_type const&, tag::static_storage): "
-                "size of requested storage exceeds the current buffer size"
+                "size of requested storage exceeds the current container size"
             );
         }
     }
@@ -125,9 +132,6 @@ public:
      *
      * @param l initializer list for setting the dimension extents of the tensor_core
      */
-    template<typename U = extents_type, 
-        typename = std::enable_if_t< is_dynamic_v<U> >
-    >
     explicit inline
     tensor_core (std::initializer_list<size_type> l)
         : tensor_core( std::move(l), resizable_tag{} )
@@ -159,25 +163,7 @@ public:
     tensor_core (extents_type const& s, value_type const& i)
         : tensor_core( s, resizable_tag{} )
     {
-        std::fill_n(begin(),product(s),i);
-    }
-
-    /** @brief Constructs a tensor_core with a \c shape
-     *
-     * By default, its elements are initialized to 0.
-     *
-     * @code tensor_core<float> A{extents{4,2,3}}; @endcode
-     *
-     * @param i initial tensor_core with this value
-     */
-    explicit inline
-    tensor_core (value_type const& i)
-        : tensor_core( extents_type{}, resizable_tag{} )
-    {
-        static_assert(is_static_v<extents_type>,"boost::numeric::ublas::tensor_core:"
-            "The extents should be a static tensor extents"
-        );
-        std::fill_n(begin(),product(extents_),i);
+        std::fill_n(begin(),size_,i);
     }
 
     /** @brief Constructs a tensor_core with a \c shape and initiates it with one-dimensional data
@@ -188,13 +174,14 @@ public:
      *  @param s initial tensor_core dimension extents
      *  @param a container of \c array_type that is copied according to the storage layout
      */
+    inline
     tensor_core (extents_type const& s, const array_type &a)
         : tensor_core( s, resizable_tag{} )
     {
-        if( product(extents_) != a.size() ){
+        if( size_ != a.size() ){
             throw std::runtime_error("boost::numeric::ublas::tensor_core(extents_type,array_type): array size mismatch with extents");
         }
-        std::copy_n(a.begin(),product(s),begin());
+        std::copy_n(a.begin(),size_,begin());
     }
 
 
@@ -357,6 +344,7 @@ public:
         : tensor_expression_type<self_type>()
         , extents_ (v.extents_)
         , strides_ (v.strides_)
+        , size_    (v.size_)
         , data_    (v.data_   )
     {}
 
@@ -371,6 +359,7 @@ public:
         : tensor_expression_type<self_type>() //tensor_container<self_type> ()
         , extents_ (std::move(v.extents_))
         , strides_ (std::move(v.strides_))
+        , size_    (std::move(v.size_))
         , data_    (std::move(v.data_   ))
     {}
 
@@ -397,7 +386,7 @@ public:
 
     tensor_core& operator=(const_reference v)
     {
-        std::fill(this->begin(), this->end(), v);
+        std::fill_n(this->begin(), size_, v);
         return *this;
     }
 
@@ -407,11 +396,16 @@ public:
         return this->data_.empty();
     }
 
-
     /** @brief Returns the size of the tensor_core */
     [[nodiscard]] inline
     constexpr size_type size () const noexcept{
-        return this->data_.size ();
+        return this->size_;
+    }
+
+    /** @brief Returns the container size or buffer size of the tensor_core */
+    [[nodiscard]] inline
+    constexpr size_type container_size () const noexcept{
+        return this->data_.size();
     }
 
     /** @brief Returns the size of the tensor_core */
@@ -455,7 +449,11 @@ public:
     constexpr extents_type& extents () noexcept{
         return this->extents_;
     }
-
+    
+    inline
+    constexpr void invalidate_size(){
+        this->size_ = product(this->extents_);
+    }
 
     /** @brief Returns a \c const reference to the container. */
     [[nodiscard]] inline
@@ -588,6 +586,7 @@ public:
         std::swap(lhs.data_   , rhs.data_   );
         std::swap(lhs.extents_, rhs.extents_);
         std::swap(lhs.strides_, rhs.strides_);
+        std::swap(lhs.size_, rhs.size_);
     }
 
 
@@ -667,6 +666,7 @@ private:
 
     extents_type extents_;
     strides_type strides_;
+    size_type  size_{};
     array_type data_;
 };
 

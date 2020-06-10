@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test_fixed_rank_extents_ctor)
 
 struct fixture {
     template<size_t N>
-    using dynamic_extents = boost::numeric::ublas::extents<N>;
+    using extents = boost::numeric::ublas::extents<N>;
 
     extents<0> de0{};            // 0
 

@@ -84,13 +84,7 @@ struct basic_fixed_rank_extents
     
     constexpr basic_fixed_rank_extents& operator=(basic_fixed_rank_extents other) noexcept
     {
-        std::swap(*this,other);
-        return *this;
-    }
-    
-    constexpr basic_fixed_rank_extents& operator=(basic_fixed_rank_extents&& other) noexcept
-    {
-        std::swap(*this,other);
+        swap(*this,other);
         return *this;
     }
     

@@ -94,9 +94,9 @@ namespace boost::numeric::ublas
      *
      * @returns tensor object C with order p-1, the same storage format and allocator type as A
     */
-    template <typename TensorEngine, typename A, typename V = typename tensor_core< TensorEngine >::value_type >
+    template <typename TensorEngine, typename A >
     inline decltype(auto) prod( tensor_core< TensorEngine > const &a, 
-        vector<V, A> const &b, 
+        vector<typename tensor_core< TensorEngine >::value_type, A> const &b, 
         const std::size_t m)
     {
         using tensor_type   = tensor_core< TensorEngine >;
@@ -106,7 +106,7 @@ namespace boost::numeric::ublas
         using size_type     = typename extents_type::size_type;
         using layout_type   = typename tensor_type::layout_type;
 
-        auto const p = std::size_t(a.rank());
+        auto const p = a.rank();
 
         if (m == 0)
             throw std::length_error(
@@ -145,9 +145,9 @@ namespace boost::numeric::ublas
                 layout::first_order<c_extents_type>,
                 layout::last_order<c_extents_type>
             >,
-            rebind_storage_t<extents_type,array_type,value_type>
+            rebind_storage_t<c_extents_type,array_type,value_type>
         >;
-
+        
         auto c = tensor_core<t_engine>( nc, value_type{} );
         auto bb = &(b(0));
         ttv(m, p,
@@ -169,12 +169,9 @@ namespace boost::numeric::ublas
      *
      * @returns tensor object C with order p, the same storage format and allocator type as A
     */
-    template <typename TensorEngine, typename A, 
-        typename V = typename tensor_core< TensorEngine >::value_type,
-        typename L = typename tensor_core< TensorEngine >::layout_type 
-    >
+    template <typename TensorEngine, typename A>
     inline decltype(auto) prod( tensor_core< TensorEngine > const &a, 
-        matrix<V, L, A> const &b, 
+        matrix<typename tensor_core< TensorEngine >::value_type, typename tensor_core< TensorEngine >::layout_type , A> const &b, 
         const std::size_t m)
     {
 
@@ -182,7 +179,6 @@ namespace boost::numeric::ublas
         using value_type    = typename tensor_type::value_type;
         using layout_type   = typename tensor_type::layout_type;
         using array_type    = typename tensor_type::array_type;
-        using extents_type  = typename tensor_type::extents_type;
         using dynamic_strides_type = basic_strides<std::size_t,layout_type>;
 
         auto const p = a.rank();
@@ -223,7 +219,7 @@ namespace boost::numeric::ublas
                 layout::first_order<c_extents_type>,
                 layout::last_order<c_extents_type>
             >,
-            rebind_storage_t<extents_type,array_type,value_type>
+            rebind_storage_t<c_extents_type,array_type,value_type>
         >;
 
         auto c = tensor_core<t_engine>(nc, value_type{});
@@ -265,12 +261,13 @@ namespace boost::numeric::ublas
         using value_type        = typename tensor_type::value_type;
         using layout_type       = typename tensor_type::layout_type;
         using size_type         = typename extents_type_1::size_type;
-        using array_type        = typename tensor_type::array_type;
+        using array_type1       = typename tensor_type::array_type;
+        using array_type2       = typename tensor_core< TensorEngine2 >::array_type;
 
         auto const pa = a.rank();
         auto const pb = b.rank();
 
-        auto const q = size_type(phia.size());
+        auto const q = static_cast<size_type>(phia.size());
 
         if (pa == 0ul)
             throw std::runtime_error("error in ublas::prod: order of left-hand side tensor must be greater than 0.");
@@ -329,6 +326,7 @@ namespace boost::numeric::ublas
         assert(phia1.size() == pa);
         assert(phib1.size() == pb);
 
+        using array_type = select_storage_t<array_type1, array_type2>;
 
         using t_engine = tensor_engine< 
             extents<>,
@@ -337,7 +335,7 @@ namespace boost::numeric::ublas
                 layout::first_order<extents<>>,
                 layout::last_order<extents<>>
             >,
-            rebind_storage_t<extents_type_1,array_type,value_type>
+            rebind_storage_t<extents<>,array_type,value_type>
         >;
 
         auto c = tensor_core<t_engine>( extents<>(nc), value_type{} );
@@ -430,8 +428,8 @@ namespace boost::numeric::ublas
         using tensor_type   = tensor_core< TensorEngine1 >;
         using value_type    = typename tensor_type::value_type;
         using layout_type   = typename tensor_type::layout_type;
-        using array_type    = typename tensor_type::array_type;
-        using extents_type  = typename tensor_type::extents_type;
+        using array_type1   = typename tensor_type::array_type;
+        using array_type2   = typename tensor_core< TensorEngine2 >::array_type;
 
 
 
@@ -451,6 +449,7 @@ namespace boost::numeric::ublas
             nc.at(a.rank()+i) = b_extents.at(i);
 
         using c_extents_type = std::decay_t< decltype(nc) >;
+        using array_type = select_storage_t<array_type1, array_type2>;
 
         using t_engine = tensor_engine< 
             c_extents_type,  
@@ -459,7 +458,7 @@ namespace boost::numeric::ublas
                 layout::first_order<c_extents_type>,
                 layout::last_order<c_extents_type>
             >,
-            rebind_storage_t<extents_type,array_type,value_type>
+            rebind_storage_t<c_extents_type,array_type,value_type>
         >;
 
         auto c = tensor_core<t_engine>( nc, value_type{} );
@@ -565,7 +564,7 @@ namespace boost::numeric::ublas
      * @returns   unary tensor expression
     */
     template<typename TensorEngine, class D,
-        std::enable_if_t< detail::is_complex_v<typename TensorEngine::value_type>, int > = 0
+        std::enable_if_t< detail::is_complex_v<typename tensor_core< TensorEngine >::value_type>, int > = 0
     >
     auto conj(detail::tensor_expression< tensor_core<TensorEngine>, D > const& expr)
     {
@@ -628,16 +627,17 @@ namespace boost::numeric::ublas
      * @returns   unary tensor expression
     */
     template<typename TensorEngine, class D,
-        std::enable_if_t< detail::is_complex_v<typename TensorEngine::value_type>, int > = 0
+        std::enable_if_t< detail::is_complex_v<typename tensor_core< TensorEngine >::value_type>, int > = 0
     >
     auto real(detail::tensor_expression< tensor_core< TensorEngine > ,D > const& expr)
     {
         
-        using tensor_type   = tensor_core< TensorEngine >;
-        using value_type    = typename tensor_type::value_type;
-        using layout_type   = typename tensor_type::layout_type;
-        using array_type    = typename tensor_type::array_type;
-        using extents_type  = typename tensor_type::extents_type;
+        using tensor_complex_type   = tensor_core< TensorEngine >;
+        using complex_type  = typename tensor_complex_type::value_type;
+        using value_type    = typename complex_type::value_type;
+        using layout_type   = typename tensor_complex_type::layout_type;
+        using array_type    = typename tensor_complex_type::array_type;
+        using extents_type  = typename tensor_complex_type::extents_type;
         
         using t_engine = tensor_engine< 
             extents<>,
@@ -680,12 +680,13 @@ namespace boost::numeric::ublas
      * @returns   unary tensor expression
     */
     template<typename TensorEngine, class D,
-        std::enable_if_t< detail::is_complex_v<typename TensorEngine::value_type>, int > = 0
+        std::enable_if_t< detail::is_complex_v<typename tensor_core< TensorEngine >::value_type>, int > = 0
     >
     auto imag(detail::tensor_expression< tensor_core< TensorEngine > ,D> const& expr)
     {
         using old_tensor_type   = tensor_core< TensorEngine >;
-        using value_type    = typename old_tensor_type::value_type;
+        using complex_type  = typename old_tensor_type::value_type;
+        using value_type    = typename complex_type::value_type;
         using layout_type   = typename old_tensor_type::layout_type;
         using array_type    = typename old_tensor_type::array_type;
         using extents_type  = typename old_tensor_type::extents_type;
@@ -843,7 +844,7 @@ namespace boost::numeric::ublas
 
         using tensor_type = tensor_core<t_engine>;
 
-        auto c = tensor_type(value_type{});
+        auto c = tensor_type(c_extents_type{},value_type{});
         auto bb = &(b(0));
 
         auto& a_static_extents = a.extents().base();
@@ -924,7 +925,7 @@ namespace boost::numeric::ublas
 
         using tensor_type = tensor_core<t_engine>;
 
-        auto c = tensor_type(value_type{});
+        auto c = tensor_type(c_extents_type{},value_type{});
 
         auto bb = &(b(0, 0));
 
@@ -971,11 +972,13 @@ namespace boost::numeric::ublas
         using old_tensor_type   = tensor_core< TensorEngine1 >;
         using value_type        = typename old_tensor_type::value_type;
         using layout_type       = typename old_tensor_type::layout_type;
-        using array_type        = typename old_tensor_type::array_type;
+        using array_type1       = typename old_tensor_type::array_type;
+        using array_type2       = typename tensor_core< TensorEngine2 >::array_type;
         
         auto nc = detail::impl::concat_t<extents_type1, extents_type2>{};
                         
         using c_extents_type = std::decay_t<decltype(nc)>;
+        using array_type = select_storage_t<array_type1, array_type2>;
 
         using t_engine = tensor_engine<
             c_extents_type,
@@ -988,7 +991,7 @@ namespace boost::numeric::ublas
         >;
 
         using tensor_type = tensor_core<t_engine>;
-        auto c = tensor_type(value_type{});
+        auto c = tensor_type(nc,value_type{});
 
         auto const& a_static_extents = a.extents().base();        
         auto const& a_static_strides = a.strides().base();

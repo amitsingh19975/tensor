@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( test_tensor_prod_vector_exception )
     auto t2 = s_tensor_type{};
     BOOST_REQUIRE_THROW(prod(t2,v1,2),std::length_error);
 
-    auto t3 = s_tensor_type{value_type{1}};
+    auto t3 = s_tensor_type{s_extents_type{},value_type{1}};
     auto v2 = vector_type{0,value_type{1}};
     BOOST_REQUIRE_THROW(prod(t3,v2,2),std::length_error);
 }
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE( test_tensor_prod_matrix_exception )
 
     BOOST_REQUIRE_THROW(prod(t2,m1,2),std::length_error);
 
-    auto t3 = s_tensor_type{value_type{1}};
+    auto t3 = s_tensor_type{s_extents_type{},value_type{1}};
     auto m2 = matrix_type{0,0,value_type{1}};
     BOOST_REQUIRE_THROW(prod(t3,m2,2),std::length_error);
 }
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE( test_tensor_prod_tensor_1_exception )
     using s_tensor_type  = ublas::static_tensor<value_type,s_extents_type,layout_type>;
 
     auto t1 = d_tensor_type{};
-    auto t2 = s_tensor_type{1.f};
+    auto t2 = s_tensor_type{s_extents_type{},1.f};
     std::vector<std::size_t> phia = {1,2,3};
     std::vector<std::size_t> phib = {1,2,3,4,5};
 
@@ -378,7 +378,7 @@ BOOST_AUTO_TEST_CASE( test_tensor_inner_prod_exception )
     auto t2 = d_tensor_type{d_extents_type{1,2,3},1.f};
     BOOST_REQUIRE_THROW( ublas::inner_prod(t1, t2), std::length_error);
 
-    auto t3 = s_tensor_type{1.f};
+    auto t3 = s_tensor_type{s_extents_type{},1.f};
     auto t4 = d_tensor_type{d_extents_type{1,2,4,5},1.f};
     BOOST_REQUIRE_THROW( ublas::inner_prod(t3, t4), std::length_error);
 }

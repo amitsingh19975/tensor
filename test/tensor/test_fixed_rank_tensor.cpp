@@ -402,7 +402,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_reshape, value,  test_types, fixtu
                 for(auto i = 0ul; i < t.size(); ++i)
                     BOOST_CHECK_EQUAL( t[i], v );
 
-                t.reshape(eto);
+                ublas::reshape(t,eto);
                 for(auto i = 0ul; i < std::min(product(efrom),product(eto)); ++i)
                     BOOST_CHECK_EQUAL( t[i], v );
 
@@ -504,7 +504,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_tensor_throw, value, test_types, fixture)
 
   auto t = tensor_type{{5,5}};
   auto i = ublas::index::index_type<4>{};
-  BOOST_CHECK_THROW(t.operator()(i,i,i), std::runtime_error);
+  BOOST_CHECK_THROW((void)t.operator()(i,i,i), std::runtime_error);
 
 }
 

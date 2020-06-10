@@ -113,8 +113,6 @@ BOOST_AUTO_TEST_CASE(test_static_rank_extents_ctor)
 
 struct fixture {
     using extents_type = boost::numeric::ublas::extents<>;
-    template<size_t N>
-    using static_rank_extents_type = boost::numeric::ublas::extents<N>;
 
     fixture() : extents{
                   extents_type{},            // 0

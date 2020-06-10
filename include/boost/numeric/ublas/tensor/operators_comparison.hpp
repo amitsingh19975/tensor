@@ -31,7 +31,7 @@ template<class T1, class T2, class BinaryPred>
 [[nodiscard]] inline 
 constexpr bool compare(tensor_core<T1> const& lhs, tensor_core<T2> const& rhs, BinaryPred pred)
 {
-    static_assert( std::is_same_v<typename T1::value_type, typename T2::value_type>,
+    static_assert( std::is_same_v<typename tensor_core<T1>::value_type, typename tensor_core<T2>::value_type>,
         "boost::numeric::ublas::detail::compare() : LHS and RHS both should have same value type"
     );
 

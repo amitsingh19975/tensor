@@ -51,6 +51,7 @@ constexpr auto reshape(tensor_core<T>& t, ExtentsType const &e, ValueType v = Va
     auto pp = product(te);
     te = e;
     t.strides() = strides_type(te);
+    t.invalidate_size();
 
     auto p = product(te);
 

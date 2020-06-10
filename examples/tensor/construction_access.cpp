@@ -83,7 +83,7 @@ int main()
     // reshaping tensors.
     auto new_extents = B.extents().base();
     std::next_permutation( new_extents.begin(), new_extents.end() );
-    D.reshape( extents<>(new_extents)  );
+    reshape( D, extents<>(new_extents)  );
     std::cout << "% --------------------------- " << std::endl;
     std::cout << "% --------------------------- " << std::endl << std::endl;
     std::cout << "newD=" << D << ";" << std::endl << std::endl;

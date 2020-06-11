@@ -628,11 +628,11 @@ namespace boost::numeric::ublas
         using extents_type  = typename old_tensor_type::extents_type;
         
         using t_engine = tensor_engine< 
-            extents<>,
+            extents_type,
             std::conditional_t< 
                 std::is_same_v< layout_type, first_order >,
-                layout::first_order<extents<>>,
-                layout::last_order<extents<>>
+                layout::first_order<extents_type>,
+                layout::last_order<extents_type>
             >,
             rebind_storage_t<extents_type,array_type,value_type>
         >;
@@ -680,11 +680,11 @@ namespace boost::numeric::ublas
         using extents_type  = typename old_tensor_type::extents_type;
         
         using t_engine = tensor_engine<
-            extents<>,
+            extents_type,
             std::conditional_t< 
                 std::is_same_v< layout_type, first_order >,
-                layout::first_order<extents<>>,
-                layout::last_order<extents<>>
+                layout::first_order<extents_type>,
+                layout::last_order<extents_type>
             >,
             rebind_storage_t<extents_type,array_type,value_type>
         >;

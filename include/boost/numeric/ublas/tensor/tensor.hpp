@@ -97,9 +97,7 @@ namespace boost::numeric::ublas{
         using extents_type 	        = ExtentsType;
         using layout_type 	        = typename layout::extract_strides_t<extents_type,LayoutType>::layout_type;
         using strides_type 	        = typename layout::extract_strides_t<extents_type,LayoutType>::strides_type;
-        using container_type        = typename storage_traits<StorageType>::array_type;
-        using container_tag         = typename storage_traits<StorageType>::container_tag;
-        using resizable_tag         = typename storage_traits<StorageType>::resizable_tag;
+        using storage_traits        = storage_traits<StorageType>;
     };
     
     template<typename LayoutType, typename StorageType>
@@ -107,9 +105,7 @@ namespace boost::numeric::ublas{
         using extents_type 	        = typename layout::extract_strides_t<void,LayoutType>::extents_type;
         using layout_type 	        = typename layout::extract_strides_t<void,LayoutType>::layout_type;
         using strides_type 	        = typename layout::extract_strides_t<void,LayoutType>::strides_type;
-        using container_type        = typename storage_traits<StorageType>::array_type;
-        using container_tag         = typename storage_traits<StorageType>::container_tag;
-        using resizable_tag         = typename storage_traits<StorageType>::resizable_tag;
+        using storage_traits        = storage_traits<StorageType>;
     };
 
     template<typename ValueType, typename Layout = first_order>

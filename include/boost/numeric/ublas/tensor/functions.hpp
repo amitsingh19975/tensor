@@ -427,8 +427,6 @@ namespace boost::numeric::ublas
         using array_type1   = typename tensor_type::array_type;
         using array_type2   = typename tensor_core< TensorEngine2 >::array_type;
 
-
-
         if (a.empty() || b.empty())
             throw std::runtime_error(
                 "error in boost::numeric::ublas::outer_prod: "
@@ -436,7 +434,8 @@ namespace boost::numeric::ublas
 
         auto nc = detail::extents_result_type_outer_prod(a.extents(), b.extents());
 
-        auto a_extents = a.extents();        auto b_extents = b.extents();
+        auto a_extents = a.extents();        
+        auto b_extents = b.extents();
 
         for(auto i = 0u; i < a.rank(); ++i)
             nc.at(i) = a_extents.at(i);

@@ -211,12 +211,20 @@ public:
      * @param expr tensor_core expression
      * @param size tensor_core expression
      */
-    template<typename derived_type>
-    tensor_core (const tensor_expression_type<derived_type> &expr)
+    template<typename other_tensor,typename derived_type>
+    tensor_core (const detail::tensor_expression<other_tensor,derived_type> &expr)
         : tensor_core( detail::retrieve_extents(expr), resizable_tag{} )
     {
-        static_assert( detail::has_tensor_types<self_type, tensor_expression_type<derived_type>>::value,
-                                     "Error in boost::numeric::ublas::tensor_core: expression does not contain a tensor_core. cannot retrieve shape.");
+        static_assert(is_valid_tensor_v<other_tensor>,
+            "boost::numeric::ublas::tensor_core(tensor_expression<other_tensor, derived_type> const&) : "
+            "other_tensor should be a valid tensor type"
+        );
+        
+        static_assert(std::is_same_v<value_type, typename other_tensor::value_type>,
+            "boost::numeric::ublas::tensor_core(tensor_expression<other_tensor, derived_type> const&) : "
+            "tensor_core and other_tensor should have same value type"
+        );
+
         detail::eval( *this, expr );
     }
 

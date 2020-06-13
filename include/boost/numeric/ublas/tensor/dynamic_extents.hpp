@@ -122,12 +122,14 @@ struct basic_extents
     {
     }
 
-    template<typename OtherExtentsType>
-    basic_extents(OtherExtentsType const& e)
+    template<typename OtherExtents,
+        typename = std::enable_if_t< is_extents_v<OtherExtents> >
+    >
+    basic_extents(OtherExtents const& e)
         : _base(e.size())
     {
-        static_assert( is_extents_v<OtherExtentsType>, "boost::numeric::ublas::basic_fixed_rank_extents(OtherExtentsType const&) : " 
-            "OtherExtentsType is not a tensor extents"
+        static_assert( is_extents_v<OtherExtents>, "boost::numeric::ublas::basic_fixed_rank_extents(OtherExtents const&) : " 
+            "OtherExtents is not a tensor extents"
         );
         std::copy(e.begin(),e.end(), _base.begin());
     }

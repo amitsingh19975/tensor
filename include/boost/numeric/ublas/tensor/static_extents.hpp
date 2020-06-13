@@ -69,7 +69,9 @@ struct basic_static_extents{
   constexpr basic_static_extents& operator=(basic_static_extents const&) = default;
   constexpr basic_static_extents& operator=(basic_static_extents &&) = default;
   
-  template<typename OtherExtents>
+  template<typename OtherExtents,
+    typename = std::enable_if_t< is_extents_v<OtherExtents> >
+  >
   constexpr basic_static_extents(OtherExtents const&){
     static_assert(is_extents_v<OtherExtents>, "boost::numeric::ublas::basic_static_extents(OtherExtents const&)"
       "Extents is not a valid tensor tensor extents"

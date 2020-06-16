@@ -45,71 +45,26 @@ namespace boost::numeric::ublas {
 
     namespace detail{
 
-        template<typename A, typename = void>
-        struct extract_static_container_size
-            : std::integral_constant<std::size_t, storage_traits<A>::size_>
-        {};
-        
-        template<typename A>
-        struct extract_static_container_size<A,std::enable_if_t< 
-                    std::is_same_v<
-                        typename storage_traits<A>::resizable_tag, 
-                        storage_resizable_container_tag
-                    >
-                >
-            >
-            : std::integral_constant<std::size_t, 0>
-        {};
+        template<typename A, std::size_t N, typename T>
+        struct rebind_static_storage_helper;
 
-        template<typename A, std::size_t N, typename = void>
-        struct rebind_static_storage_helper
+        template<typename A, std::size_t N>
+        struct rebind_static_storage_helper<A,N,storage_static_container_tag>
         {
             using type = typename storage_traits<A>::template rebind_size<N>;
         };
         
         template<typename A, std::size_t N>
-        struct rebind_static_storage_helper<A,N,std::enable_if_t< 
-                    std::is_same_v<
-                        typename storage_traits<A>::resizable_tag, 
-                        storage_resizable_container_tag
-                    >
-                >
-            >
+        struct rebind_static_storage_helper<A,N,storage_resizable_container_tag>
         {
             using type = A;
         };
-        
-        template<typename A>
-        inline static constexpr auto const extract_static_container_size_v = extract_static_container_size<A>::value;
 
         template<typename A, std::size_t N>
-        using rebind_static_storage_helper_t = typename rebind_static_storage_helper<A,N>::type;
+        using rebind_static_storage_helper_t = typename rebind_static_storage_helper<A,N, typename storage_traits<A>::resizable_tag >::type;
         
     } // namespace detail
     
-
-    template<typename A1, typename A2>
-    struct select_storage
-        : std::conditional< 
-            std::is_same_v<
-                typename storage_traits<A1>::resizable_tag, 
-                storage_static_container_tag
-            >,
-            std::conditional_t<
-                std::is_same_v<
-                    typename storage_traits<A2>::resizable_tag, 
-                    storage_static_container_tag
-                >,
-                detail::rebind_static_storage_helper_t<A1,
-                    detail::extract_static_container_size_v<A1> * 
-                    detail::extract_static_container_size_v<A2>
-                >,
-                std::vector<typename storage_traits<A1>::value_type>
-            >,
-            std::vector<typename storage_traits<A1>::value_type>
-        >
-    {};
-
     template<typename ValueType, typename A, typename T, T... Ns>
     struct rebind_storage< basic_static_extents<T,Ns...>, A, ValueType >
         : std::conditional<
@@ -133,9 +88,6 @@ namespace boost::numeric::ublas {
 
     template<typename E, typename A, typename ValueType>
     using rebind_storage_t = typename rebind_storage<E,A,ValueType>::type;
-
-    template<typename A1, typename A2>
-    using select_storage_t = typename select_storage<A1,A2>::type;
 
 } // namespace boost::numeric::ublas
 

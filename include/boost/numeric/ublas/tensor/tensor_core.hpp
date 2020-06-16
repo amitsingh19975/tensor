@@ -411,9 +411,9 @@ public:
         return this->size_;
     }
 
-    /** @brief Returns the container size or buffer size of the tensor_core */
+    /** @brief Returns the upper bound or max size of the tensor_core */
     [[nodiscard]] inline
-    constexpr size_type container_size () const noexcept{
+    constexpr size_type max_size () const noexcept{
         return this->data_.size();
     }
 

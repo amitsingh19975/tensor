@@ -11,8 +11,8 @@
 //
 /// \file strides.hpp Definition for the basic_strides template class
 
-#ifndef _BOOST_UBLAS_TENSOR_STRIDES_HPP_
-#define _BOOST_UBLAS_TENSOR_STRIDES_HPP_
+#ifndef BOOST_UBLAS_TENSOR_STRIDES_HPP
+#define BOOST_UBLAS_TENSOR_STRIDES_HPP
 
 #include <boost/numeric/ublas/tensor/dynamic_strides.hpp>
 #include <boost/numeric/ublas/tensor/fixed_rank_strides.hpp>

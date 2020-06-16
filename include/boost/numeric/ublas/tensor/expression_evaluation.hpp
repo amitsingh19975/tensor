@@ -10,8 +10,8 @@
 //  Google and Fraunhofer IOSB, Ettlingen, Germany
 //
 
-#ifndef _BOOST_UBLAS_TENSOR_EXPRESSIONS_EVALUATION_HPP_
-#define _BOOST_UBLAS_TENSOR_EXPRESSIONS_EVALUATION_HPP_
+#ifndef BOOST_UBLAS_TENSOR_EXPRESSIONS_EVALUATION_HPP
+#define BOOST_UBLAS_TENSOR_EXPRESSIONS_EVALUATION_HPP
 
 #include <type_traits>
 #include <stdexcept>

@@ -10,8 +10,8 @@
 //  Google
 //
 
-#ifndef _BOOST_NUMERIC_UBLAS_TENSOR_EXTENTS_FUNCTIONS_HPP_
-#define _BOOST_NUMERIC_UBLAS_TENSOR_EXTENTS_FUNCTIONS_HPP_
+#ifndef BOOST_NUMERIC_UBLAS_TENSOR_EXTENTS_FUNCTIONS_HPP
+#define BOOST_NUMERIC_UBLAS_TENSOR_EXTENTS_FUNCTIONS_HPP
 
 #include <boost/numeric/ublas/tensor/type_traits.hpp>
 #include <boost/numeric/ublas/tensor/traits/static_extents_traits.hpp>

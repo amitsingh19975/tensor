@@ -11,8 +11,8 @@
 //
 
 
-#ifndef _BOOST_UBLAS_TRAITS_STORAGE_HPP_
-#define _BOOST_UBLAS_TRAITS_STORAGE_HPP_
+#ifndef BOOST_UBLAS_TRAITS_STORAGE_HPP
+#define BOOST_UBLAS_TRAITS_STORAGE_HPP
 
 #include <vector>
 #include <array>
@@ -94,4 +94,4 @@ struct storage_traits<std::array<V,N>>
 } // boost
 
 
-#endif // _BOOST_UBLAS_TRAITS_STORAGE_HPP_
+#endif // BOOST_UBLAS_TRAITS_STORAGE_HPP

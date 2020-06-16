@@ -11,12 +11,15 @@
 //
 
 
-#ifndef _BOOST_UBLAS_TENSOR_FUNCTIONS_HPP_
-#define _BOOST_UBLAS_TENSOR_FUNCTIONS_HPP_
+#ifndef BOOST_UBLAS_TENSOR_FUNCTIONS_HPP
+#define BOOST_UBLAS_TENSOR_FUNCTIONS_HPP
 
 #include <boost/numeric/ublas/tensor/detail/tensor_functions.hpp>
 #include <boost/numeric/ublas/tensor/multiplication.hpp>
+#include <boost/numeric/ublas/tensor/detail/utility.hpp>
 #include <boost/numeric/ublas/tensor/tensor.hpp>
+#include <boost/mp11/list.hpp>
+#include <boost/mp11/algorithm.hpp>
 
 // dynamic_functions
 namespace boost::numeric::ublas
@@ -181,6 +184,16 @@ namespace boost::numeric::ublas
         using array_type    = typename tensor_type::array_type;
         using dynamic_strides_type = basic_strides<std::size_t,layout_type>;
 
+
+        static_assert(  
+            std::is_same_v< 
+                typename tensor_core<TensorEngine>::resizable_tag, 
+                storage_resizable_container_tag 
+            >,
+            "error in boost::numeric::ublas::prod(tensor_core const&, matrix const& ): "
+            "tensor container should be resizable"
+        );
+
         auto const p = a.rank();
 
         if (m == 0)
@@ -258,8 +271,21 @@ namespace boost::numeric::ublas
         using value_type        = typename tensor_type::value_type;
         using layout_type       = typename tensor_type::layout_type;
         using size_type         = typename extents_type_1::size_type;
-        using array_type1       = typename tensor_type::array_type;
-        using array_type2       = typename tensor_core< TensorEngine2 >::array_type;
+        using array_type        = typename tensor_type::array_type;
+
+        static_assert( 
+            std::is_same_v< 
+                typename tensor_core<TensorEngine1>::resizable_tag, 
+                typename tensor_core<TensorEngine2>::resizable_tag 
+            > && 
+            std::is_same_v< 
+                typename tensor_core<TensorEngine1>::resizable_tag, 
+                storage_resizable_container_tag 
+            >,
+            "error in boost::numeric::ublas::prod(tensor_core const&, tensor_core const&, "
+            "std::vector<std::size_t> const&, std::vector<std::size_t> const& ): "
+            "Both tensor storage should have the same type of storage and both should be resizable"
+        );
 
         auto const pa = a.rank();
         auto const pb = b.rank();
@@ -322,8 +348,6 @@ namespace boost::numeric::ublas
 
         assert(phia1.size() == pa);
         assert(phib1.size() == pb);
-
-        using array_type = select_storage_t<array_type1, array_type2>;
 
         using t_engine = tensor_engine< 
             extents<>,
@@ -415,8 +439,8 @@ namespace boost::numeric::ublas
     */
     template <typename TensorEngine1, typename TensorEngine2,
         std::enable_if_t<
-            !(  is_static<typename TensorEngine1::extents_type>::value &&
-                is_static<typename TensorEngine2::extents_type>::value )
+            !(  is_static<typename tensor_core< TensorEngine1 >::extents_type>::value &&
+                is_static<typename tensor_core< TensorEngine2 >::extents_type>::value )
             ,int> = 0
     >
     inline decltype(auto) outer_prod(tensor_core< TensorEngine1 > const &a, tensor_core< TensorEngine2 > const &b)
@@ -424,8 +448,20 @@ namespace boost::numeric::ublas
         using tensor_type   = tensor_core< TensorEngine1 >;
         using value_type    = typename tensor_type::value_type;
         using layout_type   = typename tensor_type::layout_type;
-        using array_type1   = typename tensor_type::array_type;
-        using array_type2   = typename tensor_core< TensorEngine2 >::array_type;
+        using array_type   = typename tensor_type::array_type;
+
+        static_assert( 
+            std::is_same_v< 
+                typename tensor_core<TensorEngine1>::resizable_tag, 
+                typename tensor_core<TensorEngine2>::resizable_tag 
+            > && 
+            std::is_same_v< 
+                typename tensor_core<TensorEngine1>::resizable_tag, 
+                storage_resizable_container_tag 
+            >,
+            "error in boost::numeric::ublas::outer_prod(tensor_core const&, tensor_core const&): "
+            "Both tensor storage should have the same type of storage and both should be resizable"
+        );
 
         if (a.empty() || b.empty())
             throw std::runtime_error(
@@ -444,7 +480,6 @@ namespace boost::numeric::ublas
             nc.at(a.rank()+i) = b_extents.at(i);
 
         using c_extents_type = std::decay_t< decltype(nc) >;
-        using array_type = select_storage_t<array_type1, array_type2>;
 
         using t_engine = tensor_engine< 
             c_extents_type,  
@@ -707,69 +742,6 @@ namespace boost::numeric::ublas
 namespace boost::numeric::ublas
 {
 
-    namespace detail{
-
-        template<size_t M, size_t I, typename T, T... E, T... R>
-        inline
-        constexpr auto extents_result_tensor_times_vector(basic_static_extents<T>, 
-            basic_static_extents<T, E...>, basic_static_extents<T, R...>)
-        {
-            return basic_static_extents<T, R..., E...>{};
-        }
-
-        template<size_t M, size_t I, typename T, T E0, T... E, T O0, T... OtherE, T... R>
-        inline
-        constexpr auto extents_result_tensor_times_vector(basic_static_extents<T,E0,E...>, 
-            basic_static_extents<T, O0, OtherE...>, basic_static_extents<T, R...> = basic_static_extents<T>{})
-        {
-            if constexpr(I != M - 1){
-                return extents_result_tensor_times_vector<M,I + 1> 
-                    ( basic_static_extents<T,E...>{}, basic_static_extents<T,OtherE...>{}, basic_static_extents<T, R..., E0>{} );
-            }else{
-                return extents_result_tensor_times_vector<M,I + 1>
-                    ( basic_static_extents<T,E...>{}, basic_static_extents<T,O0,OtherE...>{}, basic_static_extents<T, R...>{} );
-            }
-        }
-
-
-        template<size_t M, typename T, T E0, T... E>
-        inline
-        constexpr auto extents_result_tensor_times_vector(basic_static_extents<T,E0,E...> const& e)
-        {
-            using size_type = typename basic_static_extents<T>::size_type;
-            auto ones = typename impl::make_sequence_of_ones_t< T, std::max( size_type(2), sizeof...(E) ) >::extents_type{};
-            return extents_result_tensor_times_vector<M,0>(e, ones);
-        }
-
-        template<size_t I, size_t NE, typename T, T E0, T... E, T... OtherE>
-        inline
-        constexpr auto static_extents_set_at
-            ( basic_static_extents<T,E0,E...> const&, basic_static_extents<T,OtherE...> = basic_static_extents<T>{}){
-            static_assert( I < sizeof...(E) + 1, "boost::numeric::ublas::detail::static_extents_set_at(): out of bound");
-            if constexpr( sizeof...(E) == 0 ){
-                if constexpr( I == 0 ){
-                    return basic_static_extents<T,OtherE..., NE>{};
-                }else{
-                    return basic_static_extents<T,OtherE...,E0>{};
-                }
-            }else{
-                if constexpr(I == 0){
-                    return basic_static_extents<T,OtherE..., NE, E...>{};
-                }else{
-                    return static_extents_set_at<I - 1, NE>( basic_static_extents<T,E...>{}, basic_static_extents<T,OtherE..., E0>{} );
-                }
-            }
-        }
-
-        namespace impl{
-            template<typename T, T... E1, T... E2>
-            struct concat< basic_static_extents<T, E1...>, basic_static_extents<T, E2...> >{
-                using type = basic_static_extents<T, E1..., E2...>;
-            };
-        }
-
-    } // namespace detail
-    
     /** @brief Computes the m-mode tensor-times-vector product
      *
      * Implements C[i1,...,im-1,im+1,...,ip] = A[i1,i2,...,ip] * b[im]
@@ -795,8 +767,10 @@ namespace boost::numeric::ublas
         using layout_type   = typename old_tensor_type::layout_type;
         using array_type    = typename old_tensor_type::array_type;
         using extents_type  = typename old_tensor_type::extents_type;
-
-        auto const p = std::size_t(a.rank());
+        
+        
+        constexpr std::size_t const p = extents_type::size_;
+        using list_type = boost::mp11::mp_repeat_c< boost::mp11::mp_size_t<1ul>, std::max( p, std::size_t(2) ) >;
 
         static_assert( M != 0, 
                 "error in boost::numeric::ublas::prod(ttv): "
@@ -814,7 +788,18 @@ namespace boost::numeric::ublas
                 "error in boost::numeric::ublas::prod(ttv): second "
                 "argument vector should not be empty.");
 
-        auto nc = detail::extents_result_tensor_times_vector<M>(a.extents());
+        auto nc = detail::static_for<p>([&](auto iter, auto ret){
+            using iter_type = decltype(iter);
+            using l_type = decltype(ret);
+            using new_el = std::integral_constant<std::size_t, extents_type::at(iter_type::value)>;
+
+            if constexpr( M - 1 == iter_type::value ){
+                return ret;
+            }else{
+                return boost::mp11::mp_replace_at<l_type,iter_type, new_el >{};
+            }
+        }, list_type{});
+
         auto nb = std::vector<typename extents_type::value_type>{b.size(), 1};
         
         using c_extents_type = std::decay_t<decltype(nc)>;
@@ -860,7 +845,7 @@ namespace boost::numeric::ublas
      *
      * @returns tensor object C with order p, the same storage format and allocator type as A
     */
-    template <size_t M, size_t MatricRow, typename TensorEngine, typename A,
+    template <size_t M, size_t MatrixNonContractedDim, typename TensorEngine, typename A,
         std::enable_if_t<is_static_v< typename tensor_core< TensorEngine >::extents_type >,int> = 0
     >
     inline decltype(auto) prod(tensor_core< TensorEngine > const &a, 
@@ -892,13 +877,20 @@ namespace boost::numeric::ublas
             throw std::length_error(
                 "error in boost::numeric::ublas::prod(ttm): second "
                 "argument matrix should not be empty.");
+        
+        using list_type = detail::static_extents_to_seq_t<extents_type>;
 
-        auto nc = detail::static_extents_set_at< M - 1, MatricRow >( a.extents() );
         auto nb = extents<>{b.size1(), b.size2()};
 
         auto wb = dynamic_strides_type(nb);
                 
-        using c_extents_type = std::decay_t<decltype(nc)>;
+        using c_extents_type = detail::seq_to_static_extents_t< 
+            boost::mp11::mp_replace_at_c<
+                list_type, 
+                M - 1, 
+                boost::mp11::mp_size_t<MatrixNonContractedDim> 
+            > 
+        >;
 
         using t_engine = tensor_engine< 
             c_extents_type,
@@ -942,30 +934,40 @@ namespace boost::numeric::ublas
     */
     template <typename TensorEngine1, typename TensorEngine2,
         std::enable_if_t<
-            is_static< typename TensorEngine1::extents_type >::value &&
-            is_static< typename TensorEngine2::extents_type >::value
+            is_static< typename tensor_core< TensorEngine1 >::extents_type >::value &&
+            is_static< typename tensor_core< TensorEngine2 >::extents_type >::value
             ,int> = 0
     >
     inline decltype(auto) outer_prod(tensor_core< TensorEngine1 > const &a, tensor_core< TensorEngine2 > const &b)
     {
 
-
-        if (a.empty() || b.empty())
-            throw std::runtime_error(
-                "error in boost::numeric::ublas::outer_prod: "
-                "tensors should not be empty.");
         using extents_type1     = std::decay_t< decltype(a.extents()) >;
         using extents_type2     = std::decay_t< decltype(b.extents()) >;
         using old_tensor_type   = tensor_core< TensorEngine1 >;
         using value_type        = typename old_tensor_type::value_type;
         using layout_type       = typename old_tensor_type::layout_type;
-        using array_type1       = typename old_tensor_type::array_type;
-        using array_type2       = typename tensor_core< TensorEngine2 >::array_type;
+        using array_type       = typename old_tensor_type::array_type;
         
-        auto nc = detail::impl::concat_t<extents_type1, extents_type2>{};
+        static_assert( 
+            std::is_same_v< 
+                typename tensor_core<TensorEngine1>::resizable_tag, 
+                typename tensor_core<TensorEngine2>::resizable_tag 
+            >,
+            "error in boost::numeric::ublas::outer_prod(tensor_core const&, tensor_core const&): "
+            "Both tensor storage should have the same type of storage and both should be resizable"
+        );
+        
+        if (a.empty() || b.empty())
+            throw std::runtime_error(
+                "error in boost::numeric::ublas::outer_prod: "
+                "tensors should not be empty.");
+
+        using concated_mp_list = boost::mp11::mp_append< 
+            detail::static_extents_to_seq_t<extents_type1>,
+            detail::static_extents_to_seq_t<extents_type2>
+        >;
                         
-        using c_extents_type = std::decay_t<decltype(nc)>;
-        using array_type = select_storage_t<array_type1, array_type2>;
+        using c_extents_type = detail::seq_to_static_extents_t<concated_mp_list>;
 
         using t_engine = tensor_engine<
             c_extents_type,
@@ -978,7 +980,7 @@ namespace boost::numeric::ublas
         >;
 
         using tensor_type = tensor_core<t_engine>;
-        auto c = tensor_type(nc,value_type{});
+        auto c = tensor_type(c_extents_type{},value_type{});
 
         auto const& a_static_extents = a.extents().base();        
         auto const& a_static_strides = a.strides().base();
@@ -995,6 +997,224 @@ namespace boost::numeric::ublas
 
         return c;
     }
+
+
+    /** @brief Computes the q-mode tensor-times-tensor product
+     *
+     * Implements C[i1,...,ir,j1,...,js] = sum( A[i1,...,ir+q] * B[j1,...,js+q]  )
+     *
+     * @note calls ublas::ttt
+     *
+     * na[phia[x]] = nb[phib[x]] for 1 <= x <= q
+     *
+     * @param[in]  phia one-based permutation tuple of length q for the first
+     * input tensor a
+     * @param[in]  phib one-based permutation tuple of length q for the second
+     * input tensor b
+     * @param[in]  a  left-hand side tensor with order r+q
+     * @param[in]  b  right-hand side tensor with order s+q
+     * @result     tensor with order r+s
+    */
+    template <std::size_t q, typename TensorEngine1, typename TensorEngine2, std::size_t... Ss1, std::size_t... Ss2>
+    inline decltype(auto) prod(tensor_core< TensorEngine1 > const &a, tensor_core< TensorEngine2 > const &b,
+                                std::integer_sequence<std::size_t, Ss1...>, std::integer_sequence<std::size_t, Ss2...>)
+    {
+        using tensor_type       = tensor_core< TensorEngine1 >;
+        using extents_type_1    = typename tensor_type::extents_type;       
+        using extents_type_2    = typename tensor_core< TensorEngine2 >::extents_type;       
+        using value_type        = typename tensor_type::value_type;
+        using layout_type       = typename tensor_type::layout_type;
+        using size_type         = typename extents_type_1::size_type;
+        using array_type        = typename tensor_type::array_type;
+        using phia              = boost::mp11::mp_list_c<std::size_t, Ss1...>;
+        using phib              = boost::mp11::mp_list_c<std::size_t, Ss2...>;
+
+        // static_assert( 
+        //     std::is_same_v< 
+        //         typename tensor_core<TensorEngine1>::resizable_tag, 
+        //         typename tensor_core<TensorEngine2>::resizable_tag 
+        //     > && 
+        //     std::is_same_v< 
+        //         typename tensor_core<TensorEngine1>::resizable_tag, 
+        //         storage_static_container_tag 
+        //     >,
+        //     "error in boost::numeric::ublas::prod(tensor_core const&, tensor_core const&, "
+        //     "std::integer_sequence<std::size_t, Ss1...>, std::integer_sequence<std::size_t, Ss2...>: "
+        //     "Both tensor storage should have the same type of storage and both should be static storage"
+        // );
+
+
+        static_assert(
+            is_static< typename tensor_core< TensorEngine1 >::extents_type >::value &&
+            is_static< typename tensor_core< TensorEngine2 >::extents_type >::value,
+            "error in boost::numeric::ublas::prod(tensor_core const&, tensor_core const&, "
+            "std::integer_sequence<std::size_t, Ss1...>, std::integer_sequence<std::size_t, Ss2...>: "
+            "Both tensor should have static extents"
+        );
+
+        constexpr auto const pa = extents_type_1::size_;
+        constexpr auto const pb = extents_type_2::size_;
+        constexpr auto const sz_phia = sizeof...(Ss1);
+        constexpr auto const sz_phib = sizeof...(Ss2);
+
+
+        static_assert(
+            pa != 0ul,
+            "error in ublas::prod: order of left-hand side tensor must be greater than 0."
+        );
+
+        static_assert(
+            pb != 0ul,
+            "error in ublas::prod: order of right-hand side tensor must be greater than 0."
+        );
+        
+        static_assert(
+            pa > q,
+            "error in ublas::prod: number of contraction dimensions cannot be greater than the order of the left-hand side tensor."
+        );
+        
+        static_assert(
+            pb > q,
+            "error in ublas::prod: number of contraction dimensions cannot be greater than the order of the right-hand side tensor."
+        );
+        
+        static_assert(
+            q == sz_phia,
+            "error in ublas::prod: permutation tuples must have the same length."
+        );
+
+        static_assert(
+            pa > sz_phia,
+            "error in ublas::prod: permutation tuple for the left-hand side tensor cannot be greater than the corresponding order."
+        );
+        
+        static_assert(
+            pb > sz_phib,
+            "error in ublas::prod: permutation tuple for the right-hand side tensor cannot be greater than the corresponding order."
+        );
+
+        auto const& na = a.extents();
+        auto const& nb = b.extents();
+
+        detail::static_for<q>([&](auto iter){
+            using namespace boost::mp11;
+            using lext = std::decay_t<decltype(na)>;
+            using rext = std::decay_t<decltype(nb)>;
+            using iter_type = decltype(iter);
+
+            using lph = phia;
+            using rph = phib;
+            
+            static_assert(
+                lext::at( mp_at<lph,iter_type>::value ) == rext::at( mp_at<rph,iter_type>::value ),
+                "error in ublas::prod: permutations of the extents are not correct."
+            );
+        });
+
+        constexpr auto const r = pa - q;
+        constexpr auto const s = pb - q;
+
+        using one_type = boost::mp11::mp_list_c<std::size_t, 1>;
+        using phia1_type = boost::mp11::mp_pop_front< boost::mp11::mp_iota_c<pa + 1> >;
+        using phib1_type = boost::mp11::mp_pop_front< boost::mp11::mp_iota_c<pb + 1> >;
+        using old_nc_type = boost::mp11::mp_repeat_c< one_type ,std::max(r + s, size_type(2)) >;
+
+        auto phia1 = detail::static_for< sz_phia >([&](auto iter, auto prev){
+            using prev_type = std::decay_t< decltype(prev) >;
+            using iter_type = decltype(iter);
+            using phia_at_type = boost::mp11::mp_at<phia,iter_type>;
+            using temp_phia1 = boost::mp11::mp_remove<prev_type,phia_at_type>;
+            
+            if constexpr( std::is_same_v<temp_phia1, phia1_type> ){
+                return temp_phia1{};
+            }else{
+                return boost::mp11::mp_append<
+                        temp_phia1, 
+                        boost::mp11::mp_list<phia_at_type>
+                    >{};
+            }
+
+        }, phia1_type{});
+
+        using transformed_phia = std::decay_t< decltype(phia1) >;
+
+        static_assert( boost::mp11::mp_size<transformed_phia>::value == pa,
+            "error in boost::numeric::ublas::prod(tensor_core const&, tensor_core const&, "
+            "std::integer_sequence<std::size_t, Ss1...>, std::integer_sequence<std::size_t, Ss2...>: "
+            "phia after transform should be equal to the extents of lhs tensor"
+        );
+
+        auto phib1 = detail::static_for< sz_phib >([&](auto iter, auto prev){
+            using prev_type = std::decay_t< decltype(prev) >;
+            using iter_type = decltype(iter);
+            using phib_at_type = boost::mp11::mp_at<phib,iter_type>;
+            using temp_phib1 = boost::mp11::mp_remove<prev_type,phib_at_type>;
+            
+            if constexpr( std::is_same_v<temp_phib1, phib1_type> ){
+                return temp_phib1{};
+            }else{
+                return boost::mp11::mp_append<
+                        temp_phib1, 
+                        boost::mp11::mp_list<phib_at_type>
+                    >{};
+            }
+
+        }, phib1_type{});
+
+        using transformed_phib = std::decay_t< decltype(phib1) >;
+
+        static_assert( boost::mp11::mp_size<transformed_phib>::value == pb,
+            "error in boost::numeric::ublas::prod(tensor_core const&, tensor_core const&, "
+            "std::integer_sequence<std::size_t, Ss1...>, std::integer_sequence<std::size_t, Ss2...>: "
+            "phib after transform should be equal to the extents of rhs tensor"
+        );
+
+        auto nc_part1 = detail::static_for<r>([&](auto iter, auto prev){
+            using prev_type = std::decay_t< decltype(prev) >;
+            using iter_type = decltype(iter);
+            constexpr auto const phia_at = boost::mp11::mp_at<transformed_phia,iter_type>::value - 1;
+            constexpr auto const na_at = extents_type_1::at(phia_at);
+            using new_value = boost::mp11::mp_list_c<std::size_t,na_at>;
+            using temp_nc = boost::mp11::mp_replace_at< prev_type, iter_type, new_value >;
+            return temp_nc{};
+        }, old_nc_type{});
+
+        auto nc = detail::static_for<s>([&](auto iter, auto prev){
+            using prev_type = std::decay_t< decltype(prev) >;
+            using iter_type = decltype(iter);
+            constexpr auto const phib_at = boost::mp11::mp_at<transformed_phib,iter_type>::value - 1;
+            constexpr auto const nb_at = extents_type_2::at(phib_at);
+            using new_value = boost::mp11::mp_list_c<std::size_t,nb_at>;
+            using temp_nc = boost::mp11::mp_replace_at_c< prev_type, iter_type::value + r, new_value >;
+            return temp_nc{};
+        }, std::decay_t< decltype(nc_part1) > {} );
+
+        using c_extents_type = detail::seq_to_static_extents_t< std::decay_t<decltype(nc)> >;
+
+        using t_engine = tensor_engine< 
+            c_extents_type,
+            std::conditional_t< 
+                std::is_same_v< layout_type, first_order >,
+                layout::first_order<c_extents_type>,
+                layout::last_order<c_extents_type>
+            >,
+            rebind_storage_t<c_extents_type,array_type,value_type>
+        >;
+
+        auto c = tensor_core<t_engine>( c_extents_type{}, value_type{} );
+        
+        auto new_phia = detail::seq_to_static_extents_t< transformed_phia >{};
+        auto new_phib = detail::seq_to_static_extents_t< transformed_phib >{};
+
+        ttt(pa, pb, q,
+            new_phia.data(), new_phib.data(),
+            c.data(), c.extents().data(), c.strides().data(),
+            a.data(), a.extents().data(), a.strides().data(),
+            b.data(), b.extents().data(), b.strides().data());
+
+        return c;
+    }
+
 
 }
 

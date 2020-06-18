@@ -145,55 +145,56 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_trans, value,  test_types, 
     using value_type   = typename value::first_type;
     using layout_type  = typename value::second_type;
 
-    auto fac = [](auto const& p){
-        auto f = 1ul;
-        for(auto i = 1u; i <= p; ++i)
-            f *= i;
-        return f;
-    };
-
-    auto inverse = [](auto const& pi){
-        auto pi_inv = pi;
-        for(auto j = 0u; j < pi.size(); ++j)
-            pi_inv[pi[j]-1] = j+1;
-        return pi_inv;
-    };
-
     for_each_tuple(static_extents,[&](auto const&, auto & n){
         using extents_type = typename std::decay<decltype(n)>::type;
         using tensor_type  = ublas::static_tensor<value_type, extents_type,layout_type>;
-        auto const p = n.size();
-        auto const s = product(n);
+        
+        constexpr auto const p = extents_type::_size;
+
+        constexpr auto const s = ublas::static_product_v<extents_type>;
         auto aref = tensor_type();
         auto v    = value_type{};
         for(auto i = 0u; i < s; ++i, v+=1)
             aref[i] = v;
 
-        auto pi = std::vector<std::size_t>(p);
-        std::iota(pi.begin(), pi.end(), 1);
         
+        using mp_list = boost::mp11::mp_pop_front< boost::mp11::mp_iota_c<p + 1> >;
+
+        auto pi = mp_list_to_int_seq_t<mp_list> {};
         auto a = ublas::trans( aref, pi );
         
         for(auto i = 0ul; i < a.size(); i++){
             BOOST_CHECK( a[i] == aref[i]  );
         }
 
+        constexpr auto const pfac = static_factorial_v<p> - 1;
 
-        auto const pfac = fac(p);
-        auto i = 0u;
-        for(; i < pfac-1; ++i) {
-            std::next_permutation(pi.begin(), pi.end());
-            a = ublas::trans( a, pi );
-        }
-        std::next_permutation(pi.begin(), pi.end());
-        for(; i > 0; --i) {
-            std::prev_permutation(pi.begin(), pi.end());
-            auto pi_inv = inverse(pi);
-            a = ublas::trans( a, pi_inv );
-        }
+        auto res_param = ublas::detail::static_for<0ul,pfac>([&](auto, auto perm){
+            using perm_type = decltype(perm.second);
+            using next_perm = static_next_permutation<perm_type>;
+            using new_pi = mp_list_to_int_seq_t<next_perm>;
+            return std::make_pair( ublas::trans( perm.first, new_pi{} ), next_perm{} );
+        }, std::make_pair(a, mp_list{}) );
 
+        auto res = ublas::detail::static_for<0ul,pfac>([&](auto, auto perm){
+            using perm_type = decltype(perm.second);
+            auto inverse_lm = [&](auto iter, auto pres){
+                using iter_type = decltype(iter);
+                using pres_type = decltype(pres);
+                using pi_at = boost::mp11::mp_at<perm_type,iter_type>;
+                constexpr auto const J = iter_type::value;
+                using res_type = boost::mp11::mp_replace_at_c<pres_type, pi_at::value - 1, std::integral_constant<std::size_t, J + 1> >;
+                return res_type{};
+            };
+            auto pi_inv = ublas::detail::type_static_for<0,p>(std::move(inverse_lm),perm_type{});
+            using new_pi_inv = mp_list_to_int_seq_t<decltype(pi_inv)>;
+            using prev_perm = static_prev_permutation<perm_type>;
+            return std::make_pair( ublas::trans( perm.first, new_pi_inv{} ), prev_perm{});
+        }, res_param);
+
+        auto& ntensor = res.first;
         for(auto j = 0ul; j < a.size(); j++){
-            BOOST_CHECK( a[j] == aref[j]  );
+            BOOST_CHECK( ntensor[j] == aref[j]  );
         }
     });
 

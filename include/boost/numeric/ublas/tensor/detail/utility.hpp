@@ -26,17 +26,6 @@ namespace boost::numeric::ublas::detail {
     struct static_for_impl
         : std::integral_constant<std::size_t, MaxIter>
     {
-        template<typename UnaryFn>
-        constexpr auto operator()(UnaryFn fn) const{
-            if constexpr( MaxIter <= I ){
-                return;
-            }else{
-                std::integral_constant<std::size_t, I> info{};
-                fn(info);
-                static_for_impl<MaxIter,I + 1>{}(std::move(fn));
-            }
-        }
-
         template<typename BinaryFn, typename T>
         constexpr auto operator()(BinaryFn fn, T ret) const{
             if constexpr( MaxIter <= I ){
@@ -49,19 +38,14 @@ namespace boost::numeric::ublas::detail {
         }
     };
 
-    template<std::size_t MaxIter, typename UnaryFn>
-    constexpr auto static_for(UnaryFn fn){
-        static_for_impl<MaxIter,0ul>{}(std::move(fn));
-    }
-
-    template<std::size_t MaxIter, typename T, typename BinaryFn>
-    constexpr auto static_for(BinaryFn fn, T ret){
-        return std::decay_t< decltype( static_for_impl<MaxIter,0ul>{}(std::move(fn), std::move(ret)) ) > {};
+    template<std::size_t Start, std::size_t MaxIter, typename T, typename BinaryFn>
+    constexpr auto type_static_for(BinaryFn fn, T ret){
+        return std::decay_t< decltype( static_for_impl<MaxIter,Start>{}(std::move(fn), std::move(ret)) ) > {};
     }
 
     template<std::size_t Start, std::size_t MaxIter, typename T, typename BinaryFn>
     constexpr auto static_for(BinaryFn fn, T ret){
-        return std::decay_t< decltype( static_for_impl<MaxIter,Start>{}(std::move(fn), std::move(ret)) ) > {};
+        return static_for_impl<MaxIter,Start>{}(std::move(fn), std::move(ret));
     }
     
     template<typename T>

@@ -40,7 +40,7 @@ namespace boost::numeric::ublas::detail{
     using final_list = boost::mp11::mp_repeat_c<one_type, size >;
 
 
-    auto ret = static_for<0ul,size>([&](auto iter, auto pres){
+    auto ret = type_static_for<0ul,size>([&](auto iter, auto pres){
       using iter_type = decltype(iter);
 
       using ext_list = std::decay_t< decltype(std::get<0>(pres)) >;
@@ -74,7 +74,7 @@ namespace boost::numeric::ublas::detail{
     using final_list = boost::mp11::mp_repeat_c<one_type, size >;
 
 
-    return static_for<1ul,size>([&](auto iter, auto pres){
+    return type_static_for<1ul,size>([&](auto iter, auto pres){
       using iter_type = decltype(iter);
       
       using ext_list = std::decay_t< decltype(std::get<0>(pres)) >;

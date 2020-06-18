@@ -265,7 +265,8 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
   });
 
 
-  for_each_tuple(rank_1_extents,[](auto const& I, auto const& e){
+  for_each_tuple(rank_1_extents,[](auto iter, auto const& e){
+    constexpr auto const I = decltype(iter)::value;
     if( I == 0 ){
       BOOST_CHECK(  is_scalar(e) );
       BOOST_CHECK( !is_vector(e) );
@@ -287,7 +288,8 @@ BOOST_FIXTURE_TEST_CASE(test_static_extents, fixture,
     }
   });
 
-  for_each_tuple(rank_2_extents,[](auto const& I, auto const& e){
+  for_each_tuple(rank_2_extents,[](auto iter, auto const& e){
+    constexpr auto const I = decltype(iter)::value;
     if( I == 0 ){
       BOOST_CHECK(  is_scalar(e) );
       BOOST_CHECK( !is_vector(e) );

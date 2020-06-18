@@ -82,8 +82,8 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_retrieve_extents
 
     });
 
-    for_each_tuple(extents, [&](auto const& I, auto& e1){
-
+    for_each_tuple(extents, [&](auto iter_i, auto& e1){
+        constexpr auto const I = decltype(iter_i)::value;
         if ( I >= std::tuple_size_v<decltype(extents)> - 1){
             return;
         }
@@ -91,7 +91,8 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_retrieve_extents
         using extents_type1 = std::decay_t<decltype(e1)>;
         using tensor_type1 = ublas::static_tensor<value_type, extents_type1, layout_type>;
 
-        for_each_tuple(extents, [&](auto const& J, auto& e2){
+        for_each_tuple(extents, [&](auto iter_j, auto& e2){
+            constexpr auto const J = decltype(iter_j)::value;
             if( J != I + 1 ){
                 return;
             }
@@ -174,8 +175,8 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_all_extents_equa
     });
 
 
-    for_each_tuple(extents, [&](auto const& I, auto& e1){
-
+    for_each_tuple(extents, [&](auto iter_i, auto& e1){
+        constexpr auto const I = decltype(iter_i)::value;
         if ( I >= std::tuple_size_v<decltype(extents)> - 1){
             return;
         }
@@ -183,7 +184,8 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE( test_static_tensor_expression_all_extents_equa
         using extents_type1 = std::decay_t<decltype(e1)>;
         using tensor_type1 = ublas::static_tensor<value_type, extents_type1, layout_type>;
 
-        for_each_tuple(extents, [&](auto const& J, auto& e2){
+        for_each_tuple(extents, [&](auto iter_j, auto& e2){
+            constexpr auto const J = decltype(iter_j)::value;
             if( J != I + 1 ){
                 return;
             }
